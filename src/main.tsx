@@ -6,6 +6,7 @@ import { RouterProvider } from 'react-router';
 
 import { bindThemeToDocument, bootInspector, bootOperator } from './app/boot';
 import { AuditRoutes } from './audit/audit-routes';
+import { MotionProvider } from './ui/motion';
 import { Toaster } from './ui/toast';
 import { TooltipProvider } from './ui/tooltip';
 
@@ -23,10 +24,12 @@ async function start(): Promise<void> {
     const { LogsApp } = await import('./features/logs/logs-app');
     root.render(
       <StrictMode>
-        <TooltipProvider>
-          <LogsApp />
-          <Toaster />
-        </TooltipProvider>
+        <MotionProvider>
+          <TooltipProvider>
+            <LogsApp />
+            <Toaster />
+          </TooltipProvider>
+        </MotionProvider>
       </StrictMode>,
     );
     return;
@@ -37,10 +40,12 @@ async function start(): Promise<void> {
   const { router } = await import('./router');
   root.render(
     <StrictMode>
-      <TooltipProvider>
-        <RouterProvider router={router} />
-        <Toaster />
-      </TooltipProvider>
+      <MotionProvider>
+        <TooltipProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </TooltipProvider>
+      </MotionProvider>
     </StrictMode>,
   );
 }

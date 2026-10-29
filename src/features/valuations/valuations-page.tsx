@@ -13,7 +13,7 @@ import { Card } from '../../ui/card';
 import { EmptyState, Skeleton } from '../../ui/feedback';
 import { TextField } from '../../ui/field';
 import { TickerLogo } from '../../ui/ticker-logo';
-import { useAssetOverlay } from '../shell/use-asset-overlay';
+import { useOpenAsset } from '../shell/use-open-asset';
 import { SavedValuationItem } from './saved-valuation-item';
 
 interface Group {
@@ -119,7 +119,7 @@ export function ValuationsPage() {
 }
 
 function TickerGroup({ group }: { group: Group }) {
-  const { open } = useAssetOverlay();
+  const open = useOpenAsset();
   const latest = group.records[0]!;
   return (
     <Card className="p-4 sm:p-5">

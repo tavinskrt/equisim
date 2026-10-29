@@ -152,6 +152,11 @@
   --color-json-string: var(--json-string);
   --color-json-number: var(--json-number);
   --color-json-bool: var(--json-bool);
+  /* Os nomes que os gráficos da Bklit UI esperam (decisão 156), sobre os nossos. */
+  --color-chart-label: var(--fg-3);
+  --color-chart-tooltip-background: var(--raised);
+  --color-chart-tooltip-foreground: var(--fg);
+  --color-chart-tooltip-muted: var(--fg-2);
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
@@ -342,4 +347,105 @@
     opacity: 0;
     transform: translateY(8px);
   }
+}
+
+/* ---- Movimento e profundidade (decisão 155) ---------------------------- */
+
+/* A entrada de uma área ou de um bloco: sobe de leve e acende. Em CSS, e não
+   no Motion: a animação CSS não depende de JavaScript nem de quadro de tela
+   para terminar, e o conteúdo nunca fica preso invisível. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.rise-in,
+.stagger > * {
+  animation: rise-in 280ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+/* A cascata: 50 ms entre vizinhos, até o décimo segundo; dali em diante,
+   tudo junto — ninguém espera mais que meio segundo para ler. */
+.stagger > :nth-child(2) { animation-delay: 50ms; }
+.stagger > :nth-child(3) { animation-delay: 100ms; }
+.stagger > :nth-child(4) { animation-delay: 150ms; }
+.stagger > :nth-child(5) { animation-delay: 200ms; }
+.stagger > :nth-child(6) { animation-delay: 250ms; }
+.stagger > :nth-child(7) { animation-delay: 300ms; }
+.stagger > :nth-child(8) { animation-delay: 350ms; }
+.stagger > :nth-child(9) { animation-delay: 400ms; }
+.stagger > :nth-child(10) { animation-delay: 450ms; }
+.stagger > :nth-child(n + 11) { animation-delay: 500ms; }
+
+/* A onda de brilho do carregamento do motor, letra a letra. Em CSS para o
+   laço sem fim ficar fora da linha principal; o bloco de movimento reduzido
+   acima a encurta para um quadro, e a letra fica acesa. */
+@keyframes engine-wave {
+  50% {
+    opacity: 0.35;
+  }
+}
+.engine-wave {
+  animation: engine-wave 1.6s ease-in-out infinite both;
+}
+
+/* A aura do topo da página do ativo: a luz da marca, desfocada, atrás do
+   cabeçalho. Fraca de propósito — a página é de número, não de vitrine. */
+.asset-aura {
+  background:
+    radial-gradient(60% 70% at 18% 30%, color-mix(in oklab, var(--brand) 16%, transparent), transparent 70%),
+    radial-gradient(45% 60% at 70% 10%, color-mix(in oklab, var(--chart-2) 10%, transparent), transparent 70%);
+  filter: blur(24px);
+  opacity: 0.9;
+}
+:root[data-theme='light'] .asset-aura {
+  opacity: 0.6;
+}
+
+/* A borda acesa do cartão da leitura, no tom do veredito (`--verdict`): um
+   fio de luz no alto, por cima da borda tingida, como as superfícies do
+   Linear. */
+.verdict-glow {
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in oklab, var(--verdict, var(--brand)) 9%, transparent), transparent 55%),
+    var(--surface);
+}
+.verdict-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0 12% auto 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--verdict, var(--brand)) 70%, transparent), transparent);
+  pointer-events: none;
+}
+
+/* ---- Gráficos da Bklit UI (decisão 156) -------------------------------- */
+
+/* As variáveis que os gráficos da Bklit leem, apontadas para os tokens do
+   Equisim: o tema claro e o escuro vêm dos mesmos pares medidos, e nenhuma
+   cor nova entra sem passar pelo teste de contraste. */
+.bklit-chart {
+  --foreground: var(--fg);
+  --muted-foreground: var(--fg-2);
+  --chart-foreground: var(--fg);
+  --chart-foreground-muted: var(--fg-3);
+  --chart-label: var(--fg-3);
+  --chart-background: var(--surface);
+  --chart-grid: var(--grid);
+  --chart-crosshair: var(--border-strong);
+  --chart-indicator-color: var(--border-strong);
+  --chart-indicator-secondary-color: var(--border);
+  --chart-line-primary: var(--chart-1);
+  --chart-line-secondary: var(--chart-2);
+  --chart-tooltip-background: var(--raised);
+  --chart-tooltip-foreground: var(--fg);
+  --chart-tooltip-muted: var(--fg-2);
+  --chart-segment-line: var(--border-strong);
+  --chart-segment-background: var(--sunken);
+  --chart-marker-background: var(--raised);
+  --chart-marker-border: var(--border);
+  --chart-marker-foreground: var(--fg);
+  --chart-marker-badge-background: var(--sunken);
+  --chart-marker-badge-foreground: var(--fg-2);
+  --chart-brush-border: var(--border-strong);
 }

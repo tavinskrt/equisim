@@ -21,6 +21,7 @@ import { Card } from '../../ui/card';
 import { EmptyState, Skeleton } from '../../ui/feedback';
 import { TickerLogo } from '../../ui/ticker-logo';
 import { toast } from '../../ui/toast';
+import { assetPath } from '../shell/use-open-asset';
 import { PortaZeroExplainer } from '../study/porta-zero';
 import { PremiseFields } from './premise-fields';
 import { CalculationCard, type Confirmation, DisagreementCard, ResultBar, ReverseCard, SummaryCard, YearsCard } from './result-cards';
@@ -137,10 +138,10 @@ function EditorSkeleton({ ticker }: { ticker: Ticker }) {
 function Header(props: { ticker: Ticker; changed: boolean; onReset: (() => void) | null }) {
   const navigate = useNavigate();
   const back = () => {
-    // Quem veio do Raio-X volta a ele; quem abriu o link direto vai ao Raio-X sobre o estudo.
+    // Quem veio do Raio-X volta a ele; quem abriu o link direto vai à página do ativo.
     const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
     if (idx > 0) navigate(-1);
-    else navigate(`/estudo?ativo=${props.ticker.value}`);
+    else navigate(assetPath(props.ticker));
   };
   return (
     <div className="flex items-center gap-2">

@@ -5,7 +5,7 @@ import { cn } from '../../ui/cn';
 import { HintPopover } from '../../ui/hint';
 import { TickerLogo } from '../../ui/ticker-logo';
 import { toneText } from '../../ui/tone';
-import { useAssetOverlay } from '../shell/use-asset-overlay';
+import { useOpenAsset } from '../shell/use-open-asset';
 import { perAssetGlossary } from './glossary';
 import { PortfolioBadge, PortfolioColors } from './portfolio-badge';
 
@@ -71,7 +71,7 @@ export function PerAssetCard({ principal, reserve }: { principal: BacktestOutcom
 }
 
 function AssetGroup(props: { label: string; color: string; assets: readonly AssetPerformance[]; className?: string }) {
-  const { open } = useAssetOverlay();
+  const open = useOpenAsset();
   return (
     <div className={cn('mt-4', props.className)}>
       <PortfolioBadge name={props.label} color={props.color} />

@@ -8,7 +8,8 @@ import { cn } from './cn';
 /**
  * Painel sobreposto: **desliza da direita** a partir de 768 px e **sobe de
  * baixo** abaixo disso, onde a lateral espremeria o conteúdo. É a casa do
- * Raio-X do ativo e das listas de escolha.
+ * seletor de ativos e das listas de escolha; o Raio-X tem página própria
+ * desde a decisão 155.
  */
 export function Sheet(props: {
   open: boolean;

@@ -281,7 +281,14 @@ async function step(errors: string[], label: string, fn: () => Promise<void>): P
 async function captureAll(browser: Browser, base: string, theme: ThemeName, width: number, errors: string[]): Promise<number> {
   const dir = join(OUT, theme);
   mkdirSync(dir, { recursive: true });
-  const context = await browser.newContext({ viewport: { width, height: heightFor(width) }, locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
+  // Movimento reduzido (decisão 155): a foto pega o estado final, e não um
+  // quadro no meio da cascata ou da contagem dos números.
+  const context = await browser.newContext({
+    viewport: { width, height: heightFor(width) },
+    locale: 'pt-BR',
+    timezoneId: 'America/Sao_Paulo',
+    reducedMotion: 'reduce',
+  });
   await context.clock.setFixedTime(CAPTURE_DATE);
   await context.addInitScript((t) => {
     try {
@@ -349,9 +356,13 @@ async function captureAll(browser: Browser, base: string, theme: ThemeName, widt
   await step(errors, `${tag} raio-x`, async () => {
     await page.getByRole('button', { name: 'Adicionar ativo' }).first().click();
     await page.locator('#picker-search').fill('VALE3');
+    // Abre a página do ativo (decisão 155); o Voltar devolve ao Estudo.
     await page.getByRole('button', { name: 'Abrir o Raio-X de VALE3' }).click();
+    await page.waitForURL(/\/ativo\/VALE3$/);
     await page.waitForTimeout(5000);
     await shot(page, 2, 'raio-x');
+    await page.getByRole('button', { name: 'Voltar', exact: true }).click();
+    await page.waitForTimeout(600);
     await closeDialogs();
   });
   await step(errors, `${tag} simular`, async () => {
