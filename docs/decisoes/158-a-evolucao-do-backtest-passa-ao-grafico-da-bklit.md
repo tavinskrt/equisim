@@ -11,6 +11,7 @@ afeta:
   - src/ui/charts/bklit/
   - src/styles.css
   - src/features/shell/app-shell.tsx
+  - src/features/backtest/backtest-page.tsx
   - test/ui/evolution-chart.test.tsx
   - docs/motor/07-aplicativo.md
 substitui: []
@@ -58,7 +59,12 @@ no Recharts.**
 5. **Nada alarga a página no celular.** No iPhone, a tela de Backtest
    apareceu reduzida, como se o documento fosse mais largo que a tela. Não
    foi possível reproduzir isso no Chromium, e o WebKit não está disponível
-   no ambiente de desenvolvimento. A correção cobre as três saídas possíveis:
+   no ambiente de desenvolvimento. O aparelho mostrou a causa: no modo
+   Completo, o risco × retorno e o mapa de correlação ficavam mais largos que
+   a tela. A grade dos dois não declarava coluna abaixo de `xl`, e a coluna
+   implícita (`auto`) crescia até a largura mínima do mapa de muitos ativos,
+   em vez de deixá-lo rolar dentro do cartão. As duas grades da tela passam a
+   `grid-cols-1`, que é `minmax(0, 1fr)`. Junto entram três proteções:
    - o gráfico da Bklit corta na horizontal (`overflow-x: clip` em
      `.bklit-chart`), porque desenha o SVG com overflow visível e põe tooltip
      e eixos em divs absolutos;

@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-29, a partir de `b44e95a`.
+Gerado em 2026-10-29, a partir de `9425385`.
 
 ## Decisões registradas
 
@@ -889,7 +889,7 @@ Linhas versionadas, excluindo artefatos gerados.
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
 | Nucleo de dominio | 79 | 24.999 |
-| Apresentacao | 181 | 25.834 |
+| Apresentacao | 181 | 25.838 |
 | Camada de dados | 38 | 4.728 |
 | Auditoria | 5 | 679 |
 | Ferramentas de medicao | 126 | 29.669 |
@@ -900,6 +900,7 @@ Linhas versionadas, excluindo artefatos gerados.
 ## Histórico recente
 
 ```
+2026-10-29  9425385  Nada do gráfico alarga a página no celular
 2026-10-29  b44e95a  A evolução comparada do Backtest passa ao gráfico da Bklit (decisão 158)
 2026-10-28  20e933e  Excluir a conta apaga todos os dados dela (decisão 157)
 2026-10-29  6df65a0  Excluir a conta apaga todos os dados dela (decisão 157)
@@ -914,5 +915,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-10-28  5bea0f6  Mostra a logo da empresa ao lado de cada ticker (decisão 154)
 2026-10-26  2dab605  tesouro_baixar: agente de navegador e nova tentativa no 429
 2026-10-25  22edc46  O lucro de partida passa a ser o ano corrente anualizado (decisão 153)
-2026-10-25  d2a6359  Reconstrói o Equisim em TypeScript para a web e tira o Dart do repositório
 ```

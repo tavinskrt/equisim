@@ -227,7 +227,7 @@ function ComparisonBody({ result }: { result: PortfolioComparison }) {
         </Banner>
       ))}
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {principal !== null && <GoalConfrontation principal={principal} reserve={reserve} />}
         <WealthBridge principal={principal} reserve={reserve} />
       </div>
@@ -244,7 +244,11 @@ function ComparisonBody({ result }: { result: PortfolioComparison }) {
       <PerAssetCard principal={principal} reserve={reserve} />
 
       {analyst ? (
-        <div className="grid gap-4 xl:grid-cols-2">
+        // `grid-cols-1` fixa a coluna em `minmax(0, 1fr)`: sem ela, a coluna
+        // implícita cresce até a largura mínima do conteúdo, e no Safari o mapa
+        // de correlação de muitos ativos alarga o cartão (e o do lado) para fora
+        // da tela, em vez de rolar dentro dele.
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {result.riskReturn.length > 0 && <RiskReturnChart result={result} />}
           {correlation.status === 'success' && correlation.data !== null && <CorrelationHeatmap data={correlation.data} />}
         </div>
