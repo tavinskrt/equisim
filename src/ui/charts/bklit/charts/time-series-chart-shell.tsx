@@ -125,6 +125,8 @@ export interface TimeSeriesChartInnerProps {
   composedStackGap?: number;
   /** When set, drives the y-axis max instead of scanning `lines` (e.g. stacked bar totals). */
   yScaleDomainMax?: number;
+  /** Fit the y-domain to the data (padded min..max) instead of anchoring it at zero. Default: false */
+  yDomainFit?: boolean;
   /** Loading vs ready — drives chart phase until transition orchestration lands. */
   chartStatus?: ChartStatus;
   loadingLabel?: string;
@@ -170,6 +172,7 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
   composedStackOffsets,
   composedStackGap,
   yScaleDomainMax,
+  yDomainFit,
   chartStatus = DEFAULT_CHART_STATUS,
   loadingLabel,
   yDomainTween = true,
@@ -194,9 +197,14 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
         usesDefaultOnly && yScaleDomainMax != null
           ? yScaleDomainMax
           : undefined;
-      return resolveTimeSeriesYDomain(sourceData, dataKeys, domainMax);
+      return resolveTimeSeriesYDomain(
+        sourceData,
+        dataKeys,
+        domainMax,
+        yDomainFit
+      );
     },
-    [lines, yScaleDomainMax]
+    [lines, yScaleDomainMax, yDomainFit]
   );
 
   const skeletonData = useMemo(() => {

@@ -115,7 +115,8 @@ export function AppShell() {
       </header>
       <ContextBar />
 
-      <main id="conteudo" className="mx-auto w-full max-w-[1440px] flex-1 px-4 pb-28 pt-4 sm:px-6 md:pb-10">
+      {/* `overflow-x-clip`: um elemento mais largo que a tela é cortado aqui, em vez de alargar o documento, o que no Safari do iPhone reduz a página inteira. `clip`, e não `hidden`, para não virar área de rolagem e o índice lateral continuar grudado. */}
+      <main id="conteudo" className="mx-auto w-full min-w-0 max-w-[1440px] flex-1 overflow-x-clip px-4 pb-28 pt-4 sm:px-6 md:pb-10">
         {/* No celular o modo mora aqui: o cabeçalho não tem largura. */}
         <div className="mb-3 flex justify-end sm:hidden">
           <Segmented

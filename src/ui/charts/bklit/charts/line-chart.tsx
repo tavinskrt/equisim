@@ -61,6 +61,8 @@ export interface LineChartProps {
    * leave headroom above the series. Default: data max.
    */
   yScaleDomainMax?: number;
+  /** Fit the y-domain to the data (padded min..max) instead of anchoring it at zero. Default: false */
+  yDomainFit?: boolean;
   /** Inline container styles (e.g. fixed height for brush strip). */
   style?: CSSProperties;
   /** Fires when the internal chart phase changes (e.g. OG capture readiness). */
@@ -162,6 +164,8 @@ interface ChartInnerProps {
   xDomainSlotCount?: number;
   tweenYDomainOnXDomainChange?: boolean;
   yScaleDomainMax?: number;
+  /** Fit the y-domain to the data (padded min..max) instead of anchoring it at zero. Default: false */
+  yDomainFit?: boolean;
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   onPhaseChange: (phase: ChartPhase) => void;
@@ -185,6 +189,7 @@ function ChartInner({
   xDomainSlotCount,
   tweenYDomainOnXDomainChange,
   yScaleDomainMax,
+  yDomainFit,
   children,
   containerRef,
   onPhaseChange,
@@ -214,6 +219,7 @@ function ChartInner({
       yDomainTween={yDomainTween}
       yDomainTweenDuration={yDomainTweenDuration}
       yScaleDomainMax={yScaleDomainMax}
+      yDomainFit={yDomainFit}
     >
       {children}
     </TimeSeriesChartInner>
@@ -238,6 +244,7 @@ export function LineChart({
   xDomainSlotCount,
   tweenYDomainOnXDomainChange = false,
   yScaleDomainMax,
+  yDomainFit,
   style,
   onPhaseChange,
   children,
@@ -295,6 +302,7 @@ export function LineChart({
             yDomainTween={yDomainTween}
             yDomainTweenDuration={yDomainTweenDuration}
             yScaleDomainMax={yScaleDomainMax}
+            yDomainFit={yDomainFit}
           >
             {children}
           </ChartInner>
