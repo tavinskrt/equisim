@@ -13,7 +13,7 @@ resultado (7.6).
 | **Estudo** | [builder-page.tsx](../../src/features/study/builder-page.tsx) | monta as carteiras Principal e Reserva e mostra o potencial de cada ativo |
 | **Raio-X** (`/ativo/<ATIVO>`) | [asset-page.tsx](../../src/features/asset/asset-page.tsx); [asset-xray.tsx](../../src/features/asset/asset-xray.tsx) | a avaliação de um ativo (capítulo 6), em dois modos — **Essencial**, a leitura e a régua de preço, e **Completo**, com o modelo, a taxa, a normalização, a sensibilidade e a projeção —, e o botão **Simular minhas premissas**, que abre a conta do motor para o usuário refazê-la (7.5); no computador, um índice lateral leva a cada seção. O endereço antigo, `?ativo=<ATIVO>` sobre qualquer área, redireciona para a página |
 | **Meta** | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | a rentabilidade que um plano patrimonial exige, e a carteira frente a ela; a curva de acumulação ([accumulation-chart.tsx](../../src/features/goal/accumulation-chart.tsx)) é o piloto dos gráficos da Bklit UI (decisão 156) |
-| **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras sob o mesmo plano de aportes |
+| **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras sob o mesmo plano de aportes; a evolução comparada ([evolution-chart.tsx](../../src/features/backtest/evolution-chart.tsx)) é desenhada pelo gráfico de linha da Bklit UI, e o risco × retorno segue no Recharts (decisão 158) |
 | **Meus valuations** | [valuations-page.tsx](../../src/features/valuations/valuations-page.tsx) | os valuations que o usuário confirmou, de todos os ativos (7.6) |
 
 Onde aparece um ticker — Estudo, seletor, busca, Raio-X, Backtest, Meus

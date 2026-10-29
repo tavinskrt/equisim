@@ -1,17 +1,19 @@
+import { curveLinear } from '@visx/curve';
 import { Download } from 'lucide-react';
 import { useState } from 'react';
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import type { PortfolioComparison } from '../../app/backtest';
-import { type BacktestOutcome, DateTime } from '../../core';
+import type { BacktestOutcome, DateTime } from '../../core';
 import { Fmt } from '../../copy';
-import { axisProps, ChartFrame, DataTable, type LegendItem, TooltipBox } from '../../ui/charts/chart-frame';
+import { ChartTooltip, Grid, Line, LineChart, TooltipContent, XAxis, YAxis } from '../../ui/charts/bklit';
+import { ChartFrame, DataTable, type LegendItem } from '../../ui/charts/chart-frame';
 import { IconButton } from '../../ui/button';
 import { Segmented } from '../../ui/segmented';
 
 type Measure = 'base100' | 'wealth';
+type SeriesKey = 'principal' | 'reserve';
 
-interface Row {
+export interface Row {
   readonly t: number;
   readonly date: DateTime;
   principal?: number;
@@ -48,11 +50,64 @@ function monthEnds(rows: readonly Row[]): Row[] {
   return out;
 }
 
+/** Um ponto do gráfico: a data como `Date`, que é o eixo da Bklit, e a linha de origem, que o tooltip lê. */
+export interface PlotPoint extends Record<string, unknown> {
+  readonly date: Date;
+  readonly source: Row;
+}
+
+/**
+ * Os pontos que o gráfico desenha. O gráfico da Bklit lê todas as curvas de
+ * uma tabela só, e um valor ausente vira o topo do gráfico, então:
+ *
+ * - **no meio** de uma curva, o pregão que falta a ela é interpolado no tempo,
+ *   o mesmo segmento reto que o `connectNulls` do Recharts desenhava;
+ * - **nas pontas**, o gráfico fica no período em que todas as curvas têm
+ *   valor (`trimmed` avisa quando isso corta alguma), porque esticar uma
+ *   curva para antes do começo dela inventaria trajetória.
+ *
+ * O valor interpolado só posiciona a linha: o tooltip lê `source`, que guarda
+ * o ausente como ausente, e a tabela e o CSV não passam por aqui.
+ */
+export function plotPoints(rows: readonly Row[], keys: readonly SeriesKey[]): { points: PlotPoint[]; trimmed: boolean } {
+  if (keys.length === 0 || rows.length === 0) return { points: [], trimmed: false };
+  let from = 0;
+  let to = rows.length - 1;
+  for (const k of keys) {
+    const first = rows.findIndex((r) => r[k] !== undefined);
+    const last = rows.findLastIndex((r) => r[k] !== undefined);
+    if (first < 0) return { points: [], trimmed: false };
+    from = Math.max(from, first);
+    to = Math.min(to, last);
+  }
+  if (from > to) return { points: [], trimmed: true };
+  const span = rows.slice(from, to + 1);
+  const points: PlotPoint[] = span.map((r) => ({ date: new Date(r.t), source: r }));
+  for (const k of keys) {
+    let prev = 0;
+    for (let i = 0; i < span.length; i++) {
+      if (span[i]![k] === undefined) continue;
+      if (i - prev > 1) {
+        const a = span[prev]!;
+        const b = span[i]!;
+        for (let j = prev + 1; j < i; j++) points[j]![k] = a[k]! + ((b[k]! - a[k]!) * (span[j]!.t - a.t)) / (b.t - a.t);
+      }
+      points[i]![k] = span[i]![k];
+      prev = i;
+    }
+  }
+  return { points, trimmed: from > 0 || to < rows.length - 1 };
+}
+
 /**
  * **Evolução comparada**: o índice TWR em base 100 das duas carteiras — a
  * curva que neutraliza os aportes e por isso compara composições —, ou o
  * patrimônio em reais, que salta no dia de cada aporte. Duas vistas, nunca dois
  * eixos: as grandezas têm escalas diferentes.
+ *
+ * O desenho é o gráfico de linha da Bklit UI (decisão 158). A base 100 ajusta
+ * o eixo à faixa dos dados, com a linha de 100 tracejada, porque a diferença
+ * entre as carteiras é o que se lê ali; o patrimônio em reais parte do zero.
  */
 export function EvolutionChart(props: { result: PortfolioComparison; onExport: () => void }) {
   const { principal, reserve } = props.result;
@@ -67,8 +122,16 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
     ...(reserve !== null ? [{ key: 'reserve' as const, label: 'Reserva', color: 'var(--reserve)' }] : []),
   ];
   const legend: LegendItem[] = series.map((s) => ({ key: s.key, label: s.label, color: s.color }));
-  const first = rows[0]?.t ?? 0;
-  const last = rows[rows.length - 1]?.t ?? 0;
+  const { points, trimmed } = plotPoints(
+    rows,
+    series.map((s) => s.key),
+  );
+  if (measure === 'base100') for (const p of points) p['base'] = 100;
+  const labels = points.map((p) => Fmt.shortDate(p.source.date));
+  const footer =
+    measure === 'base100'
+      ? 'Índice ponderado pelo tempo (TWR): o retorno da composição, neutro ao cronograma de aportes. A série diária completa vai no CSV.'
+      : 'Posições a mercado mais o caixa, incluindo os aportes — por isso a curva salta no dia de cada um. Para comparar composições, use a base 100.';
 
   return (
     <ChartFrame
@@ -94,48 +157,43 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
         </>
       }
       chart={
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-            <CartesianGrid vertical={false} stroke="var(--grid)" />
-            <XAxis
-              dataKey="t"
-              type="number"
-              scale="time"
-              domain={[first, last]}
-              tickFormatter={(t: number) => Fmt.shortDate(DateTime.fromMillisecondsSinceEpoch(t))}
-              minTickGap={32}
-              {...axisProps}
-            />
-            <YAxis width={measure === 'base100' ? 44 : 80} domain={['auto', 'auto']} tickFormatter={fmt} {...axisProps} />
-            {measure === 'base100' && <ReferenceLine y={100} stroke="var(--border-strong)" strokeDasharray="3 3" />}
-            <Tooltip
-              cursor={{ stroke: 'var(--border-strong)' }}
-              content={({ active, payload }) => {
-                if (!active || payload === undefined || payload.length === 0) return null;
-                const row = payload[0]!.payload as Row;
-                return (
-                  <TooltipBox
-                    title={Fmt.date(row.date)}
-                    rows={series.map((s) => ({ key: s.key, label: s.label, color: s.color, value: row[s.key] === undefined ? '—' : fmtExact(row[s.key]!) }))}
-                  />
-                );
-              }}
-            />
-            {series.map((s) => (
-              <Line
-                key={s.key}
-                dataKey={s.key}
-                type="linear"
-                stroke={s.color}
-                strokeWidth={2}
-                dot={false}
-                connectNulls
-                activeDot={{ r: 4, stroke: 'var(--surface)', strokeWidth: 2 }}
-                isAnimationActive={false}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        <LineChart
+          // Trocar a grandeza remonta o gráfico: a curva entra de novo, em vez
+          // de se transformar de índice em reais, que não são a mesma conta.
+          key={measure}
+          data={points}
+          aspectRatio=""
+          className="bklit-chart h-full"
+          // A Bklit prende o toque para o arrasto; aqui não há arrasto, e a
+          // página tem de rolar com o dedo por cima da curva.
+          style={{ touchAction: 'pan-y' }}
+          margin={{ top: 8, right: 12, bottom: 28, left: measure === 'base100' ? 44 : 76 }}
+          yDomainFit={measure === 'base100'}
+        >
+          <Grid horizontal />
+          {measure === 'base100' && <Line dataKey="base" stroke="var(--border-strong)" strokeWidth={1} curve={curveLinear} dashFromIndex={0} dashArray="3,3" showHighlight={false} />}
+          {series.map((s) => (
+            // Segmento reto entre pregões: a curva natural, padrão da Bklit,
+            // passa por valores que a carteira nunca teve entre um dia e outro.
+            // Sem o esmaecer das pontas, também padrão: o último pregão é o
+            // resultado da simulação, e não pode sumir no fundo.
+            <Line key={s.key} dataKey={s.key} stroke={s.color} strokeWidth={2} curve={curveLinear} fadeEdges={false} />
+          ))}
+          <YAxis formatValue={fmt} />
+          <XAxis labels={labels} numTicks={5} />
+          <ChartTooltip
+            showDatePill={false}
+            content={({ point }) => {
+              const source = (point as PlotPoint).source;
+              return (
+                <TooltipContent
+                  title={Fmt.date(source.date)}
+                  rows={series.map((s) => ({ label: s.label, color: s.color, value: source[s.key] === undefined ? '—' : fmtExact(source[s.key]!) }))}
+                />
+              );
+            }}
+          />
+        </LineChart>
       }
       table={
         <DataTable
@@ -144,11 +202,7 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
           rows={monthEnds(rows).map((r) => [Fmt.date(r.date), ...series.map((s) => (r[s.key] === undefined ? '—' : fmtExact(r[s.key]!)))])}
         />
       }
-      footer={
-        measure === 'base100'
-          ? 'Índice ponderado pelo tempo (TWR): o retorno da composição, neutro ao cronograma de aportes. A série diária completa vai no CSV.'
-          : 'Posições a mercado mais o caixa, incluindo os aportes — por isso a curva salta no dia de cada um. Para comparar composições, use a base 100.'
-      }
+      footer={trimmed ? `${footer} O gráfico mostra o período em que as duas carteiras têm cotação; a tabela e o CSV trazem cada uma inteira.` : footer}
     />
   );
 }

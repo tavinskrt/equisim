@@ -41,12 +41,13 @@ export function collectNumericExtents(
 
 /**
  * Line / area y-domain: zero-anchored while every value is >= 0, padded
- * min..max once any value is negative.
+ * min..max once any value is negative — or always, with `fit`.
  */
 export function resolveTimeSeriesYDomain(
   data: Record<string, unknown>[],
   dataKeys: string[],
-  yScaleDomainMax: number | undefined
+  yScaleDomainMax: number | undefined,
+  fit = false
 ): YDomain {
   if (yScaleDomainMax != null && yScaleDomainMax > 0) {
     return [0, yScaleDomainMax * 1.1];
@@ -54,7 +55,7 @@ export function resolveTimeSeriesYDomain(
 
   const { minValue, maxValue } = collectNumericExtents(data, dataKeys);
 
-  if (minValue >= 0) {
+  if (minValue >= 0 && !fit) {
     const top = maxValue <= 0 ? 100 : maxValue * 1.1;
     return [0, top];
   }

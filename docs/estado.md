@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-29, a partir de `ccab439`.
+Gerado em 2026-10-29, a partir de `20e933e`.
 
 ## Decisões registradas
 
-**130** aceita · **2** cumprida · **7** substituída
+**131** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -154,6 +154,7 @@ Gerado em 2026-10-29, a partir de `ccab439`.
 | 155 | O Raio-X ganha página própria com Voltar, e a interface ganha movimento curto pelo Motion, com peças da Kokonut UI e profundidade em CSS | aceita | voce | 2026-10-28 |
 | 156 | A curva de acumulação da Meta é o piloto dos gráficos da Bklit UI, e os outros gráficos continuam no Recharts até a comparação | aceita | voce | 2026-10-28 |
 | 157 | Excluir a conta apaga todos os dados dela no Firestore, e exige a senha antes de apagar qualquer coisa | aceita | voce | 2026-10-29 |
+| 158 | A evolução comparada do Backtest passa ao gráfico de linha da Bklit UI, e o risco × retorno fica no Recharts | aceita | voce | 2026-10-29 |
 
 ### Caminhos retirados
 
@@ -888,17 +889,19 @@ Linhas versionadas, excluindo artefatos gerados.
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
 | Nucleo de dominio | 79 | 24.999 |
-| Apresentacao | 181 | 25.743 |
-| Camada de dados | 37 | 4.687 |
+| Apresentacao | 181 | 25.820 |
+| Camada de dados | 38 | 4.728 |
 | Auditoria | 5 | 679 |
 | Ferramentas de medicao | 126 | 29.669 |
-| Testes do app | 40 | 6.152 |
+| Testes do app | 42 | 6.325 |
 | Testes do nucleo | 65 | 31.881 |
 | Ferramentas de QA | 21 | 7.565 |
 
 ## Histórico recente
 
 ```
+2026-10-28  20e933e  Excluir a conta apaga todos os dados dela (decisão 157)
+2026-10-29  6df65a0  Excluir a conta apaga todos os dados dela (decisão 157)
 2026-10-28  ccab439  Fecha falhas de segurança do proxy, das regras e do Hosting
 2026-10-29  f32ac46  Fecha falhas de segurança do proxy, das regras e do Hosting
 2026-10-28  14f086e  O Raio-X ganha página própria, a interface ganha movimento e a Meta pilota a Bklit UI (decisões 155 e 156)
@@ -912,6 +915,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-10-25  22edc46  O lucro de partida passa a ser o ano corrente anualizado (decisão 153)
 2026-10-25  d2a6359  Reconstrói o Equisim em TypeScript para a web e tira o Dart do repositório
 2026-10-25  49c1883  Tira da árvore o harness Dart da paridade
-2026-10-25  26e099a  Registra a decisão 152 e leva a documentação à árvore TypeScript
-2026-10-25  772a5ec  Apaga o Flutter e o núcleo Dart, e leva as ferramentas do repositório ao TypeScript
 ```

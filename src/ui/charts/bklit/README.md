@@ -26,5 +26,11 @@ O que mudou em relação ao original, e só isto:
    `zinc`; em `y-axis.tsx`, o recuo de 8 px dos rótulos saiu do `style` para
    as classes `pr-2` e `pl-2`.
 
+5. Uma opção nova, `yDomainFit`, no `LineChart` (decisão 158): o eixo y se
+   ajusta à faixa dos dados em vez de partir do zero. Ela passa por
+   `line-chart.tsx` e `time-series-chart-shell.tsx` até
+   `resolveTimeSeriesYDomain`, em `y-domain-utils.ts`. Sem ela, o
+   comportamento é o original.
+
 Para atualizar, copie de novo a mesma lista de arquivos do repositório de
-origem e reaplique os quatro passos.
+origem e reaplique os cinco passos.
