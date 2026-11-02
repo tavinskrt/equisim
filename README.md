@@ -278,8 +278,8 @@ os de `npm run tool -- …`):
 
 | Etapa | Comandos |
 |---|---|
-| 1. Bases brutas, em `data/` | `python tool/cvm_baixar.py`; `python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre`; `python tool/cvm_baixar.py --docs FCA`; `python tool/b3_baixar.py`; `python tool/b3_companhias_baixar.py`; `python tool/b3_complemento_baixar.py`; `python tool/b3_complemento_baixar.py --deslistadas`; `python tool/b3_ponte.py`; `python tool/tesouro_baixar.py` |
-| 2. Ingestão e contagens por data | `cvm-ingest data/cvm`; `b3-delisted-count` |
+| 1. Bases brutas, em `data/` | `python tool/cvm_baixar.py`; `python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre`; `python tool/cvm_baixar.py --docs FCA`; `python tool/b3_baixar.py`; `python tool/b3_companhias_baixar.py`; `python tool/b3_complemento_baixar.py`; `python tool/tesouro_baixar.py` |
+| 2. Ingestão, pontes e contagens por data, nesta ordem | `cvm-ingest data/cvm` (com 16 GB de memória ou menos, `cvm-ingest data/cvm --partes 4`); `python tool/b3_ponte.py`, que lê o que a ingestão gravou; `python tool/b3_complemento_baixar.py --deslistadas` e `python tool/cvm_versoes_baixar.py`, que leem a ponte; `cvm-ingest` de novo, para montar as versões antigas; `b3-delisted-count` |
 | 3. Pacotes de dado | `cvm-package`, `b3-package`, `b3-dividends-package`, `capital-package --agora`, `fre-grants`, `unit-package --agora`, `control-package --agora` e `curve-package` |
 | 4. Congelar a entrada nova | `cascade-golden`, sem `--regravar`: copia o cache do dia para `data/gabarito/` |
 | 5. Pacotes medidos sobre ela | `beta-prior-package`, `multiples-package` e `implied-premium --so-serie` — que recusa regravar trimestre já gravado que tenha mudado; confira a causa antes de usar `--aceitar-mudanca-do-passado` (item B48) |
