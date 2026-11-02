@@ -194,6 +194,18 @@ npm run tool -- curve-package
 
 Depois, `npm run build`.
 
+**A entrada congelada não lê este pacote.** Regerá-lo para publicar tira dele
+as datas-base de 14/09/2026, e por isso o gabarito e as medições sobre a
+entrada congelada leem a curva dela, `tool/validation/curva_congelada.json`,
+gerada uma vez da mesma base do Tesouro:
+
+```bash
+npm run tool -- curve-package --ate 2026-09-14 --saida tool/validation/curva_congelada.json
+```
+
+Sem esse arquivo, as ferramentas da entrada congelada param e dizem o que
+rodar, em vez de avaliar sem curva.
+
 ### Como conferir que a avaliação está íntegra
 
 Abra o Raio-X de uma ação e o painel de logs:

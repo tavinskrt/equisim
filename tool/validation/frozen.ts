@@ -77,6 +77,39 @@ const cacheFile = `${folder}/cache.sqlite`;
 const ibovespaFile = `${folder}/ibovespa.json`;
 const universeFile = `${folder}/universo.json`;
 
+/**
+ * A curva do Tesouro da entrada congelada: as dez datas-base até
+ * [frozenToday], gravadas uma vez da base do Tesouro.
+ *
+ * **Não é o pacote do aplicativo.** `public/assets/tesouro/curva.json` guarda
+ * as datas-base mais recentes e precisa ser regerado antes de cada publicação;
+ * o de 15/10/2026 já não tinha data-base até 14/09/2026, e o gabarito e as
+ * medições sobre a entrada congelada passaram a correr sem curva, em silêncio,
+ * com o preço justo fora de comparação com o da documentação. Por isso a
+ * entrada congelada tem a curva dela, e a falta dela encerra a ferramenta em
+ * vez de virar recuo.
+ */
+export const frozenCurveFile = 'tool/validation/curva_congelada.json';
+
+/** A curva de [frozenCurveFile] em [frozenToday]; encerra com código 2 sem ela. */
+export function frozenCurve(): YieldCurve {
+  const make = `  npm run tool -- curve-package --ate 2026-09-14 --saida ${frozenCurveFile}`;
+  if (!existsSync(frozenCurveFile)) {
+    process.stderr.write(`sem a curva da entrada congelada em ${frozenCurveFile}. Gere da base do Tesouro:\n`);
+    process.stderr.write('  python tool/tesouro_baixar.py\n');
+    process.stderr.write(`${make}\n`);
+    process.exit(2);
+  }
+  const curve = TreasuryCurve.at(TreasuryQuotesCodec.decode(readJson(frozenCurveFile)), frozenToday);
+  if (curve === null) {
+    process.stderr.write(
+      `${frozenCurveFile} não tem data-base nos ${TreasuryCurve.fallbackDays} dias até 14/09/2026. Gere de novo:\n${make}\n`,
+    );
+    process.exit(2);
+  }
+  return curve;
+}
+
 /** O pacote do prêmio implícito (decisão 142). */
 const premiumPackageFile = 'public/assets/mercado/premio_implicito.json';
 const answerKeyFile = 'docs/validacao/gabarito_cascata.json';
@@ -213,7 +246,7 @@ export class Frozen {
       process.exit(2);
     }
 
-    const curve = TreasuryCurve.at(TreasuryQuotesCodec.decode(readJson('public/assets/tesouro/curva.json')), frozenToday);
+    const curve = frozenCurve();
     const registry = B3RegistryCodec.decodePackage(readJson('public/assets/b3/emissores.json'));
     const docs = CvmDocumentCodec.decodePackage(readJson('public/assets/cvm/documentos.json'));
     const terms = ConcessionTermsCodec.decode(readJson('public/assets/cvm/outorgas.json'));

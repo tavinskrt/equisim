@@ -96,8 +96,6 @@ import {
   type ShareholderControlPeriod,
   StochasticScenarios,
   Ticker,
-  TreasuryCurve,
-  TreasuryQuotesCodec,
   type UnitComposition,
   UnitCompositionCodec,
   ValuationCascade,
@@ -111,7 +109,7 @@ import {
 import { OfficialSectorFundamentalsRepository } from '../src/data/repositories/b3-registry-repository';
 import { dartString, errln, jsonPretty, outln, readJson, writeText } from './lib/files';
 import { ValidationContext } from './validation/context';
-import { CvmFundamentals, frozenToday, SavedIbovespa } from './validation/frozen';
+import { CvmFundamentals, frozenCurve, frozenToday, SavedIbovespa } from './validation/frozen';
 
 const today = frozenToday;
 const file = 'docs/validacao/gabarito_cascata.json';
@@ -299,7 +297,9 @@ export async function main(args: string[]): Promise<void> {
   // reproduzir-se sem os 750 MB da CVM nem o arquivo do Tesouro, que não
   // sobrevivem a uma máquina nova. Antes a curva vinha do CSV do Tesouro e os
   // documentos, da base ingerida — as duas fontes de que o pacote é gerado.
-  const curve = TreasuryCurve.at(TreasuryQuotesCodec.decode(readJson<JsonObject>('public/assets/tesouro/curva.json')), today);
+  // A curva é a da entrada congelada, e não o pacote do aplicativo, que é
+  // regerado a cada publicação e deixa de cobrir 14/09/2026 (ver `frozenCurve`).
+  const curve = frozenCurve();
   const registry = B3RegistryCodec.decodePackage(readJson<JsonObject>('public/assets/b3/emissores.json'));
   const docs = CvmDocumentCodec.decodePackage(readJson<JsonObject>('public/assets/cvm/documentos.json'));
   const terms = ConcessionTermsCodec.decode(readJson<JsonObject>('public/assets/cvm/outorgas.json'));
