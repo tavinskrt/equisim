@@ -1,5 +1,11 @@
 # Caso WEGE3 — WEG, via da firma, do início ao fim
 
+> **Números refeitos em 03/11/2026.** Com o motor da decisão 153, o último ponto
+> da série passou a ser 2026, com o lucro acumulado do ano anualizado, e os dados
+> deste caso foram regerados em [dados/WEGE3.json](dados/WEGE3.json): preço justo
+> **R$ 15,97** contra R$ 50,74, upside de **−68,5%**, com Ke de 14,91%. O texto
+> abaixo ainda traz a conta anterior e vai ser refeito.
+
 > **O que este caso mostra.** Uma empresa industrial, com mais caixa que dívida,
 > retorno sobre o capital muito alto e crescimento consistente. É o caminho
 > completo da **via da firma**, com vantagem competitiva residual na

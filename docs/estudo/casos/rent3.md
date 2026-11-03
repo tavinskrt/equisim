@@ -1,5 +1,11 @@
 # Caso RENT3 — Localiza: quando o motor se recusa a dar um preço
 
+> **Números refeitos em 03/11/2026.** Com o motor da decisão 153, o último ponto
+> da série passou a ser 2026, com o lucro acumulado do ano anualizado, e a
+> Localiza **passou a ser avaliada** pela via da firma: preço justo **R$ 22,71**
+> contra R$ 35,59, upside de **−36,2%** ([dados/RENT3.json](dados/RENT3.json)). O
+> texto abaixo, que explica a recusa, é o da contagem anterior.
+
 > **O que este caso mostra.** Nem toda empresa recebe preço justo. A Localiza
 > passa pelas portas, mas a conta da via da firma diz que, com o custo de
 > capital que ela tem e o retorno que ela entrega, **o valor da operação não

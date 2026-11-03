@@ -56,7 +56,7 @@ P = preço de hoje;  V = preço justo;  σ = volatilidade anual do papel
 | `σ` = desvio-padrão amostral dos retornos log diários dos últimos 252 pregões × √252 (≥ 120 retornos) | [calibrated-band.ts, `trailingVolatility`](../../src/core/services/valuation/calibrated-band.ts) | — |
 | `a`, `b`, `z` por horizonte e nominal, do pacote [banda_calibrada.json](../../public/assets/validacao/banda_calibrada.json), medidos nas coortes trimestrais (12 meses: 2018–2025; 36 meses: 2018–2023) | `VolatilityBandTable`, [tool/cobertura_banda.py](../../tool/cobertura_banda.py) | decisões 100 e 124 |
 | 12 meses: `a = 0,0781`, `b = 0,0202`; 36 meses: `a = 0,1318`, `b = 0,0615` — o preço converge pouco ao justo | pacote | [cobertura_banda.md](../validacao/cobertura_banda.md) |
-| A tela afirma "8 de cada 10" só se a cobertura fora da amostra estiver a até 5 p.p. de 80% nos dois horizontes (medida em 02/10/2026: 79,7% e 78,7%) | `CalibratedBandCard.criterionMargin` | critério do R2 |
+| A tela afirma "8 de cada 10" só se a cobertura fora da amostra estiver a até 5 p.p. de 80% nos dois horizontes (medida em 03/11/2026: 79,0% e 79,1%) | `CalibratedBandCard.criterionMargin` | critério do R2 |
 
 ---
 

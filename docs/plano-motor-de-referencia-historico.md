@@ -11,6 +11,42 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## A entrada congelada e a validação refeitas com o motor da decisão 153 (03/11/2026)
+
+**O pedido.** Os números do artigo do TG vinham do motor de antes da decisão
+153, e o usuário pediu que fossem refeitos com o motor atual, reconstruindo a
+base: `data/`, com o gabarito e as bases brutas, não existia mais em nenhuma
+máquina.
+
+**O que foi feito.** As bases foram baixadas de novo (CVM, FRE, FCA, COTAHIST,
+cadastro e complemento da B3) e a brapi foi consultada de novo. Três defeitos
+de ferramenta apareceram no caminho e foram corrigidos:
+
+- As ferramentas da entrada congelada liam a curva do pacote do aplicativo, cujas
+  datas-base (01 a 15/10/2026) não cobrem 14/09/2026: desde 23/10 elas rodavam
+  sem curva, em silêncio. A entrada passa a ter a curva dela
+  (`tool/validation/curva_congelada.json`, gerada por `curve-package --ate`), e
+  a ferramenta sai com código 2 sem ela.
+- A `cvm-ingest` passou de 9 GB de memória num computador de 16 GB; `--partes N`
+  divide a montagem por companhia, com saída idêntica.
+- O RAD ficou fora do ar por uma noite; depois, uma das 626 versões antigas (a
+  DFP 2022 v3 do BEES) não era lida, porque o XML traz a hora no nome. A
+  expressão que acha o XML aceita o sufixo.
+
+A paridade com o Dart passou a ler os pacotes de validação da gravação
+(`test/parity/golden/validacao/`), porque eles são medição, e não método.
+
+**Verificado.** Cascata: 121 avaliados de 379 (101 pela via da firma, 20 pela do
+acionista); `manual-calculation-check` sem troca, ao centavo, nos 121. Faixa de
+80%: 79,0% em 12 meses e 79,1% em 36, fora da amostra
+([cobertura_banda.md](validacao/cobertura_banda.md) §16). R3: 0,034, `t`
+corrigido de 0,25 contra 2,70, efeito mínimo detectável de 0,48
+([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §14,
+[poder_r3.md](validacao/poder_r3.md)). Suíte: 1.372 de 1.372 no Node 22; no
+Node 24, a paridade difere no 15º dígito e não fecha.
+
+---
+
 ## A sensibilidade nomeada pelas premissas — o B38 fechado (14/10/2026)
 
 **O pedido.** «Já que não são calculados cenários pessimista e otimista, qual

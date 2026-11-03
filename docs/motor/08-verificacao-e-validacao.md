@@ -9,7 +9,7 @@ ele diz serve?** (validação). Estudo: [guia, cap. 7](../estudo/07-como-o-motor
 
 | Mecanismo | O que confere | Onde | Quando roda |
 |---|---|---|---|
-| **Testes do núcleo** | cada regra, com casos de borda; identidade entre as rotas da firma e do acionista; pureza (zero dependências); determinismo | [test/core/](../../test/core/) (920 testes em 25/10/2026) | a cada mudança (`npm test`; só o núcleo: `npm run test:core`) |
+| **Testes do núcleo** | cada regra, com casos de borda; identidade entre as rotas da firma e do acionista; pureza (zero dependências); determinismo | [test/core/](../../test/core/) (930 testes em 03/11/2026) | a cada mudança (`npm test`; só o núcleo: `npm run test:core`) |
 | **Paridade com o motor Dart** | o núcleo TypeScript contra o gabarito gravado pelo núcleo Dart antes da remoção: 371 ativos, treze montagens, igualdade exata de número, texto e rastro | [test/parity/](../../test/parity/) | a cada mudança (`npm run test:parity`); decisão 152 |
 | **Testes do aplicativo** | dados, cache, rede, auditoria, telas, worker de avaliação e ferramentas | [test/data/](../../test/data/), [test/app/](../../test/app/), [test/audit/](../../test/audit/), [test/ui/](../../test/ui/) e [test/tool/](../../test/tool/) (372 testes) | a cada mudança (`npm test`) |
 | **Gate local** | regras determinísticas: segredo em staging, `DateTime.now()` direto em caminho de cálculo, referência quebrada no registro | [scripts/qa-local.mjs](../../scripts/qa-local.mjs), `.githooks/pre-commit` | todo commit |
@@ -48,8 +48,8 @@ O objetivo "motor de referência" tem três condições
 | | Condição | Medida | Estado |
 |---|---|---|---|
 | **R1** | Nenhum defeito conhecido | nenhum item de defeito com `R1` aberto no plano | ver o plano |
-| **R2** | Incerteza calibrada | faixa de 80% com cobertura fora da amostra a até 5 p.p., em 12 e 36 meses, sem viés de sobrevivência | **atingido**: 79,7% e 78,7%, remedidos em 02/10/2026 ([cobertura_banda.md](../validacao/cobertura_banda.md); decisões 100 e 124) |
-| **R3** | Habilidade testada, com o poder declarado | potencial condicionado ao book-to-market em 36 meses, pelo critério fixado antes (decisão 96), com o poder do teste declarado | **atingido na definição da decisão 140**: `t` corrigido de 0,05 contra 2,70; efeito mínimo detectável de 0,70 contra 0,010 medido, em 02/10/2026 (nem o book-to-market sozinho passa: `t` de 2,40) ([poder_r3.md](../validacao/poder_r3.md), [habilidade_trimestral.md](../validacao/habilidade_trimestral.md)) |
+| **R2** | Incerteza calibrada | faixa de 80% com cobertura fora da amostra a até 5 p.p., em 12 e 36 meses, sem viés de sobrevivência | **atingido**: 79,0% e 79,1%, remedidos em 03/11/2026 ([cobertura_banda.md](../validacao/cobertura_banda.md); decisões 100 e 124) |
+| **R3** | Habilidade testada, com o poder declarado | potencial condicionado ao book-to-market em 36 meses, pelo critério fixado antes (decisão 96), com o poder do teste declarado | **atingido na definição da decisão 140**: `t` corrigido de 0,25 contra 2,70; efeito mínimo detectável de 0,48 contra 0,034 medido, em 03/11/2026 (nem o book-to-market sozinho passa: `t` de 2,15) ([poder_r3.md](../validacao/poder_r3.md), [habilidade_trimestral.md](../validacao/habilidade_trimestral.md)) |
 
 ### O instrumento
 

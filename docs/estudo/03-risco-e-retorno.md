@@ -271,11 +271,11 @@ ficar com aquela ação.
 Exemplo, com os números da WEG em 14/09/2026:
 
 ```
-Ke = 14,09% + 0,714 × 1,21% = 14,09% + 0,86% = 14,95%
+Ke = 14,05% + 0,714 × 1,21% = 14,05% + 0,86% = 14,91%
 ```
 
 Quem compra WEG exige, em média, 15% ao ano. Uma empresa com β = 1,3 exigiria
-14,09% + 1,57% = 15,66%. Com um prêmio pequeno, o beta muda pouco o Ke: quase
+14,05% + 1,57% = 15,62%. Com um prêmio pequeno, o beta muda pouco o Ke: quase
 todo ele é a taxa do Tesouro.
 
 **Dois usos do mesmo Ke:**

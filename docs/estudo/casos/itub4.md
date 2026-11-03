@@ -1,5 +1,12 @@
 # Caso ITUB4 — Itaú Unibanco, via do acionista (banco)
 
+> **Números refeitos em 03/11/2026.** Com o motor da decisão 153, o último ponto
+> da série passou a ser 2026, com o lucro acumulado do ano anualizado, e os dados
+> deste caso foram regerados em [dados/ITUB4.json](dados/ITUB4.json): preço justo
+> **R$ 28,53** contra R$ 42,35, upside de **−32,6%**. No ano 1, LPA de 3,98,
+> crescimento de 9,79%, ROE de 18,59%, retenção de 52,6% e fluxo de 1,89. O texto
+> abaixo ainda traz a conta anterior e vai ser refeito.
+
 > **O que este caso mostra.** Um banco: a dívida é matéria-prima, então o motor
 > pula a firma e desconta direto o lucro do acionista. Compare cada passo com o
 > [caso WEGE3](wege3.md) — a tabela lado a lado está no

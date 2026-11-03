@@ -7,19 +7,17 @@ mesma régua, onde cada objetivo está. O que cada rodada encontrou, o que as
 lentes disseram e o que a auditoria reprovou ficam no
 [histórico](plano-motor-de-referencia-historico.md).
 
-> **Última atualização: 14/10/2026 — a sensibilidade nomeada pelas premissas, e
-> o porquê das normalizações.** O cartão de cenários e o de sensibilidade
-> viraram um só, "Sensibilidade", e os conjuntos fixos passaram de «Pessimista»
-> e «Otimista» a «Premissas mais duras» e «Premissas mais brandas», com o quanto
-> foi mexido em nota, a cor de cada valor pela posição contra o preço justo e o
-> aviso quando as mais brandas valem menos — o que **fecha o B38**
-> ([decisão 148](decisoes/148-a-sensibilidade-e-nomeada-pelas-premissas-num-cartao-so.md)).
-> No mesmo dia, a pedido do orientador, o porquê de cada normalização do lucro
-> de partida passou a aparecer no painel de logs e na tela Editar valuation, e o
-> de cada um dos 110 avaliados em [normalizacoes.md](validacao/normalizacoes.md)
-> — 18 para cima, 27 para baixo, 47 dentro do normal, 14 por tendência, 3
-> reconstruídos e 1 sem ciclo. **Nenhum número mudou**: o R1, o R2 e o R3
-> continuam como medidos em 02/10/2026. Seguem abertos, para o usuário, o B33, o
+> **Última atualização: 03/11/2026 — a entrada congelada e a validação
+> refeitas com o motor da decisão 153.** A base foi reconstruída numa máquina
+> nova (CVM, FRE, FCA, COTAHIST, cadastro e complemento da B3, e as 626 versões
+> antigas do RAD), e a entrada congelada de 14/09/2026 ganhou a curva do Tesouro
+> dela (`tool/validation/curva_congelada.json`), que faltava às ferramentas
+> desde 23/10. A cascata avalia 121 de 379 ativos
+> ([normalizacoes.md](validacao/normalizacoes.md): 13 para cima, 33 para baixo,
+> 53 dentro do normal, 15 por tendência, 4 travados pela queda, 1 reconstruído
+> e 2 sem ciclo). **Nenhum veredito mudou**: a faixa de 80% cobre 79,0% em 12
+> meses e 79,1% em 36, e o critério do R3 fica em 0,034, com `t` corrigido de
+> 0,25 contra 2,70 e o poder declarado. Seguem abertos, para o usuário, o B33, o
 > B34, o B45 e o B46. As rodadas anteriores estão no
 > [histórico](plano-motor-de-referencia-historico.md).
 
@@ -1551,7 +1549,7 @@ contagem por data do FRE e a oficial da B3 já estão na máquina.
 |---|---|---|---|---|
 | C6 | O poder do teste do R3 | R3 | ✅ | a reprovação do R3 diz o que o teste conseguiria ver: o efeito mínimo detectável a 80%, o limite superior que a amostra sustenta e quantas coortes cada ordenação pediria — **aberto e fechado em 22/09/2026** ([poder_r3.md](validacao/poder_r3.md), `tool/poder_r3.dart`). A simulação usa a estrutura de sobreposição com que o crítico da decisão 96 é simulado, e está calibrada: sem efeito passa em 2,4% contra 2,3% nominal. **Em 36 meses o efeito mínimo detectável é 0,62** para o critério do R3 e 0,28 para o book-to-market, que tem 37% de poder no próprio efeito e precisaria de 66 coortes — retornos em 2037. **Em 12 meses** a amostra descarta coeficiente condicionado acima de 0,20. Aberto porque «não passa» sem o poder não distingue falta de habilidade de falta de amostra **Remedido em 25/09/2026**: o mesmo 0,62, e o book-to-market continua pedindo 66 coortes — 2037 **Remedido em 01/10/2026**, com o prêmio de mercado da decisão 142 em cada coorte e as decisões 143 e 144: efeito mínimo detectável de **0,65**, e o book-to-market passa a pedir **54 coortes** — 2034 ([poder_r3.md](validacao/poder_r3.md)) **Remedido em 02/10/2026**, com a base de patrimônio corrigida (B47): efeito mínimo detectável de **0,70**, e o book-to-market pede **50 coortes** — 2033 ([poder_r3.md](validacao/poder_r3.md)) |
 | C1 | Habilidade, com todas as fases completas | R3 | ✅ | com as Fases 1 a 3 fechadas, o backtest monta as coortes do motor daquele dia, e o potencial condicionado ao B/M em 36 meses passa no critério da decisão 96 — `t` corrigido pela sobreposição acima do crítico dela, e Newey-West acima de 2 — **ou** o registro declara que não passa — **fechado em 22/09/2026: o registro declara que não passa** ([decisão 129](decisoes/129-o-r3-nao-passa-e-o-teste-declara-o-poder-que-tem.md)). Sobre o motor final, com o B26 corrigido: **0,052 com `t` corrigido de 0,30 contra 2,70**, e nenhuma das cinco ordenações passa, bruta ou líquida de custo ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §9, [custos_transacao.md](validacao/custos_transacao.md)). A regra da decisão 103 devolve prêmio nenhum, e o retorno esperado continua no `Ke`. O poder do teste acompanha o veredito (C6). **Remedido em 24/09/2026**, com o backtest reexecutado pelo B27: os mesmos 0,052 e 0,30 ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §10) **Remedido em 25/09/2026**, com o capital posterior, as bonificações não ajustadas, a contagem atrasada e os proventos do mesmo dia corrigidos (B28 ao B31): **0,058 com `t` corrigido de 0,34** — não passa ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §11) **Remedido em 01/10/2026**, com o prêmio de mercado de cada coorte tirado do preço da bolsa (decisão 142), a contagem conferida (B43) e os proventos que faltavam (B44): **0,032 com `t` corrigido de 0,18**, Newey-West de 0,44 — não passa; o book-to-market vai a 2,27 e continua abaixo do crítico, e o retorno esperado continua sem prêmio de ordenação ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §12) **Remedido em 02/10/2026**, com a base de patrimônio corrigida (B47): **0,010 com `t` corrigido de 0,05**, Newey-West de 0,14 — não passa; o book-to-market vai a 2,40, abaixo do crítico ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §13) |
-| C2c | A faixa calibrada sobre o motor da Fase 3 | R2 | ✅ | **a forma da decisão 100 é remedida sobre o motor que a Fase 3 deixar, sem escolher outra**, e cobre a até 5 p.p. da nominal em 12 e 36 meses — atingido em 21/09/2026, com as coortes reexecutadas pelo C5 e o motor doze decisões adiante: **90% nominal cobre 88,1% em 12 meses e 89,3% em 36**, desvios de **1,9** e **2,6 p.p.** contra o limite de 5, estável por tercil de potencial e entre listadas e deslistadas. **A forma não foi reescolhida** — é a mesma `VolatilityBandTable`, o que faz disto réplica e não reajuste. **O R2 é atingido sobre o motor da Fase 3** ([decisão 124](decisoes/124-a-faixa-calibrada-replica-sobre-o-motor-da-fase-3.md), [cobertura_banda.md](validacao/cobertura_banda.md)) **Replicada de novo em 25/09/2026**, com o retorno das coortes corrigido pelo B29 ao B31 — a variável que a faixa cobre mudou —: **87,6% e 88,1%**, desvios de 2,4 e 3,0 p.p., com a mesma forma ([cobertura_banda.md](validacao/cobertura_banda.md) §12) **Remedida em 01/10/2026**, com o prêmio de mercado da decisão 142 e o B43 e o B44 corrigidos: **87,9/79,7/50,7%** em 12 meses e **88,3/79,6/51,6%** em 36, desvios máximos de 2,1 e 1,7 p.p., com a mesma forma ([cobertura_banda.md](validacao/cobertura_banda.md) §14) **Remedida em 02/10/2026**, com a base de patrimônio corrigida (B47): **87,9/79,7/50,9%** em 12 meses e **88,1/78,7/50,3%** em 36, desvios máximos de 2,1 e 1,9 p.p., com a mesma forma ([cobertura_banda.md](validacao/cobertura_banda.md) §15) |
+| C2c | A faixa calibrada sobre o motor da Fase 3 | R2 | ✅ | **a forma da decisão 100 é remedida sobre o motor que a Fase 3 deixar, sem escolher outra**, e cobre a até 5 p.p. da nominal em 12 e 36 meses — atingido em 21/09/2026, com as coortes reexecutadas pelo C5 e o motor doze decisões adiante: **90% nominal cobre 88,1% em 12 meses e 89,3% em 36**, desvios de **1,9** e **2,6 p.p.** contra o limite de 5, estável por tercil de potencial e entre listadas e deslistadas. **A forma não foi reescolhida** — é a mesma `VolatilityBandTable`, o que faz disto réplica e não reajuste. **O R2 é atingido sobre o motor da Fase 3** ([decisão 124](decisoes/124-a-faixa-calibrada-replica-sobre-o-motor-da-fase-3.md), [cobertura_banda.md](validacao/cobertura_banda.md)) **Replicada de novo em 25/09/2026**, com o retorno das coortes corrigido pelo B29 ao B31 — a variável que a faixa cobre mudou —: **87,6% e 88,1%**, desvios de 2,4 e 3,0 p.p., com a mesma forma ([cobertura_banda.md](validacao/cobertura_banda.md) §12) **Remedida em 01/10/2026**, com o prêmio de mercado da decisão 142 e o B43 e o B44 corrigidos: **87,9/79,7/50,7%** em 12 meses e **88,3/79,6/51,6%** em 36, desvios máximos de 2,1 e 1,7 p.p., com a mesma forma ([cobertura_banda.md](validacao/cobertura_banda.md) §14) **Remedida em 02/10/2026**, com a base de patrimônio corrigida (B47): **87,9/79,7/50,9%** em 12 meses e **88,1/78,7/50,3%** em 36, desvios máximos de 2,1 e 1,9 p.p., com a mesma forma ([cobertura_banda.md](validacao/cobertura_banda.md) §15) **Remedida em 03/11/2026**, com o motor da decisão 153 e a base reconstruída: **87,6/79,0/51,1%** em 12 meses e **87,8/79,1/52,6%** em 36, desvios máximos de 2,4 e 2,6 p.p., com a mesma forma ([cobertura_banda.md](validacao/cobertura_banda.md) §16) |
 
 **Por que a Fase 4 é só isto.** A habilidade e a incerteza são do motor, e o motor
 muda na Fase 3. O C2c está aqui porque a faixa calibrada é medida sobre as mesmas
@@ -1812,7 +1810,10 @@ condição cita os itens da §6 que a fecham.
   ([cobertura_banda.md](validacao/cobertura_banda.md) §14). **Remedida em
   02/10/2026**, com a base de patrimônio corrigida (B47): **87,9/79,7/50,9%** e
   **88,1/78,7/50,3%**, desvios máximos de 2,1 e 1,9 p.p.
-  ([cobertura_banda.md](validacao/cobertura_banda.md) §15)
+  ([cobertura_banda.md](validacao/cobertura_banda.md) §15). **Remedida em
+  03/11/2026**, com o motor da decisão 153 e a base reconstruída:
+  **87,6/79,0/51,1%** e **87,8/79,1/52,6%**, desvios máximos de 2,4 e 2,6 p.p.
+  ([cobertura_banda.md](validacao/cobertura_banda.md) §16)
 - [x] **R3. Habilidade testada, com o poder declarado** — **atingida em
   27/09/2026, pela definição que o usuário escolheu no C8**
   ([decisão 140](decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)).
@@ -1822,17 +1823,18 @@ condição cita os itens da §6 que a fecham.
   Newey-West de 0,94 — **0,069, `t` de 0,40 e Newey-West de 1,13 remedido em
   28/09/2026 com o B37**, e **0,032, `t` de 0,18 e Newey-West de 0,44 remedido em
   01/10/2026 com o prêmio da decisão 142, o B43 e o B44**, e **0,010, `t` de 0,05
-  e Newey-West de 0,14 remedido em 02/10/2026 com o B47** —, e nenhuma ordenação
-  passa — o book-to-market fica em 2,40 ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §13;
+  e Newey-West de 0,14 remedido em 02/10/2026 com o B47**, e **0,034, `t` de 0,25
+  e Newey-West de 0,60 remedido em 03/11/2026 com o motor da decisão 153** —, e
+  nenhuma ordenação passa — o book-to-market fica em 2,15 ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §14;
   C1, [decisão 129](decisoes/129-o-r3-nao-passa-e-o-teste-declara-o-poder-que-tem.md)).
   **O poder do teste está declarado** (C6): o menor coeficiente que o critério vê
-  com 80% de chance é 0,70, e nem o book-to-market tem poder para passar no
-  próprio efeito antes de 2033. **Habilidade comprovada**, a definição de
+  com 80% de chance é 0,48 (0,70 em 02/10/2026), e nem o book-to-market tem
+  poder para passar no próprio efeito antes de 2035. **Habilidade comprovada**, a definição de
   09/09/2026, **continua não atingida**, e a única via para ela é a réplica
   pré-registrada (C7): selada desde 24/09/2026, finalizada em 25/09 (decisão
   138), com a primeira leitura em 30/09/2029.
 
-**As três condições valem juntas desde 01/10/2026, remedidas em 02/10, e o
+**As três condições valem juntas desde 01/10/2026, remedidas em 02/10 e em 03/11, e o
 motor é motor de referência pela definição da decisão 140** — sem defeito conhecido, com a
 incerteza que cobre o que promete e com a habilidade testada até onde o
 instrumento enxerga. Já tinham valido de 27 a 29/09/2026; nos dois dias entre

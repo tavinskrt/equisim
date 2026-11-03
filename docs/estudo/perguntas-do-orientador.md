@@ -111,15 +111,15 @@ mostrou que o teste não teria poder para mostrar
 
 **12. O que a faixa calibrada garante?**
 Que, medida em coortes que não foram usadas para ajustá-la, a faixa de 80%
-conteve o preço mais os proventos em 79,7% dos casos em 12 meses e 78,7% em 36.
+conteve o preço mais os proventos em 79,0% dos casos em 12 meses e 79,1% em 36.
 Ela **não** é um intervalo em torno do preço justo: sai sobretudo do preço de
 hoje e da volatilidade ([cap. 4, seção 4.12](04-fluxo-de-caixa-descontado.md)).
 
 **13. E os cenários pessimista e otimista?** (hoje "premissas mais duras" e
 "mais brandas", no cartão "Sensibilidade")
 São sensibilidade: mostram quanto o número depende das premissas. Nas coortes,
-contiveram o resultado em 13% a 14% dos casos, e o Monte Carlo em 9% (decisão
-92; remedido em 01/10/2026). Não é taxa de acerto do motor: é uma faixa estreita
+contiveram o resultado em 11% a 15% dos casos, e o Monte Carlo em 8% a 9% (decisão
+92; remedido em 03/11/2026). Não é taxa de acerto do motor: é uma faixa estreita
 em torno do preço justo, que nunca prometeu conter o preço futuro — quem promete
 isso é a faixa calibrada, e ela entrega 8 de cada 10. E as premissas mais
 brandas podem dar preço menor que as mais duras quando a empresa rende abaixo

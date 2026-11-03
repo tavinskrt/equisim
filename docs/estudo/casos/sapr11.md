@@ -1,5 +1,13 @@
 # Caso SAPR11 — Sanepar: unit, concessão e a leitura por pares
 
+> **Números refeitos em 03/11/2026.** Com o motor da decisão 153, o último ponto
+> da série passou a ser 2026, com o lucro acumulado do ano anualizado, e os dados
+> deste caso foram regerados em [dados/SAPR11.json](dados/SAPR11.json): preço
+> justo **R$ 27,76** contra R$ 34,74, upside de **−20,1%** (era +32,6%). O ITR do
+> primeiro semestre de 2026 traz prejuízo, a anualização o dobra, e a
+> normalização para cima fica travada pela queda. O texto abaixo ainda traz a
+> conta anterior e vai ser refeito.
+
 > **O que este caso mostra.** Três coisas que não aparecem nos outros casos: a
 > **unit** (um papel que é um pacote de 5 ações), a **concessão** (um negócio
 > que opera sob contrato) e uma **divergência grande entre o fluxo descontado e

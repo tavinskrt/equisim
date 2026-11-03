@@ -53,10 +53,11 @@ O motor recusa a empresa, dizendo por quê, quando:
   tecnicamente insolvente);
 - **recuperação judicial**.
 
-Na entrada congelada de 14/09/2026, 376 ativos chegaram ao motor: 189 foram
-recusados por liquidez, 34 por história curta e 4 por patrimônio negativo; os
-demais recusados não tinham demonstrativo ou tiveram a estrutura de capital
-recusada pela conta (capítulo 3, seção 3.10, e o [caso RENT3](casos/rent3.md)). Foram avaliados 97
+Na entrada congelada de 14/09/2026, com o motor de 03/11/2026, 379 ativos
+chegaram ao motor: 195 foram recusados por liquidez, 34 por história curta e 3
+por patrimônio negativo ou nulo; os outros 26 não tinham demonstrativo ou
+cotação, não tinham dado que sustentasse uma via ou tiveram a estrutura de
+capital recusada pela conta (capítulo 3, seção 3.10). Foram avaliados 121
 ([eligibility.ts](../../src/core/services/valuation/eligibility.ts)).
 
 ### Portas 1 e 3 — qual caminho
@@ -206,7 +207,7 @@ g∞ = menor entre g e o crescimento nominal da economia, limitado a [−5%; tet
 ```
 
 Nenhuma vantagem dura para sempre: a concorrência chega aos poucos. Em
-14/09/2026 o teto era 6,78% ao ano (capítulo 1, seção 1.6).
+14/09/2026 o teto era 6,83% ao ano (capítulo 1, seção 1.6).
 
 **2. O retorno sobre o capital converge ao custo de capital.**
 
@@ -381,9 +382,9 @@ distribuição triangular com o pico na premissa do motor. A tela mostra os
 percentis 5, 50 e 95 e a fração de sorteios acima do preço de mercado.
 
 **O que eles não são.** Nas coortes históricas, a faixa entre as premissas
-mais duras e as mais brandas conteve o preço mais os proventos de 12 e 36 meses depois em 13% a 14%
-dos casos, e a faixa de 90% do Monte Carlo em 9%, contra 90% que um intervalo de
-confiança prometeria (decisão 92; remedido em 02/10/2026). Os cenários dizem
+mais duras e as mais brandas conteve o preço mais os proventos de 12 e 36 meses depois em 11% a 15%
+dos casos, e a faixa de 90% do Monte Carlo em 8% a 9%, contra 90% que um intervalo de
+confiança prometeria (decisão 92; remedido em 03/11/2026). Os cenários dizem
 **quanto o número depende das premissas**, e não onde o preço vai estar.
 
 **Por que erram tanto.** Por dois motivos, medidos. O motor é pessimista: o
@@ -421,12 +422,12 @@ faixa = preço de hoje × exp(a + b × ln(justo ÷ preço) + σ × z)
 
 - `σ` é a volatilidade do papel no último ano (capítulo 3, seção 3.1);
 - `a` e `b` foram medidos nas coortes trimestrais do backtest (de 2018 a 2025
-  em 12 meses, de 2018 a 2023 em 36): `b` é pequeno (0,02 em 12 meses, 0,06 em
+  em 12 meses, de 2018 a 2023 em 36): `b` é pequeno (0,03 em 12 meses, 0,06 em
   36), o que quer dizer que **o preço converge pouco ao preço justo**;
 - `z` são os limites que, fora da amostra, contiveram 80% dos casos.
 
 Medida fora da amostra, a faixa de 80% conteve o preço mais os proventos em
-79,7% dos casos em 12 meses e 78,7% em 36. Por isso a tela diz "8 de cada 10".
+79,0% dos casos em 12 meses e 79,1% em 36. Por isso a tela diz "8 de cada 10".
 O preço justo entra com peso pequeno porque essa é a evidência: ele explica
 pouco do preço futuro.
 
@@ -506,7 +507,8 @@ some: ao lado de cada campo fica o número dele e de onde ele saiu, e um botão
 **A conta não é outra.** A tela não reimplementa o fluxo descontado: ela
 guarda a conta que o motor fez — o lucro normalizado, a dívida, as ações, a taxa
 de cada ano — e refaz só o pedaço que você trocou. Por isso, sem nenhuma troca,
-o preço é o do motor ao centavo. Isso foi conferido nos 110 ativos avaliados.
+o preço é o do motor ao centavo. Isso foi conferido nos 121 ativos avaliados
+(03/11/2026).
 
 **Um exemplo, com os dados de 14/09/2026.** A WEGE3 é avaliada pela via da
 firma. O motor parte de um lucro operacional de R$ 6.718,7 milhões, crescendo

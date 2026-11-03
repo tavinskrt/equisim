@@ -512,3 +512,23 @@ em 36; nas listadas, 88,2% e 87,6%, e nas deslistadas, 84,7% e 91,8%. O pacote
 foi regerado com `a = 0,0781` e `b = 0,0202` em 12 meses, `a = 0,1318` e
 `b = 0,0615` em 36. A banda de cenários cobre 13,0% em 12 meses e 13,9% em 36, e
 a de 90% do Monte Carlo, 9,6% e 8,6%.
+
+## 16. Remedido em 03/11/2026 — com o motor da decisão 153 e as versões antigas da CVM
+
+Sem reescolher a forma, com a base reconstruída numa máquina nova e o backtest
+refeito com o motor da decisão 153 (o ano corrente anualizado entra como o ponto
+mais recente da série) e as 626 versões antigas dos balanços reapresentados,
+baixadas de novo do RAD (31 coortes, 10.861 observações):
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| **convergência na escala da volatilidade** | **87,6 / 79,0 / 51,1** | **2,4 p.p.** | **87,8 / 79,1 / 52,6** | **2,6 p.p.** |
+| em torno do justo, mesmas observações | 84,4 / 74,1 / 45,7 | 5,9 p.p. | 84,9 / 75,0 / 45,1 | 5,1 p.p. |
+
+Sobre 2.854 observações de teste em 12 meses e 1.167 em 36. Por tercil de
+potencial, a de 90% cobre 88,1 / 87,2 / 87,4% em 12 meses e 84,9 / 87,0 / 91,5%
+em 36; nas listadas, 87,7% e 87,2%, e nas deslistadas, 86,0% e 93,9%. O pacote
+foi regerado com `a = 0,0790` e `b = 0,0256` em 12 meses, `a = 0,1444` e
+`b = 0,0574` em 36. A banda de cenários cobre 11,4% em 12 meses e 15,3% em 36, e
+a de 90% do Monte Carlo, 8,7% e 8,1%. A forma continua a até 5 p.p. nos dois
+horizontes, e a frase "8 de cada 10" da tela continua valendo.

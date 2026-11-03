@@ -1,5 +1,13 @@
 # Caso VALE3 — Vale, via da firma com normalização pelo ciclo
 
+> **Números refeitos em 03/11/2026.** Com o motor da decisão 153, o último ponto
+> da série passou a ser 2026, com o lucro acumulado do ano anualizado, e os dados
+> deste caso foram regerados em [dados/VALE3.json](dados/VALE3.json): preço justo
+> **R$ 53,06** contra R$ 75,48, upside de **−29,7%** (era +17,6%). O retorno de
+> 2026 (15,6%) não destoa mais do típico (20,3%), e o lucro de partida deixou de
+> ser normalizado para cima. O texto abaixo ainda traz a conta anterior e vai
+> ser refeito.
+
 > **O que este caso mostra.** Uma empresa de commodity no fundo do ciclo: o
 > lucro de 2025 é uma fração do de 2022, e avaliar pelo último ano diria que a
 > Vale encolheu para sempre. O caso mostra a **normalização pelo ciclo**, a

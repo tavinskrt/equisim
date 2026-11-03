@@ -68,8 +68,8 @@ passo; o [caso WEGE3](docs/estudo/casos/wege3.md) mostra todas as contas.
 | | Condição | Situação |
 |---|---|---|
 | **R1** | nenhum defeito conhecido | ver o [plano](docs/plano-motor-de-referencia.md): a rodada de 02/10/2026 achou e fechou mais um — companhias com patrimônio positivo recusadas como insolventes (B47); o B38, o rótulo do cenário otimista, aguarda decisão |
-| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,7% (12 meses) e 78,7% (36 meses) dos casos fora da amostra (remedida em 02/10/2026) |
-| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,010, `t` de 0,05 contra 2,70), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
+| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,0% (12 meses) e 79,1% (36 meses) dos casos fora da amostra (remedida em 03/11/2026) |
+| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,034, `t` de 0,25 contra 2,70, remedido em 03/11/2026), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
 
 Dois fatos que qualquer leitor deve ter em mente: o motor é **sistematicamente
 mais pessimista que o mercado** (upside mediano de −37%, remedido em 02/10/2026 sobre os dados de 14/09/2026), e **não
