@@ -13,11 +13,11 @@ aqui, o que ver fora, e como praticar no próprio Equisim.
 | 1 | Juros, valor presente, inflação | [cap. 1](01-dinheiro-no-tempo.md) | Khan Academy, "Juros e dívida"; Assaf Neto, *Matemática Financeira*, caps. de juros compostos | Refazer à mão o "fator acumulado" de três anos de um caso |
 | 2 | Balanço e resultado | [cap. 2](02-a-empresa-em-numeros.md) | CVM, "Caderno de Educação Financeira"; Póvoa, *Valuation*, caps. iniciais | Abrir o [JSON da WEGE3](casos/dados/WEGE3.json) e achar EBIT, dívida e patrimônio de 2025 |
 | 3 | Estatística básica | [cap. 6](06-estatistica.md), seções 6.1 a 6.5 | Morettin e Bussab, *Estatística Básica*; StatQuest (YouTube) sobre regressão | Calcular a mediana e o MAD de oito retornos de um caso |
-| 4 | Risco, beta, CAPM, WACC | [cap. 3](03-risco-e-retorno.md) | Damodaran Online, aulas "Risk and return" e "Cost of capital"; Bodie, Kane e Marcus, caps. de CAPM | Conferir o WACC da [VALE3](casos/vale3.md), passo 5, com calculadora |
+| 4 | Risco, beta, CAPM, WACC | [cap. 3](03-risco-e-retorno.md) | Damodaran Online, aulas "Risk and return" e "Cost of capital"; Bodie, Kane e Marcus, caps. de CAPM | Conferir o WACC da [UNIP6](casos/unip6.md), seção 5, com calculadora |
 | 5 | Fluxo de caixa descontado | [cap. 4](04-fluxo-de-caixa-descontado.md) | Damodaran, *Valuation*, caps. de crescimento e valor terminal; planilha "fcffginzu" | Refazer o ano 1 e o terminal da [WEGE3](casos/wege3.md) |
 | 6 | Bancos | [cap. 5](05-bancos.md) e [caso ITUB4](casos/itub4.md) | Damodaran, "Valuing financial service firms" | Comparar, linha a linha, o painel de logs de um banco e de uma indústria |
 | 7 | Validação | [cap. 6](06-estatistica.md), seção 6.10, e [cap. 7](07-como-o-motor-foi-validado.md) | Harvey, Liu e Zhu (2016); StatQuest sobre poder estatístico | Ler [poder_r3.md](../validacao/poder_r3.md) e explicar em uma frase o resultado |
-| 8 | Revisão e casos | [VALE3](casos/vale3.md), [SAPR11](casos/sapr11.md), [RENT3](casos/rent3.md), [perguntas](perguntas-do-orientador.md) | — | Explicar um caso inteiro um para o outro, sem olhar |
+| 8 | Revisão e casos | [UNIP6](casos/unip6.md), [SAPR11](casos/sapr11.md), [RAPT4](casos/rapt4.md), [perguntas](perguntas-do-orientador.md) | — | Explicar um caso inteiro um para o outro, sem olhar |
 
 ---
 

@@ -137,7 +137,8 @@ leituras previstas são em 2029 e 2031.
   converge pouco ao justo);
 - que comprar os de maior upside dá retorno maior (não comprovado);
 - que o nível do preço justo está "certo": ele é sistematicamente mais baixo que
-  o mercado (upside mediano de −37% com os dados de 14/09/2026), e isso está declarado nas
+  o mercado (upside mediano de −36,2% nos 121 avaliados com os dados de
+  14/09/2026, medido em 03/11/2026), e isso está declarado nas
   [limitações](../validacao/limitacoes.md).
 
 A frase da decisão 140 resume a posição do projeto: o motor "não atinge nossos

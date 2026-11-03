@@ -72,7 +72,7 @@ passo; o [caso WEGE3](docs/estudo/casos/wege3.md) mostra todas as contas.
 | **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,034, `t` de 0,25 contra 2,70, remedido em 03/11/2026), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
 
 Dois fatos que qualquer leitor deve ter em mente: o motor é **sistematicamente
-mais pessimista que o mercado** (upside mediano de −37%, remedido em 02/10/2026 sobre os dados de 14/09/2026), e **não
+mais pessimista que o mercado** (upside mediano de −36,2% nos 121 avaliados, remedido em 03/11/2026 sobre os dados de 14/09/2026), e **não
 se comprovou** que comprar as ações de maior upside rende mais.
 
 ---

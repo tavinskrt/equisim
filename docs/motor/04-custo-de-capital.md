@@ -3,7 +3,7 @@
 A taxa que desconta cada ano. Estudo: [guia, cap. 3](../estudo/03-risco-e-retorno.md).
 Casos: WACC com caixa líquido na [WEGE3](../estudo/casos/wege3.md), passo 7;
 banco sem realavancagem no [ITUB4](../estudo/casos/itub4.md), passo 3;
-estrutura recusada na [RENT3](../estudo/casos/rent3.md).
+estrutura recusada na [RAPT4](../estudo/casos/rapt4.md).
 
 ---
 

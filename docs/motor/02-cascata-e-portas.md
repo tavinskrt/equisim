@@ -85,4 +85,5 @@ da decisão 153 e da base reconstruída em 02/11/2026. Até 02/10/2026, cinco
 companhias com patrimônio positivo na CVM saíam recusadas como insolventes,
 porque a fonte de mercado devolvia a contagem do exercício zerada (item B47,
 decisão 146). A RENT3, que a contagem anterior recusava por estrutura de
-capital, passa a ser avaliada ([caso RENT3](../estudo/casos/rent3.md)).
+capital, passa a ser avaliada, e o caso de estudo da recusa passa a ser o da
+RAPT4 ([caso RAPT4](../estudo/casos/rapt4.md)).

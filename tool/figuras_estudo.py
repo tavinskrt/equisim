@@ -116,6 +116,12 @@ def present_value():
 
 
 # ---------------------------------------------------------------- 2 -------
+def data_br(iso):
+    """'2026-09-14' (ou com hora) → '14/09/2026'."""
+    a, m, d = iso[:10].split('-')
+    return f'{d}/{m}/{a}'
+
+
 def curve():
     d = json.load(open('docs/estudo/casos/dados/WEGE3.json', encoding='utf-8'))
     fw = d['curva']['forwards']
@@ -128,7 +134,7 @@ def curve():
     def X(i): return x0 + (x1 - x0) * i / 11
     def Y(v): return y0 - (y0 - y1) * (v - lo) / (hi - lo)
     c = ['<text class="t1" x="24" y="32">Taxa livre de risco de cada ano: forwards da curva do Tesouro</text>',
-         '<text class="t2" x="24" y="52">Prefixados de 10/09/2026, usados na avaliação de 14/09/2026</text>']
+         f'<text class="t2" x="24" y="52">Prefixados de {data_br(d["curva"]["data"])}, usados na avaliação de {data_br(d["asOf"])}</text>']
     for k in range(5):
         v = lo + (hi - lo) * k / 4
         c.append(f'<line class="grade" x1="{x0}" x2="{x1}" y1="{Y(v):.1f}" y2="{Y(v):.1f}"/>')
@@ -149,7 +155,8 @@ def curve():
         v = fw[i] if i < 10 else term
         c.append(f'<text class="t3" x="{x:.1f}" y="{y - 12:.1f}" text-anchor="middle">{br(v * 100, 2)}%</text>')
     svg('curva-forwards.svg', W, H, 'Forwards anuais da curva prefixada',
-        'A taxa sobe de 13,62% no ano 1 para 14,63% no ano 5 e fica em 14,29% no ano 10 e na perpetuidade; o CDI de hoje é 14,09%.',
+        f'A taxa sobe de {br(fw[0] * 100, 2)}% no ano 1 para {br(fw[4] * 100, 2)}% no ano 5 e fica em '
+        f'{br(fw[9] * 100, 2)}% no ano 10 e {br(term * 100, 2)}% na perpetuidade; o CDI de hoje é {br(cdi * 100, 2)}%.',
         ''.join(c))
 
 

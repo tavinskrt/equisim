@@ -123,21 +123,30 @@ para ela: o NOPAT não sustenta uma projeção, mas o lucro líquido pode susten
 (uma holding com resultado de participações, por exemplo). Diferente do banco,
 ela **tem** dívida de estrutura de capital, e por isso o motor recalcula o Ke
 ano a ano com a alavancagem projetada, como faz na via da firma (decisão 46).
-Em 14/09/2026 era um único caso entre os 110 avaliados (a AZEV4).
+Na entrada de 14/09/2026, com o motor de 03/11/2026, são dois casos entre os
+121 avaliados (a AZEV4 e a HBSA3); com o motor de 01/10/2026 era só a AZEV4.
 
 ---
 
 ## 5.7 O que muda no resultado de um banco
 
-- **O desconto é mais alto.** Sem o custo mais baixo da dívida para diluir, a
-  taxa é o próprio Ke: no Itaú, 19,0% no ano 1, contra um WACC de 18,1% na WEG.
-- **O retorno raramente supera o custo.** Com Ke perto de 19–20%, um ROE de 18%
-  (a mediana do Itaú) fica abaixo do custo. Na conta do motor, crescer não cria
-  valor para esse banco, e a vantagem competitiva residual é barrada ("sem
-  excedente").
-- **Com retorno abaixo do custo, mais crescimento vale menos.** Em 10 dos 19
-  bancos e financeiras avaliados em 14/09/2026, o cenário "só crescimento +3
-  pontos" dá um preço justo **menor** (item B38).
+- **O desconto é o próprio Ke.** Sem o custo mais baixo da dívida para
+  diluir, a taxa do banco é a do capital próprio: no Itaú, 14,89% no ano 1. Numa
+  empresa com dívida líquida, como a Sanepar, o WACC do ano 1 é 13,69%, abaixo
+  do Ke dela (14,38%), porque o juro da dívida, depois do imposto, custa menos
+  que o capital próprio (números de 14/09/2026, motor de 03/11/2026).
+- **O retorno passa o custo por pouco, e o excedente some depressa.** Com Ke
+  perto de 15%, o ROE típico do Itaú (18,59%) fica três pontos acima: crescer
+  cria valor, mas a persistência medida na série do banco é baixa (φ = 0,42), e
+  em dez anos sobra 0,02% do excedente. Num banco com ROE abaixo do Ke, a
+  vantagem competitiva residual é barrada ("sem excedente") e crescer não cria
+  valor.
+- **Com retorno abaixo do custo, mais crescimento vale menos.** Na medição do
+  item B38 (28/09/2026, com o prêmio de 5,5% de então), o cenário "só
+  crescimento +3 pontos" dava um preço justo **menor** em 10 dos 19 bancos e
+  financeiras avaliados. Com o prêmio de 1,21% da decisão 142, o cenário
+  otimista combinado não fica abaixo do pessimista em nenhum dos 20 ativos da
+  via do acionista.
 
 ## Para estudar mais
 

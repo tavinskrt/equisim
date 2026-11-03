@@ -18,10 +18,12 @@ As limitações estão em ordem de importância para quem lê um preço justo.
 
 ### 1.1 O motor é mais pessimista que o mercado, de forma sistemática
 
-**O que é.** Com os dados congelados de 14/09/2026 e o motor de 01/10/2026, dos
-110 ativos avaliados, o upside mediano é **−37%**, e só 28 tinham upside
-positivo. A WEG sai a R$ 16,18 contra R$ 50,74; o Itaú a R$ 29,14 contra
-R$ 42,35. Com o prêmio de 5,5% de antes da decisão 142, eram −45% e 15.
+**O que é.** Com os dados congelados de 14/09/2026 e o motor de 03/11/2026, dos
+121 ativos avaliados, o upside mediano é **−36,2%**, e só 28 têm upside
+positivo; o primeiro quartil é −61,3% e o terceiro, −0,3%. A WEG sai a
+R$ 15,97 contra R$ 50,74; o Itaú a R$ 28,53 contra R$ 42,35. Com o motor de
+01/10/2026 eram −37% nos 110 avaliados, e com o prêmio de 5,5% de antes da
+decisão 142, −45% e 15 acima de zero.
 
 **Por que importa.** Um preço justo abaixo do mercado não quer dizer "ação cara"
 no sentido de uma recomendação: quer dizer que as premissas do motor são mais

@@ -95,9 +95,9 @@ Toda avaliação tem data, e só entram exercícios já entregues à CVM naquela
 ### Sobre os resultados
 
 **10. Por que os preços justos são tão menores que os preços de mercado?**
-É o viés de nível, medido e declarado: upside mediano de −37% nos 110 avaliados
-com os dados de 14/09/2026 (com o motor de 01/10/2026; com o prêmio de 5,5% de
-antes, eram −45%). As causas são o conjunto das premissas conservadoras — juros
+É o viés de nível, medido e declarado: upside mediano de −36,2% nos 121
+avaliados com os dados de 14/09/2026 (com o motor de 03/11/2026; com o motor de
+01/10/2026 eram −37% nos 110, e com o prêmio de 5,5% de antes, −45%). As causas são o conjunto das premissas conservadoras — juros
 de 14% na curva inteira, retorno convergindo ao custo em dez anos, terminal
 neutro —, e não um parâmetro isolado: o prêmio tirado do preço da bolsa diminuiu
 o desacordo, mas não o acabou ([limitações](../validacao/limitacoes.md)).
@@ -156,7 +156,7 @@ tem prêmio variável no tempo. A lista completa está nas
 Para dar o ponto de partida e a conta. O botão "Simular minhas premissas" abre a
 avaliação do motor com cada premissa preenchida e explicada, e quem discorda
 troca o número; a conta que refaz o preço é a mesma do motor — sem troca, dá o
-preço do motor ao centavo, conferido nos 110 avaliados. O preço do motor
+preço do motor ao centavo, conferido nos 121 avaliados (03/11/2026). O preço do motor
 continua sendo o validado, com faixa calibrada e teste de habilidade; o do
 usuário é a opinião dele aplicada à mesma conta, e a tela diz isso
 ([cap. 4, seção 4.16](04-fluxo-de-caixa-descontado.md); decisão 147).

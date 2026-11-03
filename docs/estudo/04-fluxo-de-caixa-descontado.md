@@ -94,9 +94,15 @@ acionista**. A diferença é por onde elas chegam lá.
 
 ## 4.4 Porta 2, primeira saída: o lucro de partida (a base)
 
-O ponto de partida é o lucro do último exercício publicado: NOPAT na via da
-firma, lucro líquido por papel na do acionista. Antes de projetar, o motor
-pergunta: **esse lucro é representativo?**
+O ponto de partida é o lucro do último ponto da série: NOPAT na via da
+firma, lucro líquido por papel na do acionista. Desde a decisão 153, esse ponto
+é o **ano corrente anualizado**: o acumulado do último ITR, levado a doze meses
+(o primeiro semestre vezes 2, por exemplo), com o balanço da mesma data. A
+anualização supõe que o resto do ano repete o acumulado, sem correção de
+sazonalidade, e multiplica junto o que for não recorrente; a tela declara isso
+num aviso, e o [caso SAPR11](casos/sapr11.md) mostra o que acontece quando o
+semestre traz um prejuízo. Antes de projetar, o motor pergunta: **esse lucro é
+representativo?**
 
 Ele compara o retorno do último ano (ROIC ou ROE) com o **retorno do ciclo**: a
 mediana dos oito exercícios anteriores. Três guardas decidem:
@@ -144,18 +150,21 @@ do último ano pelo lucro que **a empresa de hoje teria rendendo o retorno
 típico dela**. Daí a direção:
 
 - **para cima** quando o último ano rendeu **menos** que o típico — o motor o lê
-  como um vale. A VALE3, com os dados de 14/09/2026, rendeu 9,3% sobre o capital
-  em 2025 contra o típico de 20,4% de 2017 a 2024: fator de 2,18;
+  como um vale. A UNIP6, com os dados de 14/09/2026, rendeu 12,4% sobre o
+  capital em 2026 anualizado contra o típico de 30,0% de 2018 a 2025: fator de
+  2,43 ([caso UNIP6](casos/unip6.md));
 - **para baixo** quando rendeu **mais** — o motor o lê como um pico. O ITUB4
-  rendeu 20,7% sobre o patrimônio contra o típico de 18,4%: fator de 0,89;
+  rendeu 22,5% sobre o patrimônio contra o típico de 18,6%: fator de 0,83;
 - **nenhuma** quando o último ano está dentro do normal da empresa — a WEGE3,
-  com 35,9% contra 32,0%, está — ou quando o retorno vem mudando de patamar e o
-  último ano é o novo normal.
+  com 40,1% contra 34,6%, está —, quando o retorno vem mudando de patamar e o
+  último ano é o novo normal, ou quando a trava de saúde segura o fator, como na
+  SAPR11 (10,9% contra 13,4%, com o lucro caindo 120% em três anos).
 
-Dos 110 avaliados, 18 foram normalizados para cima, 27 para baixo, 47 ficaram
-no lucro publicado por estarem dentro do normal, 14 por tendência, 3 tiveram a
-base reconstruída e 1 não tinha ciclo medível. O porquê de cada um, com os
-números, está em [normalizacoes.md](../validacao/normalizacoes.md).
+Dos 121 avaliados em 03/11/2026, 13 foram normalizados para cima, 33 para baixo,
+53 ficaram no lucro publicado por estarem dentro do normal, 15 por tendência, 4
+foram travados pela queda, 1 teve a base reconstruída e 2 não tinham ciclo
+medível. O porquê de cada um, com os números, está em
+[normalizacoes.md](../validacao/normalizacoes.md).
 
 **Onde ver no aplicativo.** No **painel de logs**, o passo "Base do fluxo" abre
 com um quadro **"Por quê"**, em texto corrido, antes das variáveis e da conta. No
@@ -271,7 +280,7 @@ VT = lucro do ano 11 × (1 − g∞ ÷ ROIC∞) ÷ (custo∞ − g∞)
 
 Só vale com pelo menos oito exercícios, crescimento orgânico (Φ ≤ 0,60),
 retorno do ciclo acima do custo e persistência estimável; e nunca para
-concessão (decisões 36 e 50). Na WEGE3, `φ` = 0,84 e sobram 17% do excedente
+concessão (decisões 36 e 50). Na WEGE3, `φ` = 0,87 e sobram 24% do excedente
 (ver o [caso](casos/wege3.md)).
 
 ### Concessão com prazo
@@ -479,8 +488,9 @@ dado público e regra fixa. Ele **não** é previsão de preço. Três fatos med
 para ter em mente:
 
 1. **O motor é sistematicamente mais pessimista que o mercado.** Com os dados
-   de 14/09/2026 e o motor de 01/10/2026, o upside mediano dos 110 avaliados é
-   −37%, e só 28 tinham upside positivo. Com o prêmio de mercado tirado do
+   de 14/09/2026 e o motor de 03/11/2026, o upside mediano dos 121 avaliados é
+   −36,2%, e só 28 têm upside positivo; metade fica entre −61% e 0%. Com o
+   prêmio de mercado tirado do
    próprio preço da bolsa (1,21%, decisão 142) o desacordo diminuiu — com os 5,5%
    de antes eram −45% —, mas não acabou: ele é com o conjunto das premissas —
    juros de 14% na curva inteira, retorno convergindo ao custo em dez anos —, e
@@ -511,25 +521,26 @@ o preço é o do motor ao centavo. Isso foi conferido nos 121 ativos avaliados
 (03/11/2026).
 
 **Um exemplo, com os dados de 14/09/2026.** A WEGE3 é avaliada pela via da
-firma. O motor parte de um lucro operacional de R$ 6.718,7 milhões, crescendo
-10,84% no primeiro ano. O desconto é de 14,49% no primeiro ano e de 15,15% na
-perpetuidade. Os dez anos valem R$ 36,2 bilhões hoje, e a perpetuidade, R$ 33,0
-bilhões; tirada a parte dos minoritários das controladas, o patrimônio vale
-R$ 68,0 bilhões. Dividido por 4,2 bilhões de ações, o preço justo é R$ 16,22,
-contra R$ 50,74 na bolsa. O que acontece quando se discorda:
+firma. O motor parte de um lucro operacional de R$ 6.357,0 milhões (o de 2026
+anualizado), crescendo 10,84% no primeiro ano. O desconto é de 14,54% no
+primeiro ano e de 15,24% na perpetuidade. Os dez anos valem R$ 35,4 bilhões
+hoje, e a perpetuidade, R$ 32,9 bilhões; tirada a parte dos minoritários das
+controladas, o patrimônio vale R$ 67,0 bilhões. Dividido por 4,2 bilhões de
+ações, o preço justo é R$ 15,97, contra R$ 50,74 na bolsa. O que acontece
+quando se discorda (conferido em 03/11/2026):
 
 | Troca | Preço justo |
 |---|---|
-| Nenhuma (o motor) | R$ 16,22 |
-| Taxa 1 ponto mais baixa em todos os anos | R$ 18,39 |
-| Taxa 1 ponto mais alta | R$ 14,51 |
-| Uma taxa só de 14,49%, sem a curva | R$ 17,62 |
-| Crescimento 2 pontos maior no início | R$ 16,93 |
+| Nenhuma (o motor) | R$ 15,97 |
+| Taxa 1 ponto mais baixa em todos os anos | R$ 18,13 |
+| Taxa 1 ponto mais alta | R$ 14,28 |
+| Uma taxa só de 14,54%, sem a curva | R$ 17,41 |
+| Crescimento 2 pontos maior no início | R$ 16,72 |
 
 E o botão **"O que o preço de hoje supõe?"** faz a pergunta ao contrário: que
 número faria o preço justo bater com os R$ 50,74 da bolsa? Para a WEGE3, uma
-taxa de desconto de **8,78%** em vez de 14,49% — ou um lucro de partida de
-R$ 20,8 bilhões, três vezes o do último exercício. Nenhum crescimento no
+taxa de desconto de **8,78%** em vez de 14,54% — ou um lucro de partida de
+R$ 20,0 bilhões, pouco mais de três vezes o de 2026 anualizado. Nenhum crescimento no
 início chega lá, porque crescer exige reinvestir, e o motor limita o
 reinvestimento a 95% do lucro. É um jeito de ler o preço da bolsa: ele está
 apostando num juro muito mais baixo do que o de hoje, ou numa empresa muito
@@ -542,8 +553,9 @@ infinita. O resto é opinião sua, e a tela aceita.
 
 **Dois cuidados.** Primeiro: na via da firma, a taxa que você digita é a que
 desconta o dinheiro do acionista; o custo médio do capital, que guia quanto a
-empresa reinveste, fica o do motor. Se mudasse junto, em 12 dos 90 ativos dessa
-via subir a taxa **subiria** o preço — o contrário do que se espera. Quem
+empresa reinveste, fica o do motor. Se mudasse junto, subir a taxa **subiria** o
+preço em parte dos ativos dessa via — em 12 dos 90 na medição da decisão 147 —,
+o contrário do que se espera. Quem
 discorda do retorno da empresa tem um campo próprio para isso. Segundo: **o
 preço que você calcula não é validado.** A faixa calibrada (4.12) e o teste de
 habilidade são do preço do motor; o seu é a conta do motor com a sua opinião.

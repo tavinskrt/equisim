@@ -37,17 +37,17 @@ cinco empresas reais calculadas passo a passo, com cada conta refeita.
 
 ## Os casos
 
-Cinco empresas avaliadas pelo motor em 14/09/2026, sobre a entrada congelada do
-gabarito. Cada caso segue os passos do painel de logs, na ordem, com as contas
+Cinco empresas passadas pelo motor em 14/09/2026, sobre a entrada congelada do
+gabarito, com o motor de 03/11/2026: quatro avaliadas e uma recusada. Cada caso segue os passos do painel de logs, na ordem, com as contas
 refeitas e o porquê de cada uma.
 
 | Caso | O que ele mostra | Resultado |
 |---|---|---|
 | [WEGE3 — WEG](casos/wege3.md) | a via da firma completa, com caixa líquido e vantagem competitiva residual | R$ 15,97 (mercado: R$ 50,74) |
 | [ITUB4 — Itaú](casos/itub4.md) | a via do acionista de um banco, e o que não é calculado nela | R$ 28,53 (mercado: R$ 42,35) |
-| [VALE3 — Vale](casos/vale3.md) | normalização pelo ciclo em commodity | R$ 53,06 (mercado: R$ 75,48) |
-| [SAPR11 — Sanepar](casos/sapr11.md) | unit (5 ações por papel) e concessão | R$ 27,76 (mercado: R$ 34,74) |
-| [RENT3 — Localiza](casos/rent3.md) | a recusa: quando a conta não fecha (avaliada desde a contagem de 03/11/2026) | R$ 22,71 (mercado: R$ 35,59) |
+| [UNIP6 — Unipar](casos/unip6.md) | normalização pelo ciclo em commodity, isenta da trava de saúde | R$ 75,38 (mercado: R$ 57,04) |
+| [SAPR11 — Sanepar](casos/sapr11.md) | unit (5 ações por papel), concessão e a trava de saúde | R$ 27,76 (mercado: R$ 34,74) |
+| [RAPT4 — Randon](casos/rapt4.md) | a recusa: quando a conta não fecha | recusa (mercado: R$ 5,04) |
 
 Os dados de cada caso — insumos, resultado, cenários, Monte Carlo, faixa
 calibrada, múltiplos e o rastro inteiro do painel de logs — estão em

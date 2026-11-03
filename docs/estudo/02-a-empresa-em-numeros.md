@@ -166,7 +166,8 @@ nunca distribuir nada) e a zero (sem crescimento não há reinvestimento)
 O lucro de um único ano pode enganar:
 
 - **Empresas cíclicas** (mineração, petróleo, siderurgia, celulose) vivem de
-  preço de commodity. No auge do minério, a Vale lucra muito; no fundo, pouco.
+  preço de commodity. No auge da soda cáustica, a Unipar lucra muito; no fundo,
+  pouco.
   Avaliar pelo lucro do auge supõe que o auge dura para sempre.
 - **Anos atípicos**: uma venda de ativo, uma multa, uma greve.
 
@@ -178,7 +179,7 @@ ciclo** — a mediana dos oito exercícios anteriores. Se o último ano destoa m
 lucro-base = lucro do último ano × (retorno do ciclo ÷ retorno atual)
 ```
 
-limitado a um fator entre 1/3 e 3. O capítulo 4 e o [caso VALE3](casos/vale3.md)
+limitado a um fator entre 1/3 e 3. O capítulo 4 e o [caso UNIP6](casos/unip6.md)
 mostram essa conta em detalhe.
 
 ---

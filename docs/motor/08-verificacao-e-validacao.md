@@ -78,7 +78,8 @@ comprovada" (decisões 133, 138 e 140; [validacao/c7/](../validacao/c7/)).
 ### O que a validação mostrou, em uma frase cada
 
 - O motor é **mais pessimista que o mercado** de forma sistemática (upside
-  mediano de −37% com os dados de 14/09/2026, remedido em 02/10/2026), mesmo com
+  mediano de −36,2% nos 121 avaliados com os dados de 14/09/2026, remedido em
+  03/11/2026), mesmo com
   o prêmio de mercado tirado do preço da bolsa (decisão 142).
 - A **faixa calibrada** cumpre o que promete (R2).
 - A **ordenação** não foi comprovada, e o teste não teria poder para comprová-la
