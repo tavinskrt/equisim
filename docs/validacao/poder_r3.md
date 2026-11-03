@@ -120,3 +120,15 @@ Com a base de patrimônio corrigida (decisão 146), o critério do R3 vai a 0,01
 **0,704**, e o limite superior que a amostra sustenta em 0,540. O
 book-to-market, com IC de 0,179 e poder de 49% no próprio efeito, pede **50
 coortes**, disponíveis em 30/06/2033.
+
+## Remedido em 03/11/2026
+
+Com o motor da decisão 153 e o backtest refeito sobre a base reconstruída, com
+as 626 versões antigas dos balanços reapresentados, o critério do R3 vai a
+0,034 (`t` corrigido de 0,25, Newey-West de 0,60), em 22 coortes e 2.332
+observações. O efeito mínimo detectável com 80% de poder fica em **0,480**, e o
+limite superior que a amostra sustenta em 0,394; no efeito medido, o teste
+passaria em 4,1% das amostras. O book-to-market, com IC de 0,192, `t` corrigido
+de 2,15 e poder de 41% no próprio efeito, pede **58 coortes**, disponíveis em
+30/06/2035; o composto pediria 138. Em 12 meses, a amostra descarta coeficiente
+condicionado acima de 0,17.

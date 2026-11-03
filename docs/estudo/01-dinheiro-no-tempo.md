@@ -164,9 +164,9 @@ baixa, mas no Brasil o erro chega a meio ponto.
 **Onde isso aparece no Equisim:** o teto do crescimento perpétuo de uma empresa é
 o crescimento **nominal** da economia, montado por Fisher ao contrário:
 `(1 + crescimento real) × (1 + inflação) − 1`. Na data dos casos deste guia
-(14/09/2026), a inflação média de dez anos (IPCA) era 4,92% ao ano e o
-crescimento real médio da economia (IBC-Br) 1,77%; o teto saiu
-`1,0177 × 1,0492 − 1 = 6,78%` ao ano
+(14/09/2026), a inflação média de dez anos (IPCA) era 4,965% ao ano e o
+crescimento real médio da economia (IBC-Br) 1,773%; o teto saiu
+`1,01773 × 1,04965 − 1 = 6,83%` ao ano
 ([portfolio-usecases.ts](../../src/core/usecases/portfolio-usecases.ts)).
 
 ---

@@ -84,13 +84,13 @@ forma a cotação.
 Calculadas em [portfolio-usecases.ts, `ResolveMarketAnchors`](../../src/core/usecases/portfolio-usecases.ts)
 sobre uma janela de dez anos até a data.
 
-| Âncora | Conta | Uso | Valor em 14/09/2026 |
+| Âncora | Conta | Uso | Valor em 14/09/2026 (refeito em 03/11/2026) |
 |---|---|---|---:|
-| CDI corrente | rendimento dos últimos 63 pregões, anualizado por composição | Ke "do dia", WACC estático, meta | 14,09% |
-| CDI de dez anos | taxa composta média | recuo da perpetuidade sem curva | 9,39% |
-| Inflação | IPCA de dez anos, composto | âncora do crescimento não identificado | 4,92% |
+| CDI corrente | rendimento dos últimos 63 pregões, anualizado por composição | Ke "do dia", WACC estático, meta | 14,05% |
+| CDI de dez anos | taxa composta média | recuo da perpetuidade sem curva | 9,40% |
+| Inflação | IPCA de dez anos, composto | âncora do crescimento não identificado | 4,96% |
 | Crescimento real | IBC-Br, médias móveis de 12 meses nas pontas | compõe o teto | 1,77% |
-| Teto do crescimento perpétuo | `(1 + real) × (1 + inflação) − 1` | limite de `g∞` | 6,78% |
+| Teto do crescimento perpétuo | `(1 + real) × (1 + inflação) − 1` | limite de `g∞` | 6,83% |
 | Retorno do Ibovespa | médias de 63 pregões nas pontas, composto | meta (decisão 60) | — |
 
 Sem rede e sem cache, valem valores de recuo declarados em

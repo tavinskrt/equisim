@@ -68,11 +68,11 @@ passo; o [caso WEGE3](docs/estudo/casos/wege3.md) mostra todas as contas.
 | | Condição | Situação |
 |---|---|---|
 | **R1** | nenhum defeito conhecido | ver o [plano](docs/plano-motor-de-referencia.md): a rodada de 02/10/2026 achou e fechou mais um — companhias com patrimônio positivo recusadas como insolventes (B47); o B38, o rótulo do cenário otimista, aguarda decisão |
-| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,7% (12 meses) e 78,7% (36 meses) dos casos fora da amostra (remedida em 02/10/2026) |
-| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,010, `t` de 0,05 contra 2,70), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
+| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,0% (12 meses) e 79,1% (36 meses) dos casos fora da amostra (remedida em 03/11/2026) |
+| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,034, `t` de 0,25 contra 2,70, remedido em 03/11/2026), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
 
 Dois fatos que qualquer leitor deve ter em mente: o motor é **sistematicamente
-mais pessimista que o mercado** (upside mediano de −37%, remedido em 02/10/2026 sobre os dados de 14/09/2026), e **não
+mais pessimista que o mercado** (upside mediano de −36,2% nos 121 avaliados, remedido em 03/11/2026 sobre os dados de 14/09/2026), e **não
 se comprovou** que comprar as ações de maior upside rende mais.
 
 ---
@@ -194,6 +194,18 @@ npm run tool -- curve-package
 
 Depois, `npm run build`.
 
+**A entrada congelada não lê este pacote.** Regerá-lo para publicar tira dele
+as datas-base de 14/09/2026, e por isso o gabarito e as medições sobre a
+entrada congelada leem a curva dela, `tool/validation/curva_congelada.json`,
+gerada uma vez da mesma base do Tesouro:
+
+```bash
+npm run tool -- curve-package --ate 2026-09-14 --saida tool/validation/curva_congelada.json
+```
+
+Sem esse arquivo, as ferramentas da entrada congelada param e dizem o que
+rodar, em vez de avaliar sem curva.
+
 ### Como conferir que a avaliação está íntegra
 
 Abra o Raio-X de uma ação e o painel de logs:
@@ -266,8 +278,8 @@ os de `npm run tool -- …`):
 
 | Etapa | Comandos |
 |---|---|
-| 1. Bases brutas, em `data/` | `python tool/cvm_baixar.py`; `python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre`; `python tool/cvm_baixar.py --docs FCA`; `python tool/b3_baixar.py`; `python tool/b3_companhias_baixar.py`; `python tool/b3_complemento_baixar.py`; `python tool/b3_complemento_baixar.py --deslistadas`; `python tool/b3_ponte.py`; `python tool/tesouro_baixar.py` |
-| 2. Ingestão e contagens por data | `cvm-ingest data/cvm`; `b3-delisted-count` |
+| 1. Bases brutas, em `data/` | `python tool/cvm_baixar.py`; `python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre`; `python tool/cvm_baixar.py --docs FCA`; `python tool/b3_baixar.py`; `python tool/b3_companhias_baixar.py`; `python tool/b3_complemento_baixar.py`; `python tool/tesouro_baixar.py` |
+| 2. Ingestão, pontes e contagens por data, nesta ordem | `cvm-ingest data/cvm` (com 16 GB de memória ou menos, `cvm-ingest data/cvm --partes 4`); `python tool/b3_ponte.py`, que lê o que a ingestão gravou; `python tool/b3_complemento_baixar.py --deslistadas` e `python tool/cvm_versoes_baixar.py`, que leem a ponte; `cvm-ingest` de novo, para montar as versões antigas; `b3-delisted-count` |
 | 3. Pacotes de dado | `cvm-package`, `b3-package`, `b3-dividends-package`, `capital-package --agora`, `fre-grants`, `unit-package --agora`, `control-package --agora` e `curve-package` |
 | 4. Congelar a entrada nova | `cascade-golden`, sem `--regravar`: copia o cache do dia para `data/gabarito/` |
 | 5. Pacotes medidos sobre ela | `beta-prior-package`, `multiples-package` e `implied-premium --so-serie` — que recusa regravar trimestre já gravado que tenha mudado; confira a causa antes de usar `--aceitar-mudanca-do-passado` (item B48) |

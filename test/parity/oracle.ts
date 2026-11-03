@@ -4,7 +4,8 @@
  * Refaz, passo a passo, o que o harness em Dart (`test/parity/dart/harness.dart`, no commit
  * `7480c5a`) fez sobre o
  * núcleo Dart original compilado para JavaScript: lê os pacotes versionados de
- * `public/assets/` (CVM, B3, Tesouro, mercado, validação), monta um mercado sintético
+ * `public/assets/` (CVM, B3, Tesouro, mercado) e os dois de validação fixados em
+ * `test/parity/golden/validacao/` (ver [readPinnedValidation]), monta um mercado sintético
  * **determinístico** — cotações, Ibovespa, CDI, IPCA e IBC-Br sorteados pelo
  * mesmo gerador `Random(seed)` do Dart, que `SeededRandom` reproduz bit a bit —
  * e avalia cada ativo em treze montagens da cascata.
@@ -692,6 +693,19 @@ function readPackage(repo: string, name: string): JsonObject {
 }
 
 /**
+ * Pacote de validação **como estava na gravação do gabarito**.
+ *
+ * A faixa calibrada e a leitura de habilidade são medidas pelo backtest, e
+ * `public/assets/validacao/` muda a cada rodada dele: é dado, e não método.
+ * O gabarito fotografou o motor com os pacotes de 23/10/2026, e a paridade
+ * confere o porte do método; por isso lê a cópia fixada ao lado do gabarito,
+ * e uma nova medição não a deixa vermelha.
+ */
+function readPinnedValidation(name: 'banda_calibrada.json' | 'habilidade.json'): JsonObject {
+  return JSON.parse(readFileSync(join(__dirname, 'golden', 'validacao', name), 'utf8')) as JsonObject;
+}
+
+/**
  * Roda o oráculo sobre o repositório em [repo].
  *
  * - [limit]: quantos ativos avaliar, na ordem alfabética; `0` para todos.
@@ -717,7 +731,7 @@ export async function runOracle(options: { repo: string; limit?: number; keepTra
   const control: ReadonlyMap<string, readonly ShareholderControlPeriod[]> =
     ShareholderControlHistory.decode(readPackage(repo, 'public/assets/cvm/controle.json'))?.byIssuer ?? new Map();
   const peers = PeerMultipleCodec.decode(readPackage(repo, 'public/assets/mercado/multiplos_setoriais.json'));
-  const bandTables = CalibratedBandCodec.decode(readPackage(repo, 'public/assets/validacao/banda_calibrada.json'));
+  const bandTables = CalibratedBandCodec.decode(readPinnedValidation('banda_calibrada.json'));
 
   const codes = [...docs.keys()].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   const tickers = codes.map((c) => Ticker.parse(c));
@@ -956,7 +970,7 @@ export async function runOracle(options: { repo: string; limit?: number; keepTra
       priorInputs,
       histories,
       profiles,
-      skill: SkillReadingCodec.decode(readPackage(repo, 'public/assets/validacao/habilidade.json')),
+      skill: SkillReadingCodec.decode(readPinnedValidation('habilidade.json')),
       premium: packagePremium ?? CapmInputs.defaultMarketPremium,
     });
     return { header, rows, services: servicesOut, traces };

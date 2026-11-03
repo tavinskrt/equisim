@@ -93,7 +93,7 @@ alguns valores, e a decisão 152 lista cada caso. Os que mais aparecem:
 | `controle_empacotar.dart` | [`control-package.ts`](control-package.ts) | `npm run tool -- control-package` | B46 — empacota a espécie do controle acionário de cada emissor. |
 | `divisor_contrafactual.dart` | [`counterfactual-divisor.ts`](counterfactual-divisor.ts) | `npm run tool -- counterfactual-divisor` | O divisor da ponte: quanto custa a regra do maior, e o que o backtest vê. |
 | `curva_ligar.dart` | [`curve-link.ts`](curve-link.ts) | `npm run tool -- curve-link` | A2 — a curva de juros observada ligada ao motor, e o que ela move. |
-| `curva_empacotar.dart` | [`curve-package.ts`](curve-package.ts) | `npm run tool -- curve-package` | A2.1 — empacota as cotações recentes do Tesouro para o aplicativo. |
+| `curva_empacotar.dart` | [`curve-package.ts`](curve-package.ts) | `npm run tool -- curve-package` | A2.1 — empacota as cotações recentes do Tesouro para o aplicativo. Com `--ate 2026-09-14 --saida tool/validation/curva_congelada.json`, grava a curva da entrada congelada, que o gabarito e as medições sobre 14/09/2026 leem. |
 | `cvm_ponte.dart` | [`cvm-bridge.ts`](cvm-bridge.ts) | `npm run tool -- cvm-bridge` | Constrói a ponte ticker -> CNPJ com as regras do núcleo, sobre o FCA real. |
 | `cvm_conferir.dart` | [`cvm-check.ts`](cvm-check.ts) | `npm run tool -- cvm-check` | Roda o leitor do plano de contas da CVM sobre os arquivos REAIS. |
 | `cvm_ingerir.dart` | [`cvm-ingest.ts`](cvm-ingest.ts) | `npm run tool -- cvm-ingest` | Ingestão da CVM: dos CSVs anuais para a série de documentos do motor. |

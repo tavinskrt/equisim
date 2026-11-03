@@ -3,8 +3,9 @@
 Como o motor escolhe o lucro de partida e quanto ele cresce. Estudo:
 [guia, cap. 4, seções 4.4 a 4.6](../estudo/04-fluxo-de-caixa-descontado.md);
 estatística no [cap. 6](../estudo/06-estatistica.md). Casos: normalização em
-[VALE3](../estudo/casos/vale3.md) e [ITUB4](../estudo/casos/itub4.md); tendência
-que mantém a base em [WEGE3](../estudo/casos/wege3.md).
+[UNIP6](../estudo/casos/unip6.md) e [ITUB4](../estudo/casos/itub4.md); trava de
+saúde em [SAPR11](../estudo/casos/sapr11.md) e [RAPT4](../estudo/casos/rapt4.md);
+base mantida em [WEGE3](../estudo/casos/wege3.md).
 
 Parâmetros em [growth-guards.ts, `ValuationParameters`](../../src/core/services/valuation/growth-guards.ts);
 série em [capital-base.ts](../../src/core/services/valuation/capital-base.ts);
@@ -78,7 +79,7 @@ que a decidiram — nada é recalculado para explicar:
 | As duas medidas da Guarda 3, sem mudar a regra | `GrowthGuards.cycleDeviation` | — |
 | O porquê em linguagem corrente, com os números | `whyTheBase`, em compute-valuation.ts; `CalculationTrace.explanation` | painel de logs, quadro "Por quê" do passo "Base do fluxo" |
 | O mesmo porquê na tela, com os anos do ciclo em barras | [normalization-panel.tsx](../../src/features/asset/normalization-panel.tsx), [normalization-copy.ts](../../src/copy/normalization-copy.ts) | Raio-X, modo Completo, e Simular minhas premissas, cartão do lucro de partida |
-| O porquê de cada ativo do universo | [tool/normalizations.ts](../../tool/normalizations.ts) | [normalizacoes.md](../validacao/normalizacoes.md): 18 para cima, 27 para baixo, 47 dentro do normal, 14 por tendência, 3 reconstruídos, 1 sem ciclo, nos 110 avaliados de 14/09/2026 |
+| O porquê de cada ativo do universo | [tool/normalizations.ts](../../tool/normalizations.ts) | [normalizacoes.md](../validacao/normalizacoes.md): 13 para cima, 33 para baixo, 53 dentro do normal, 15 por tendência, 4 travados pela queda, 1 reconstruído, 2 sem ciclo, nos 121 avaliados de 14/09/2026 (motor de 03/11/2026) |
 
 **Nenhum número mudou.** O gabarito de 14/10/2026 saiu igual em preço, cenários e
 diagnósticos nos 376 ativos e nas nove montagens; mudaram só o texto do aviso e

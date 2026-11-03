@@ -18,10 +18,12 @@ As limitações estão em ordem de importância para quem lê um preço justo.
 
 ### 1.1 O motor é mais pessimista que o mercado, de forma sistemática
 
-**O que é.** Com os dados congelados de 14/09/2026 e o motor de 01/10/2026, dos
-110 ativos avaliados, o upside mediano é **−37%**, e só 28 tinham upside
-positivo. A WEG sai a R$ 16,18 contra R$ 50,74; o Itaú a R$ 29,14 contra
-R$ 42,35. Com o prêmio de 5,5% de antes da decisão 142, eram −45% e 15.
+**O que é.** Com os dados congelados de 14/09/2026 e o motor de 03/11/2026, dos
+121 ativos avaliados, o upside mediano é **−36,2%**, e só 28 têm upside
+positivo; o primeiro quartil é −61,3% e o terceiro, −0,3%. A WEG sai a
+R$ 15,97 contra R$ 50,74; o Itaú a R$ 28,53 contra R$ 42,35. Com o motor de
+01/10/2026 eram −37% nos 110 avaliados, e com o prêmio de 5,5% de antes da
+decisão 142, −45% e 15 acima de zero.
 
 **Por que importa.** Um preço justo abaixo do mercado não quer dizer "ação cara"
 no sentido de uma recomendação: quer dizer que as premissas do motor são mais
@@ -44,18 +46,18 @@ pendente (item B33; [selic_focus.md](selic_focus.md)).
 ### 1.2 A habilidade de escolher ações não está comprovada
 
 **O que é.** O teste pré-registrado (as ações de maior upside, controlando pelo
-book-to-market, renderam mais em 36 meses?) deu `t` corrigido de 0,05 contra o
-crítico de 2,70, remedido em 01/10/2026. Não passou. Nem o book-to-market
-sozinho passou (`t` de 2,40), e por isso o retorno esperado não leva prêmio de
+book-to-market, renderam mais em 36 meses?) deu `t` corrigido de 0,25 contra o
+crítico de 2,70, remedido em 03/11/2026. Não passou. Nem o book-to-market
+sozinho passou (`t` de 2,15), e por isso o retorno esperado não leva prêmio de
 ordenação (decisão 103).
 
 **Por que importa.** Não há evidência de que ordenar por upside ajude a escolher
 ações.
 
 **E o teste não teria poder para passar.** O menor efeito que ele detecta com
-80% de chance é 0,70, setenta vezes o medido (0,010, remedido em
-02/10/2026); o book-to-market só teria esse poder no efeito dele com 50
-coortes, em 2033
+80% de chance é 0,48, cerca de catorze vezes o medido (0,034, remedido em
+03/11/2026); o book-to-market só teria esse poder no efeito dele com 58
+coortes, em 2035
 ([poder_r3.md](poder_r3.md), [habilidade_trimestral.md](habilidade_trimestral.md)).
 
 **O que o projeto faz.** O critério passou a ser "habilidade testada, com o
@@ -79,9 +81,9 @@ que a evidência sustenta, e a tela diz isso (decisões 100 e 124;
 ### 1.4 Os cenários são sensibilidade, e as premissas mais brandas podem valer menos
 
 **O que é.** Os conjuntos fixos de premissas — na tela, "mais duras" e "mais
-brandas" (crescimento ±3 p.p., desconto ±2 p.p.) — contiveram o que de fato aconteceu em 13% a 14% dos casos, e a faixa
-de 90% do Monte Carlo em 9%, contra 90% que um intervalo de confiança
-prometeria (decisão 92; remedido em 02/10/2026). E o conjunto mais brando
+brandas" (crescimento ±3 p.p., desconto ±2 p.p.) — contiveram o que de fato aconteceu em 11% a 15% dos casos, e a faixa
+de 90% do Monte Carlo em 8% a 9%, contra 90% que um intervalo de confiança
+prometeria (decisão 92; remedido em 03/11/2026). E o conjunto mais brando
 soma crescimento: quando o retorno da empresa fica abaixo do custo de capital,
 crescer destrói valor, e ele sai abaixo do mais duro. Com o motor de
 02/10/2026, isso acontece em 14 dos 90 ativos da via da firma (com o prêmio de

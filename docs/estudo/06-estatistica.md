@@ -115,13 +115,15 @@ usa α = 10% na Guarda 1 e no teste de crescimento.
 anterior. Numa série anual de retornos isso é falso: um ano bom tende a vir
 seguido de outro bom. Ignorar isso faz o erro parecer menor do que é, e o `t`,
 maior. O erro de **Newey-West** (1987) corrige para essa dependência. O painel
-de logs mostra "t de Newey-West" na normalização da base: na WEGE3, 6,09 — a
+de logs mostra "t de Newey-West" na normalização da base: na WEGE3, 7,02 — a
 tendência de alta do retorno é clara.
 
-**Exemplo de leitura (WEGE3, 14/09/2026):** o retorno sobre o capital subiu 2,05
-pontos por ano, com `t` de Newey-West de 6,09. A tendência é significante e, em
-oito anos, explica mais que a diferença entre o último ano (35,9%) e o ciclo
-(32,0%). Conclusão do motor: é mudança de patamar, e a base não é normalizada.
+**Exemplo de leitura (WEGE3, 14/09/2026, motor de 03/11/2026):** o retorno sobre
+o capital subiu 2,00 pontos por ano, com `t` de Newey-West de 7,02. A tendência
+é significante e, em oito anos, explica mais que a diferença entre o último
+ponto (40,1%, 2026 anualizado) e o ciclo (34,6%). Aqui o último ponto nem chega
+a destoar do ciclo; se destoasse, a tendência manteria a base do mesmo jeito: é
+mudança de patamar, e a base não é normalizada.
 
 ---
 
@@ -159,8 +161,9 @@ excedente_t = constante + φ × excedente_{t−1} + ruído
 - `φ` perto de 1: o excedente dura muito (vantagem persistente);
 - `φ` perto de 0: o excedente some de um ano para o outro.
 
-Depois de `N` anos, sobra `φ^N` do excedente inicial. Com `φ` = 0,84 (WEGE3),
-depois de 10 anos sobram 0,84¹⁰ = 17%. Com `φ` = 0,41 (VALE3), sobram 0,01%.
+Depois de `N` anos, sobra `φ^N` do excedente inicial. Com `φ` = 0,87 (WEGE3),
+depois de 10 anos sobram 0,87¹⁰ = 24%. Com `φ` = 0,23 (UNIP6), não sobra
+quase nada: 0,23¹⁰ é menos de um milionésimo.
 
 **No motor:** é o que decide o retorno terminal com vantagem competitiva
 (capítulo 4, seção 4.7). O motor limita `φ` a 0,90 e exige pelo menos quatro
@@ -225,7 +228,7 @@ senão o teste só veria as sobreviventes (**viés de sobrevivência**).
 Se você ajusta um modelo olhando os dados, ele sempre parece bom nesses dados.
 O teste honesto é **fora da amostra**: medir em dados que não foram usados para
 ajustar. A faixa calibrada foi ajustada numa parte das coortes e medida na
-outra (79,7% de cobertura para 80% prometidos, em 12 meses).
+outra (79,0% de cobertura para 80% prometidos, em 12 meses).
 
 ### Cobertura e calibração
 
@@ -254,8 +257,8 @@ limiar próprio, obtido por simulação (2,70 para 22 coortes; decisão 96).
 O **poder** é a chance de um teste detectar um efeito que existe. Com poucas
 coortes, o poder é baixo: um efeito real pode passar despercebido. O Equisim
 mediu isso: com a série brasileira disponível, o menor efeito que o teste
-enxerga com 80% de chance é 0,70, e o efeito medido foi 0,010 (decisão 140;
-remedição de 02/10/2026).
+enxerga com 80% de chance é 0,48, e o efeito medido foi 0,034 (decisão 140;
+remedição de 03/11/2026).
 Leitura correta:
 
 > "O teste não encontrou habilidade de ordenação, **e** não teria poder para

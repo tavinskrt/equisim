@@ -1,6 +1,7 @@
 # O instrumento da habilidade, pronto — itens C1c, C1d e C3
 
-> **A leitura mais recente é a §13**, de 02/10/2026, com a base de patrimônio
+> **A leitura mais recente é a §14**, de 03/11/2026, com o motor da decisão 153
+> sobre a base reconstruída. A §13, de 02/10/2026, é a da base de patrimônio
 > corrigida (item B47, decisão 146). A §12, de 01/10/2026, trouxe o prêmio de
 > mercado da decisão 142 em cada coorte, a contagem de ações conferida contra o
 > preço (decisão 143) e os proventos dos nove emissores que faltavam (decisão
@@ -174,6 +175,29 @@ O backtest trimestral inteiro foi refeito com o motor corrigido.
 
 **Nenhum veredito muda.** O efeito mínimo detectável segue em 0,62
 ([poder_r3.md](poder_r3.md)).
+
+## 14. Com o motor da decisão 153 — remedido em 03/11/2026
+
+**A mudança:** a [decisão 153](../decisoes/153-o-lucro-de-partida-e-o-ano-corrente-anualizado.md)
+fez do ano corrente, anualizado a partir do último ITR, o ponto mais recente da
+série. As bases brutas foram reconstruídas numa máquina nova (CVM, FRE, FCA,
+COTAHIST, cadastro e complemento da B3, ponte das deslistadas), e as 626 versões
+antigas dos balanços reapresentados foram baixadas de novo do RAD, com a
+correção do nome do XML que barrava uma delas. O backtest trimestral tem 31
+coortes e 10.861 observações.
+
+| 36 meses, trimestral, com deslistadas (n = 2.332) | 02/10 (§13) | **03/11** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,010 | **0,034** | **0,25 / 2,70** | 0,60 | não |
+| IC do potencial | 0,080 | 0,096 | 0,70 / 2,70 | 1,56 | não |
+| IC do book-to-market | 0,179 | 0,192 | 2,15 / 2,70 | 4,83 | não |
+| IC do lucro sobre o preço | 0,125 | 0,090 | 0,79 / 2,70 | 2,94 | não |
+| IC do composto | 0,150 | 0,155 | 1,32 / 2,70 | 3,16 | não |
+
+**Nenhum veredito muda.** O efeito mínimo detectável cai para 0,48, ainda cerca
+de catorze vezes o medido, e o book-to-market pediria 58 coortes, disponíveis em
+2035 ([poder_r3.md](poder_r3.md)). Sem ordenação que passe, o retorno esperado
+continua sem prêmio de ordenação (decisão 103).
 
 ## 13. Com a base de patrimônio corrigida — remedido em 02/10/2026
 

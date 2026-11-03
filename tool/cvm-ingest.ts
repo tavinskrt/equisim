@@ -40,14 +40,22 @@
 // O backtest lê os dois, e `CvmSeries.inForceAt` escolhe, em cada coorte, a
 // versão que era pública naquela data.
 //
+// **A memória é dividida por companhia, quando preciso.** Montar 2010 a 2026
+// de uma vez guarda todas as contas de todos os documentos ao mesmo tempo, e
+// passou de 9 GB num computador de 16 GB. Com `--partes N`, a montagem roda N
+// vezes, cada uma só com as companhias de uma parte (pelo CNPJ), e as partes
+// são juntadas e ordenadas como antes. Como todo documento é de uma companhia
+// só, a saída é a mesma de uma passada única; o custo é ler os CSVs N vezes.
+//
 // Uso:
 //   python tool/cvm_baixar.py --de 2010 --ate 2026 --docs DFP,ITR,FCA
 //   python tool/cvm_versoes_baixar.py            # as versões antigas
 //   npm run tool -- cvm-ingest data/cvm
+//   npm run tool -- cvm-ingest data/cvm --partes 8   # com menos memória
 import { existsSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 
 import { compareNum, compareStr, CvmAccountLine, CvmChart, tryParseDouble, tryParseInt } from '../src/core';
-import { dartString, errln, outln, readJson, readLatin1, splitLines, writeText } from './lib/files';
+import { dartString, errln, flagValue, outln, readJson, readLatin1, splitLines, writeText } from './lib/files';
 
 // ------------------------------------------------------------------ leitura
 
@@ -58,21 +66,21 @@ type CsvRow = Record<string, string>;
  *
  * É o leitor de linha a linha desta ingestão, e não o de `cvm/csv.ts`: linha
  * com número de campos diferente do cabeçalho é descartada, como sempre foi.
+ * Entrega uma linha por vez, para que o arquivo inteiro não vire objetos de
+ * uma vez só.
  */
-function readCsv(path: string): CsvRow[] {
+function* readCsv(path: string): Generator<CsvRow> {
   const rows = splitLines(readLatin1(path));
-  if (rows.length === 0) return [];
+  if (rows.length === 0) return;
   const headerRow = fields(rows[0]!);
-  const out: CsvRow[] = [];
   for (let i = 1; i < rows.length; i++) {
     if (rows[i]!.trim().length === 0) continue;
     const c = fields(rows[i]!);
     if (c.length !== headerRow.length) continue;
     const row: CsvRow = {};
     for (let j = 0; j < headerRow.length; j++) row[headerRow[j]!] = c[j]!;
-    out.push(row);
+    yield row;
   }
-  return out;
 }
 
 function fields(l: string): string[] {
@@ -203,8 +211,31 @@ const filesByName = (dir: string): Map<string, string> => {
   return out;
 };
 
+/** A ordem dos documentos na saída: companhia, fim do exercício e versão. */
+const byDocument = (a: FiscalYear, b: FiscalYear): number => {
+  const c = compareStr(a['cnpj'] as string, b['cnpj'] as string);
+  if (c !== 0) return c;
+  const f = compareStr(a['fimDoExercicio'] as string, b['fimDoExercicio'] as string);
+  return f !== 0 ? f : compareNum(a['versao'] as number, b['versao'] as number);
+};
+
 export function main(args: string[]): void {
-  const dir = args.length === 0 ? 'data/cvm' : args[0]!;
+  const partsArg = flagValue(args, '--partes');
+  const parts = partsArg === null ? 1 : /^\d+$/.test(partsArg) ? Number.parseInt(partsArg, 10) : Number.NaN;
+  if (!Number.isInteger(parts) || parts < 1) {
+    errln(`--partes espera um inteiro positivo, e recebeu "${partsArg}"`);
+    process.exitCode = 2;
+    return;
+  }
+  const positional = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--partes');
+  const dir = positional.length === 0 ? 'data/cvm' : positional[0]!;
+  /** A parte de uma companhia, pelo CNPJ; com uma parte só, sempre 0. */
+  const partOf = (cnpj: string): number => {
+    if (parts === 1) return 0;
+    let h = 0;
+    for (let i = 0; i < cnpj.length; i++) h = (Math.imul(h, 31) + cnpj.charCodeAt(i)) >>> 0;
+    return h % parts;
+  };
   if (!existsSync(dir)) {
     errln(`${dir} não existe. Rode antes:`);
     errln('  python tool/cvm_baixar.py --de 2010 --ate 2026');
@@ -275,10 +306,11 @@ export function main(args: string[]): void {
   });
 
   // --- Composição de capital -----------------------------------------------
-  const loadCapital = (oldVersions: boolean): KeyedMap<VersionKey, { paidInShares: number; treasury: number }> => {
+  const loadCapital = (oldVersions: boolean, part: number): KeyedMap<VersionKey, { paidInShares: number; treasury: number }> => {
     const out = new KeyedMap<VersionKey, { paidInShares: number; treasury: number }>(versionId);
     for (const [doc, f] of files('composicao_capital', oldVersions)) {
       for (const r of readCsv(f)) {
+        if (partOf(r['CNPJ_CIA'] ?? '') !== part) continue;
         const tot = tryParseDouble(r['QT_ACAO_TOTAL_CAP_INTEGR'] ?? '');
         const treasuryShares = tryParseDouble(r['QT_ACAO_TOTAL_TESOURO'] ?? '') ?? 0;
         if (tot === null || tot <= 0) continue;
@@ -293,11 +325,12 @@ export function main(args: string[]): void {
    * Lê uma demonstração de todos os anos. [order] é `Ú` (exercício do
    * documento) ou `P` (o comparativo que o acompanha).
    */
-  const load = (suffix: string, order: string, oldVersions: boolean): KeyedMap<VersionKey, Statement> => {
+  const load = (suffix: string, order: string, oldVersions: boolean, part: number): KeyedMap<VersionKey, Statement> => {
     const out = new KeyedMap<VersionKey, Statement>(versionId);
     for (const [doc, f] of files(suffix, oldVersions)) {
       for (const r of readCsv(f)) {
         if (!(r['ORDEM_EXERC'] ?? '').startsWith(order)) continue;
+        if (partOf(r['CNPJ_CIA'] ?? '') !== part) continue;
         const row = CvmAccountLine.fromText({
           code: r['CD_CONTA'] ?? '',
           label: r['DS_CONTA'] ?? '',
@@ -352,12 +385,13 @@ export function main(args: string[]): void {
 
   /**
    * Monta os exercícios de um conjunto de CSVs — os anuais ou os das versões
-   * antigas. A data de recebimento é a **da versão** que as contas trazem.
+   * antigas —, só com as companhias de [part]. A data de recebimento é a **da
+   * versão** que as contas trazem.
    */
-  const build = (oldVersions: boolean): FiscalYear[] => {
+  const build = (oldVersions: boolean, part: number): FiscalYear[] => {
     const pair = (suffix: string, order: string) => ({
-      con: load(`${suffix}_con`, order, oldVersions),
-      ind: load(`${suffix}_ind`, order, oldVersions),
+      con: load(`${suffix}_con`, order, oldVersions, part),
+      ind: load(`${suffix}_ind`, order, oldVersions, part),
     });
     const dre = pair('DRE', 'Ú');
     const previousDre = pair('DRE', 'P');
@@ -365,14 +399,14 @@ export function main(args: string[]): void {
     const dfcPrev = pair('DFC_MI', 'P');
     const bpa = pair('BPA', 'Ú');
     const bpp = pair('BPP', 'Ú');
-    const capital = loadCapital(oldVersions);
+    const capital = loadCapital(oldVersions, part);
 
     const fiscalYears: FiscalYear[] = [];
     const keys = new KeyedMap<VersionKey, VersionKey>(versionId);
     for (const k of [...dre.con.keys(), ...dre.ind.keys()]) if (!keys.has(k)) keys.set(k, k);
     if (!oldVersions) {
       const withDre = new Set(keys.keys().map((k) => docId(k)));
-      withoutDre = meta.keys().filter((k) => !withDre.has(docId(k))).length;
+      withoutDre += meta.keys().filter((k) => partOf(k.cnpj) === part && !withDre.has(docId(k))).length;
     }
     for (const k of keys.keys()) {
       // A versão das contas dá a data de recebimento. Nos anuais, a versão que
@@ -446,13 +480,22 @@ export function main(args: string[]): void {
       });
     }
 
-    fiscalYears.sort((a, b) => {
-      const c = compareStr(a['cnpj'] as string, b['cnpj'] as string);
-      if (c !== 0) return c;
-      const f = compareStr(a['fimDoExercicio'] as string, b['fimDoExercicio'] as string);
-      return f !== 0 ? f : compareNum(a['versao'] as number, b['versao'] as number);
-    });
+    fiscalYears.sort(byDocument);
     return fiscalYears;
+  };
+
+  /**
+   * [build] parte a parte, juntado na ordem de uma passada única: cada
+   * companhia está inteira numa parte, e a ordenação é estável.
+   */
+  const buildAll = (oldVersions: boolean): FiscalYear[] => {
+    if (parts === 1) return build(oldVersions, 0);
+    const all: FiscalYear[] = [];
+    for (let part = 0; part < parts; part++) {
+      outln(`  parte ${part + 1} de ${parts}${oldVersions ? ' (versões antigas)' : ''}`);
+      for (const e of build(oldVersions, part)) all.push(e);
+    }
+    return all.sort(byDocument);
   };
 
   // Nos anuais, **uma entrada por documento, a de maior versão**: um
@@ -460,7 +503,7 @@ export function main(args: string[]): void {
   // de 2021 da INTER & CO), e a versão menor não é a vigente de hoje.
   const fiscalYears = ((): FiscalYear[] => {
     const byDoc = new Map<string, FiscalYear>();
-    for (const e of build(false)) {
+    for (const e of buildAll(false)) {
       const k = `${dartString(e['cnpj'])}|${dartString(e['fimDoExercicio'])}|${dartString(e['documento'])}`;
       const current = byDoc.get(k);
       if (current === undefined || (e['versao'] as number) > (current['versao'] as number)) byDoc.set(k, e);
@@ -470,7 +513,7 @@ export function main(args: string[]): void {
   // O recuo, as duplicadas e a identidade descrevem a base vigente; as
   // versões antigas são contadas à parte.
   const [fallback0, dup0, balanceOk0, balanceN0] = [withFallback, resolvedDuplicates, balanceOk, balanceN];
-  const oldVersions = versionsByName.size === 0 ? [] : build(true);
+  const oldVersions = versionsByName.size === 0 ? [] : buildAll(true);
   const oldBalanceOk = balanceOk - balanceOk0;
   const oldBalanceN = balanceN - balanceN0;
   withFallback = fallback0;

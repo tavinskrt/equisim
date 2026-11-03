@@ -1,0 +1,1366 @@
+{
+ "ticker": "UNIP6",
+ "asOf": "2026-09-14",
+ "preco": 57.04,
+ "setor": "materiais-basicos",
+ "subsetor": "Químicos / Químicos Diversos",
+ "capm": {
+  "rf": 0.14046709824726378,
+  "beta": 0.8202865502514572,
+  "origemBeta": "shrunk",
+  "premio": 0.012107652198573262,
+  "ke": 0.1503988425008759,
+  "betaDesalavancado": 0.7858183539251267
+ },
+ "ancoras": {
+  "inflacao": 0.04964519580840321,
+  "tetoCrescimentoNominal": 0.06825018888156831,
+  "rfEstruturalDeclarada": 0.0939732438649854,
+  "rfTerminal": 0.14379999999999993
+ },
+ "curva": {
+  "data": "2026-09-14",
+  "forwards": [
+   0.1367231081853546,
+   0.14164052381865422,
+   0.1447961964716722,
+   0.14528092474767496,
+   0.1469713147983922,
+   0.1458058263975197,
+   0.14462833635832006,
+   0.14443269515513268,
+   0.14395312030418528,
+   0.14379999999999993
+  ],
+  "terminal": 0.14379999999999993,
+  "vertices": [
+   [
+    0.29365079365079366,
+    0.1359
+   ],
+   [
+    1.2896825396825398,
+    0.1368
+   ],
+   [
+    2.2738095238095237,
+    0.13970000000000002
+   ],
+   [
+    4.261904761904762,
+    0.1423
+   ],
+   [
+    5.261904761904762,
+    0.1433
+   ],
+   [
+    6.261904761904762,
+    0.1436
+   ],
+   [
+    8.242063492063492,
+    0.1438
+   ],
+   [
+    10.234126984126984,
+    0.1438
+   ]
+  ]
+ },
+ "exercicios": [
+  {
+   "ano": 2010,
+   "receita": 316234000,
+   "ebit": 42431000,
+   "ebitda": 62627000,
+   "lucroLiquido": 30296000,
+   "lucroAntesIR": 42572000,
+   "imposto": -12276000,
+   "despesaFinanceira": -78211000,
+   "equivalencia": 0,
+   "vpa": 0.4453416666666667,
+   "acoesExercicio": 840000000,
+   "acoesCorrentes": 113173264,
+   "pl": 374087000,
+   "dividaBruta": 571929000,
+   "caixa": 595784000,
+   "dividaLiquida": -23855000,
+   "capitalInvestido": 350232000,
+   "minoritarios": 0,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.2883585455228789,
+   "cobertura": 0.542519594430451,
+   "alavancagem": -0.38090599901001165,
+   "kdObservado": 0.13674949163270267,
+   "nopatPublicado": 28004459.999999996
+  },
+  {
+   "ano": 2011,
+   "receita": 345351000,
+   "ebit": 16793000,
+   "ebitda": 38280000,
+   "lucroLiquido": 4448000,
+   "lucroAntesIR": 20857000,
+   "imposto": -16409000,
+   "despesaFinanceira": -64387000,
+   "equivalencia": -25574000,
+   "vpa": 0.4563659412046489,
+   "acoesExercicio": 835498370,
+   "acoesCorrentes": 113173264,
+   "pl": 381293000,
+   "dividaBruta": 447973000,
+   "caixa": 413727000,
+   "dividaLiquida": 34246000,
+   "capitalInvestido": 415539000,
+   "minoritarios": 0,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.5,
+   "cobertura": 0.26081351825679094,
+   "alavancagem": 0.8946185997910135,
+   "kdObservado": 0.14372964442053426,
+   "nopatPublicado": 11083379.999999998
+  },
+  {
+   "ano": 2012,
+   "receita": 355386000,
+   "ebit": 59173000,
+   "ebitda": 84775000,
+   "lucroLiquido": 39282000,
+   "lucroAntesIR": 57400000,
+   "imposto": -18118000,
+   "despesaFinanceira": -37711000,
+   "equivalencia": 16878000,
+   "vpa": 0.4930063478160945,
+   "acoesExercicio": 835498370,
+   "acoesCorrentes": 113173264,
+   "pl": 411906000,
+   "dividaBruta": 274695000,
+   "caixa": 269121000,
+   "dividaLiquida": 5574000,
+   "capitalInvestido": 417480000,
+   "minoritarios": 0,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.3156445993031359,
+   "cobertura": 1.5691177640476253,
+   "alavancagem": 0.06575051607195517,
+   "kdObservado": 0.13728316860518028,
+   "nopatPublicado": 39054179.99999999
+  },
+  {
+   "ano": 2013,
+   "receita": 187309000,
+   "ebit": 390275000,
+   "ebitda": 407187000,
+   "lucroLiquido": 360072000,
+   "lucroAntesIR": 353615000,
+   "imposto": 6457000,
+   "despesaFinanceira": -61700000,
+   "equivalencia": 35839000,
+   "vpa": 0.8881282285227051,
+   "acoesExercicio": 835502100,
+   "acoesCorrentes": 113173264,
+   "pl": 742033000,
+   "dividaBruta": 740816000,
+   "caixa": 122392000,
+   "dividaLiquida": 618424000,
+   "capitalInvestido": 1360457000,
+   "minoritarios": null,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0,
+   "cobertura": 6.325364667747164,
+   "alavancagem": 1.518771473549008,
+   "kdObservado": 0.08328653808773029,
+   "nopatPublicado": 257581499.99999997
+  },
+  {
+   "ano": 2014,
+   "receita": 776483000,
+   "ebit": 136290000,
+   "ebitda": 183199000,
+   "lucroLiquido": 65591000,
+   "lucroAntesIR": 74796000,
+   "imposto": -9205000,
+   "despesaFinanceira": -90519000,
+   "equivalencia": -3205000,
+   "vpa": 9.298241141464516,
+   "acoesExercicio": 83550210,
+   "acoesCorrentes": 113173264,
+   "pl": 776870000,
+   "dividaBruta": 650203000,
+   "caixa": 166199000,
+   "dividaLiquida": 484004000,
+   "capitalInvestido": 1260874000,
+   "minoritarios": null,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.12306807850687203,
+   "cobertura": 1.5056507473569085,
+   "alavancagem": 2.641957652607274,
+   "kdObservado": 0.13921652160940506,
+   "nopatPublicado": 89951399.99999999
+  },
+  {
+   "ano": 2015,
+   "receita": 858976000,
+   "ebit": 157732000,
+   "ebitda": 236058000,
+   "lucroLiquido": 87833000,
+   "lucroAntesIR": 96864000,
+   "imposto": -9031000,
+   "despesaFinanceira": -103298000,
+   "equivalencia": -18201000,
+   "vpa": 9.900908687123588,
+   "acoesExercicio": 83550210,
+   "acoesCorrentes": 113173264,
+   "pl": 827223000,
+   "dividaBruta": 585332000,
+   "caixa": 222441000,
+   "dividaLiquida": 362891000,
+   "capitalInvestido": 1190114000,
+   "minoritarios": null,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.09323381235546746,
+   "cobertura": 1.5269608317682821,
+   "alavancagem": 1.5372959187996171,
+   "kdObservado": 0.17647762295586095,
+   "nopatPublicado": 104103119.99999999
+  },
+  {
+   "ano": 2016,
+   "receita": 889706000,
+   "ebit": 568366000,
+   "ebitda": 677977000,
+   "lucroLiquido": 280836000,
+   "lucroAntesIR": 468607000,
+   "imposto": -187771000,
+   "despesaFinanceira": -133265000,
+   "equivalencia": -75431000,
+   "vpa": 15.393845209964164,
+   "acoesExercicio": 83550210,
+   "acoesCorrentes": 113173264,
+   "pl": 1286159000,
+   "dividaBruta": 601885000,
+   "caixa": 479958000,
+   "dividaLiquida": 121927000,
+   "capitalInvestido": 1408086000,
+   "minoritarios": 204411000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.4007003736606581,
+   "cobertura": 4.264930777023224,
+   "alavancagem": 0.17983943408109715,
+   "kdObservado": 0.22141272834511577,
+   "nopatPublicado": 375121559.99999994
+  },
+  {
+   "ano": 2017,
+   "receita": 3019592000,
+   "ebit": 430697000,
+   "ebitda": 575799000,
+   "lucroLiquido": 306264000,
+   "lucroAntesIR": 336861000,
+   "imposto": -30597000,
+   "despesaFinanceira": -169351000,
+   "equivalencia": 1668000,
+   "vpa": 12.840554200881122,
+   "acoesExercicio": 83550210,
+   "acoesCorrentes": 113173264,
+   "pl": 1072831000,
+   "dividaBruta": 840368000,
+   "caixa": 401802000,
+   "dividaLiquida": 438566000,
+   "capitalInvestido": 1511397000,
+   "minoritarios": 81906000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.09082974876878,
+   "cobertura": 2.5432208844352853,
+   "alavancagem": 0.7616650949376431,
+   "kdObservado": 0.2015200483597662,
+   "nopatPublicado": 284260019.99999994
+  },
+  {
+   "ano": 2018,
+   "receita": 3469133000,
+   "ebit": 830642000,
+   "ebitda": 1007016000,
+   "lucroLiquido": 547440000,
+   "lucroAntesIR": 676737000,
+   "imposto": -129297000,
+   "despesaFinanceira": -303268000,
+   "equivalencia": 941000,
+   "vpa": 16.590480491520157,
+   "acoesExercicio": 87154920,
+   "acoesCorrentes": 113173264,
+   "pl": 1445942000,
+   "dividaBruta": 1027846000,
+   "caixa": 861481000,
+   "dividaLiquida": 166365000,
+   "capitalInvestido": 1612307000,
+   "minoritarios": 98422000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.19105945145603093,
+   "cobertura": 2.738970151812918,
+   "alavancagem": 0.16520591529826736,
+   "kdObservado": 0.2950519824954322,
+   "nopatPublicado": 548223719.9999999
+  },
+  {
+   "ano": 2019,
+   "receita": 3048730000,
+   "ebit": 397531000,
+   "ebitda": 580613000,
+   "lucroLiquido": 172358000,
+   "lucroAntesIR": 256610000,
+   "imposto": -84252000,
+   "despesaFinanceira": -281078000,
+   "equivalencia": -6507000,
+   "vpa": 15.163061930864952,
+   "acoesExercicio": 97818172,
+   "acoesCorrentes": 113173264,
+   "pl": 1483223000,
+   "dividaBruta": 677548000,
+   "caixa": 514683000,
+   "dividaLiquida": 162865000,
+   "capitalInvestido": 1646088000,
+   "minoritarios": 10170000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.3283270332411052,
+   "cobertura": 1.414308483766072,
+   "alavancagem": 0.2805052590968511,
+   "kdObservado": 0.4148458854575617,
+   "nopatPublicado": 262370459.99999997
+  },
+  {
+   "ano": 2020,
+   "receita": 3868223000,
+   "ebit": 748520000,
+   "ebitda": 946471000,
+   "lucroLiquido": 370215000,
+   "lucroAntesIR": 601157000,
+   "imposto": -230942000,
+   "despesaFinanceira": -287495000,
+   "equivalencia": -2342000,
+   "vpa": 18.415611004939276,
+   "acoesExercicio": 94432870,
+   "acoesCorrentes": 113173264,
+   "pl": 1739039000,
+   "dividaBruta": 713540000,
+   "caixa": 1113760000,
+   "dividaLiquida": -400220000,
+   "capitalInvestido": 1338819000,
+   "minoritarios": 14032000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.3841625399022219,
+   "cobertura": 2.6035931059670605,
+   "alavancagem": -0.4228550055944662,
+   "kdObservado": 0.4029136418420831,
+   "nopatPublicado": 494023199.99999994
+  },
+  {
+   "ano": 2021,
+   "receita": 6289369000,
+   "ebit": 2944488000,
+   "ebitda": 3163841000,
+   "lucroLiquido": 2003833000,
+   "lucroAntesIR": 3035323000,
+   "imposto": -1031490000,
+   "despesaFinanceira": -406804000,
+   "equivalencia": -2534000,
+   "vpa": 22.34812107032066,
+   "acoesExercicio": 103876160,
+   "acoesCorrentes": 113173264,
+   "pl": 2321437000,
+   "dividaBruta": 1474829000,
+   "caixa": 1622449000,
+   "dividaLiquida": -147620000,
+   "capitalInvestido": 2173817000,
+   "minoritarios": 32694000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.3398287431024639,
+   "cobertura": 7.238099920354766,
+   "alavancagem": -0.046658476200289456,
+   "kdObservado": 0.27583129976424386,
+   "nopatPublicado": 1943362079.9999998
+  },
+  {
+   "ano": 2022,
+   "receita": 7270406000,
+   "ebit": 2380258000,
+   "ebitda": 2627552000,
+   "lucroLiquido": 1334303000,
+   "lucroAntesIR": 2051990000,
+   "imposto": -717687000,
+   "despesaFinanceira": -306856000,
+   "equivalencia": 16772000,
+   "vpa": 22.674432709102838,
+   "acoesExercicio": 103876160,
+   "acoesCorrentes": 113173264,
+   "pl": 2355333000,
+   "dividaBruta": 1391746000,
+   "caixa": 1413969000,
+   "dividaLiquida": -22223000,
+   "capitalInvestido": 2333110000,
+   "minoritarios": 37929000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.34975170444300413,
+   "cobertura": 7.756921813489063,
+   "alavancagem": -0.008457682283737868,
+   "kdObservado": 0.2204827605037126,
+   "nopatPublicado": 1570970279.9999998
+  },
+  {
+   "ano": 2023,
+   "receita": 4897288000,
+   "ebit": 979634000,
+   "ebitda": 1226611000,
+   "lucroLiquido": 791273000,
+   "lucroAntesIR": 1165461000,
+   "imposto": -374188000,
+   "despesaFinanceira": -170781000,
+   "equivalencia": 13501000,
+   "vpa": 23.56509905641487,
+   "acoesExercicio": 103876160,
+   "acoesCorrentes": 113173264,
+   "pl": 2447852000,
+   "dividaBruta": 2061387000,
+   "caixa": 2138041000,
+   "dividaLiquida": -76654000,
+   "capitalInvestido": 2371198000,
+   "minoritarios": 25519000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.32106436852026793,
+   "cobertura": 5.736200162781574,
+   "alavancagem": -0.06249250985031114,
+   "kdObservado": 0.08284761667750888,
+   "nopatPublicado": 646558439.9999999
+  },
+  {
+   "ano": 2024,
+   "receita": 5431599000,
+   "ebit": 625019000,
+   "ebitda": 947997000,
+   "lucroLiquido": 557118000,
+   "lucroAntesIR": 784044000,
+   "imposto": -226926000,
+   "despesaFinanceira": -457475000,
+   "equivalencia": -29553000,
+   "vpa": 24.863902484954398,
+   "acoesExercicio": 113173264,
+   "acoesCorrentes": 113173264,
+   "pl": 2813929000,
+   "dividaBruta": 2317982000,
+   "caixa": 1584782000,
+   "dividaLiquida": 733200000,
+   "capitalInvestido": 3547129000,
+   "minoritarios": 23472000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.2894301850406355,
+   "cobertura": 1.3662364063610033,
+   "alavancagem": 0.7734201690511678,
+   "kdObservado": 0.1973591684491079,
+   "nopatPublicado": 412512539.99999994
+  },
+  {
+   "ano": 2025,
+   "receita": 5142676000,
+   "ebit": 793527000,
+   "ebitda": 1109677000,
+   "lucroLiquido": 481744000,
+   "lucroAntesIR": 648720000,
+   "imposto": -166976000,
+   "despesaFinanceira": -488798000,
+   "equivalencia": -7064000,
+   "vpa": 16.05233370312621,
+   "acoesExercicio": 113173264,
+   "acoesCorrentes": 113173264,
+   "pl": 1816695000,
+   "dividaBruta": 3526567000,
+   "caixa": 1074223000,
+   "dividaLiquida": 2452344000,
+   "capitalInvestido": 4269039000,
+   "minoritarios": 12896000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.2573930201011222,
+   "cobertura": 1.6234252185974574,
+   "alavancagem": 2.209961997950755,
+   "kdObservado": 0.13860448419099936,
+   "nopatPublicado": 523727819.99999994
+  },
+  {
+   "ano": 2026,
+   "receita": 5467820000,
+   "ebit": 770896000,
+   "ebitda": 1080380000,
+   "lucroLiquido": 321138000,
+   "lucroAntesIR": 532182000,
+   "imposto": -211044000,
+   "despesaFinanceira": null,
+   "equivalencia": null,
+   "vpa": 17.76803927825215,
+   "acoesExercicio": 113173264,
+   "acoesCorrentes": 113173264,
+   "pl": 2010867000,
+   "dividaBruta": 3702547000,
+   "caixa": 1371295000,
+   "dividaLiquida": 2331252000,
+   "capitalInvestido": 4342119000,
+   "minoritarios": 12045000,
+   "valorDeMercado": 5771836464,
+   "aliquotaEfetiva": 0.39656358163184774,
+   "cobertura": null,
+   "alavancagem": 2.157807438123623,
+   "kdObservado": null,
+   "nopatPublicado": null
+  }
+ ],
+ "recusa": null,
+ "resultado": {
+  "modelo": "dcfFcff",
+  "justo": 75.38,
+  "preco": 57.04,
+  "potencial": 0.3215287517531556,
+  "descontoAno1": 0.14095387507245444,
+  "cenarios": {
+   "bear": 60.7,
+   "base": 75.38,
+   "bull": 98.32
+  },
+  "monteCarlo": {
+   "p5": 66.86334303379229,
+   "p10": 68.39367383161186,
+   "p25": 71.55463190264481,
+   "p50": 75.39868063350221,
+   "p75": 79.71538537037084,
+   "p90": 84.0385951619568,
+   "p95": 86.55885183659653,
+   "n": 10000
+  },
+  "volatilidade": 0.3316171826047111,
+  "faixas": [
+   {
+    "meses": 12,
+    "nominal": 0.5,
+    "coberturaForaDaAmostra": 0.511,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -0.533175,
+    "zSup": 0.655369,
+    "faixa": [
+     52.1,
+     77.26
+    ]
+   },
+   {
+    "meses": 12,
+    "nominal": 0.8,
+    "coberturaForaDaAmostra": 0.79,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -1.202221,
+    "zSup": 1.230679,
+    "faixa": [
+     41.73,
+     93.5
+    ]
+   },
+   {
+    "meses": 12,
+    "nominal": 0.9,
+    "coberturaForaDaAmostra": 0.876,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -1.603031,
+    "zSup": 1.690225,
+    "faixa": [
+     36.54,
+     108.9
+    ]
+   },
+   {
+    "meses": 36,
+    "nominal": 0.5,
+    "coberturaForaDaAmostra": 0.526,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -0.726209,
+    "zSup": 0.970106,
+    "faixa": [
+     52.63,
+     92.37
+    ]
+   },
+   {
+    "meses": 36,
+    "nominal": 0.8,
+    "coberturaForaDaAmostra": 0.791,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -1.778078,
+    "zSup": 2.033321,
+    "faixa": [
+     37.13,
+     131.42
+    ]
+   },
+   {
+    "meses": 36,
+    "nominal": 0.9,
+    "coberturaForaDaAmostra": 0.878,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -2.579071,
+    "zSup": 2.680883,
+    "faixa": [
+     28.47,
+     162.9
+    ]
+   }
+  ],
+  "ressalvas": [
+   "crescimentoNaoIdentificado",
+   "baseNormalizadaForte"
+  ],
+  "avisos": [
+   "O último ponto da série é 2026 anualizado: o acumulado de 6 meses do último ITR vezes 2.00, com o balanço da data dele. A anualização supõe que o resto do ano repete o acumulado, sem correção de sazonalidade, e multiplica junto o que for não recorrente.",
+   "O retorno sobre o capital do exercício mais recente (12.4%) destoa do retorno típico da empresa, a mediana dos 8 exercícios anteriores (30.0%): a base foi normalizada para cima, partindo do lucro que a empresa teria rendendo o típico — fator de 2.43x sobre o lucro publicado.",
+   "O lucro ou o EBITDA recuou 59.4% no triênio, acima do máximo de 50.0%, mas o ativo é de setor de commodity: ali a queda entre pico e vale é oscilação do preço do insumo, não quebra de modelo de negócio. A trava de saúde não se aplica à base, e a convergência ao ciclo opera nos dois sentidos. A vantagem competitiva residual não tem trava de saúde desde a decisão 36: quem decide é a persistência medida do excedente.",
+   "Crescimento fundamental não identificável: os dois estimadores discordam em 7.5 pontos percentuais (4.0 erros-padrão), acima do que a série sustenta. Adotada a inflação de 5.0%, que a retenção observada de 17.7% financia.",
+   "A despesa financeira de UNIP6 não está publicada: a cobertura de juros não é medível, e o prêmio de crédito sai só da alavancagem (2.16x de dívida líquida sobre EBITDA). Custo da dívida adotado: 16.4% a.a.",
+   "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 14/09/2026: 13.7% a.a. no primeiro ano, 14.4% a.a. no ano 10 e 14.4% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
+   "O lucro operacional é tributado à alíquota estrutural do ativo, 31.6%, e não aos 34.0% estatutários que a fonte embute em todo NOPAT publicado. É a mediana dos exercícios, não a do último: JCP, incentivo regional e lucro presumido são regime no Brasil, e regime é o que se projeta. O escudo fiscal do WACC continua na estatutária, que é a alíquota da margem.",
+   "O custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz: o WACC vai de 14.1% no primeiro ano a 14.7% no ano 10, e a perpetuidade é descontada a 14.7%. A participação do capital próprio sai de 78.5% para 76.2% no mesmo intervalo — e é justamente o que a taxa única não enxergava. Ponto fixo em 28 iterações, e o veredito da perpetuidade fechou em 5 passes.",
+   "Vantagem competitiva residual: retorno do ciclo de 30.0% contra custo de capital de equilíbrio de 14.7%, com excedente decaindo 76.5% ao ano — persistência medida na própria série do ativo, sobre 15 pares. Em 10 anos sobram 0.0% do excedente, e o retorno terminal fica em 14.7% em vez do estado estacionário. O valor terminal volta a depender do crescimento perpétuo.",
+   "A leitura por múltiplos de pares diverge do fluxo descontado: R$ 37.46 contra R$ 75.38, -50.3% de diferença. Saiu de P/L 13.02× (18 pares, materiais-basicos); P/VP 0.85× (21 pares, materiais-basicos); EV/EBITDA 6.44× (21 pares, materiais-basicos). **O preço justo continua sendo o do fluxo descontado** — a segunda leitura é teste de sanidade sobre o nível, e a divergência fica declarada em vez de reconciliada."
+  ],
+  "triangulacao": {
+   "consolidado": 37.4593881130475,
+   "divergencia": -0.5030317211387869,
+   "leituras": [
+    {
+     "tipo": "precoLucro",
+     "justo": 37.4593881130475,
+     "recusa": null,
+     "mediana": 13.020251577953932,
+     "pares": 18,
+     "grupo": "materiais-basicos"
+    },
+    {
+     "tipo": "precoPatrimonio",
+     "justo": 15.270410195576318,
+     "recusa": null,
+     "mediana": 0.8476523127702527,
+     "pares": 21,
+     "grupo": "materiais-basicos"
+    },
+    {
+     "tipo": "firmaEbitda",
+     "justo": 41.47152375149,
+     "recusa": null,
+     "mediana": 6.442541299664887,
+     "pares": 21,
+     "grupo": "materiais-basicos"
+    }
+   ]
+  }
+ },
+ "rastro": {
+  "transactionId": "12f0fb53-1ddb-497b-bf01-de85e542e987",
+  "timestamp": "2026-11-03T18:53:46.234Z",
+  "endpoint": "/core/valuation/UNIP6",
+  "inputPayload": {
+   "ticker": "UNIP6",
+   "asOf": "2026-09-14T00:00:00.000",
+   "marketPrice": 57.04,
+   "capm": {
+    "riskFreeRate": 0.140467,
+    "beta": 0.8203,
+    "marketPremium": 0.012108,
+    "betaSource": "shrunk",
+    "premiumSource": "impliedNormalized"
+   },
+   "marginOfSafety": 0,
+   "projectionYears": 10,
+   "perpetualGrowthCap": 0.06825,
+   "fundamentalsPeriods": 17,
+   "fundamentalsOmitted": 11,
+   "fundamentals": [
+    {
+     "fiscalPeriodEnd": "2021-12-31T00:00:00.000Z",
+     "netIncome": 2003833000,
+     "ebitda": 3163841000,
+     "operatingCashFlow": 2289901000,
+     "freeCashFlow": 875724030,
+     "sharesOutstanding": 113173264,
+     "marketCap": 5771836464,
+     "totalDebt": 1474829000,
+     "netDebt": -147620000,
+     "effectiveTaxRate": 0.3398,
+     "enterpriseToEbitda": 8.7587,
+     "bookValuePerShare": 22.35
+    },
+    {
+     "fiscalPeriodEnd": "2022-12-31T00:00:00.000Z",
+     "netIncome": 1334303000,
+     "ebitda": 2627552000,
+     "operatingCashFlow": 2036327000,
+     "freeCashFlow": 1977513000,
+     "sharesOutstanding": 113173264,
+     "marketCap": 5771836464,
+     "totalDebt": 1391746000,
+     "netDebt": -22223000,
+     "effectiveTaxRate": 0.3498,
+     "enterpriseToEbitda": 8.7587,
+     "bookValuePerShare": 22.67
+    },
+    {
+     "fiscalPeriodEnd": "2023-12-31T00:00:00.000Z",
+     "netIncome": 791273000,
+     "ebitda": 1226611000,
+     "operatingCashFlow": 1065124000,
+     "freeCashFlow": 857452030,
+     "sharesOutstanding": 113173264,
+     "marketCap": 5771836464,
+     "totalDebt": 2061387000,
+     "netDebt": -76654000,
+     "effectiveTaxRate": 0.3211,
+     "enterpriseToEbitda": 8.7587,
+     "bookValuePerShare": 23.57
+    },
+    {
+     "fiscalPeriodEnd": "2024-12-31T00:00:00.000Z",
+     "netIncome": 557118000,
+     "ebitda": 947997000,
+     "operatingCashFlow": 692727000,
+     "freeCashFlow": 70093000,
+     "sharesOutstanding": 113173264,
+     "marketCap": 5771836464,
+     "totalDebt": 2317982000,
+     "netDebt": 733200000,
+     "effectiveTaxRate": 0.2894,
+     "enterpriseToEbitda": 8.7587,
+     "bookValuePerShare": 24.86
+    },
+    {
+     "fiscalPeriodEnd": "2025-12-31T00:00:00.000Z",
+     "netIncome": 481744000,
+     "ebitda": 1109677000,
+     "operatingCashFlow": 1109123000,
+     "freeCashFlow": 297604000,
+     "sharesOutstanding": 113173264,
+     "marketCap": 5771836464,
+     "totalDebt": 3526567000,
+     "netDebt": 2452344000,
+     "effectiveTaxRate": 0.2574,
+     "enterpriseToEbitda": 8.7587,
+     "bookValuePerShare": 16.05
+    },
+    {
+     "fiscalPeriodEnd": "2026-06-30T00:00:00.000Z",
+     "netIncome": 321138000,
+     "ebitda": 1080380000,
+     "operatingCashFlow": 1235674000,
+     "freeCashFlow": null,
+     "sharesOutstanding": 113173264,
+     "marketCap": 5771836464,
+     "totalDebt": 3702547000,
+     "netDebt": 2331252000,
+     "effectiveTaxRate": 0.3966,
+     "enterpriseToEbitda": 8.7587,
+     "bookValuePerShare": 17.77
+    }
+   ],
+   "scenarioTranslation": "umPorUm",
+   "sectorKey": "materiais-basicos",
+   "industry": "Químicos / Químicos Diversos",
+   "isDistressed": false,
+   "stateControlled": false,
+   "inflation": 0.049645,
+   "terminalRiskFreeRate": 0.1438,
+   "riskFreeCurve": {
+    "referenceDate": "14/09/2026",
+    "vertices": [
+     {
+      "years": 0.2937,
+      "rate": 0.1359
+     },
+     {
+      "years": 1.2897,
+      "rate": 0.1368
+     },
+     {
+      "years": 2.2738,
+      "rate": 0.1397
+     },
+     {
+      "years": 4.2619,
+      "rate": 0.1423
+     },
+     {
+      "years": 5.2619,
+      "rate": 0.1433
+     },
+     {
+      "years": 6.2619,
+      "rate": 0.1436
+     },
+     {
+      "years": 8.2421,
+      "rate": 0.1438
+     },
+     {
+      "years": 10.2341,
+      "rate": 0.1438
+     }
+    ]
+   },
+   "officialShares": {
+    "total": 113173265,
+    "asOf": "14/09/2026"
+   },
+   "declaredSharesPerUnit": null,
+   "unleveredBeta": 0.7858,
+   "betaWindowYears": 5,
+   "dividendsInBeta": 19,
+   "creditReferenceRiskFree": 0.140467,
+   "minorityEquityValue": null,
+   "prices": {
+    "points": 1248,
+    "first": "14/09/2021",
+    "last": "14/09/2026"
+   },
+   "peerMultiples": {
+    "asOf": "14/09/2026",
+    "precoLucro": {
+     "median": 13.0203,
+     "peers": 18,
+     "group": "materiais-basicos"
+    },
+    "precoPatrimonio": {
+     "median": 0.8477,
+     "peers": 21,
+     "group": "materiais-basicos"
+    },
+    "firmaEbitda": {
+     "median": 6.4425,
+     "peers": 21,
+     "group": "materiais-basicos"
+    }
+   },
+   "overrides": {}
+  },
+  "outputPayload": {
+   "status": "ok",
+   "ticker": "UNIP6",
+   "model": "DCF por fluxo da firma",
+   "fairValue": 75.38,
+   "safetyPrice": 75.38,
+   "marketPrice": 57.04,
+   "upside": 0.321529,
+   "discountRate": 0.140954,
+   "marginOfSafety": 0,
+   "isUndervalued": true,
+   "scenarioMode": "discrete",
+   "discreteScenarios": {
+    "bear": 60.7,
+    "base": 75.38,
+    "bull": 98.32
+   },
+   "diagnostics": {
+    "terminalShare": 0.3371,
+    "equityShare": 0.7833,
+    "baseFactor": 2.4291,
+    "growthIdentified": false,
+    "moatApplied": true,
+    "caveats": [
+     "crescimentoNaoIdentificado",
+     "baseNormalizadaForte"
+    ],
+    "terminalRetainedSpread": 0.000001,
+    "growthRate": 0.049645,
+    "terminalReturnOnCapital": 0.146903,
+    "firmTaxRate": 0.315645,
+    "returnOnCapital": 0.300185,
+    "terminalDiscountRate": 0.146903,
+    "terminalCostOfEquity": 0.155273,
+    "costOfEquity": 0.150399,
+    "terminalExcessShare": null,
+    "impliedTerminalReturn": 0.255507,
+    "terminalEquityShare": 0.7623,
+    "growthPath": [
+     0.049645,
+     0.049645,
+     0.049645,
+     0.049645,
+     0.049645,
+     0.049645,
+     0.049645,
+     0.049645,
+     0.049645,
+     0.049645
+    ],
+    "retentionPath": [
+     0.165382,
+     0.175432,
+     0.186343,
+     0.198853,
+     0.212636,
+     0.229664,
+     0.249983,
+     0.273563,
+     0.302559,
+     0.337946
+    ]
+   },
+   "priceVolatility": 0.331617,
+   "triangulation": {
+    "asOf": "14/09/2026",
+    "consolidated": 37.46,
+    "divergence": -0.503,
+    "readings": [
+     {
+      "kind": "precoLucro",
+      "fairValuePerShare": 37.46,
+      "refusal": null,
+      "peer": {
+       "median": 13.0203,
+       "peers": 18,
+       "group": "materiais-basicos"
+      }
+     },
+     {
+      "kind": "precoPatrimonio",
+      "fairValuePerShare": 15.27,
+      "refusal": null,
+      "peer": {
+       "median": 0.8477,
+       "peers": 21,
+       "group": "materiais-basicos"
+      }
+     },
+     {
+      "kind": "firmaEbitda",
+      "fairValuePerShare": 41.47,
+      "refusal": null,
+      "peer": {
+       "median": 6.4425,
+       "peers": 21,
+       "group": "materiais-basicos"
+      }
+     }
+    ]
+   },
+   "warnings": [
+    "O último ponto da série é 2026 anualizado: o acumulado de 6 meses do último ITR vezes 2.00, com o balanço da data dele. A anualização supõe que o resto do ano repete o acumulado, sem correção de sazonalidade, e multiplica junto o que for não recorrente.",
+    "O retorno sobre o capital do exercício mais recente (12.4%) destoa do retorno típico da empresa, a mediana dos 8 exercícios anteriores (30.0%): a base foi normalizada para cima, partindo do lucro que a empresa teria rendendo o típico — fator de 2.43x sobre o lucro publicado.",
+    "O lucro ou o EBITDA recuou 59.4% no triênio, acima do máximo de 50.0%, mas o ativo é de setor de commodity: ali a queda entre pico e vale é oscilação do preço do insumo, não quebra de modelo de negócio. A trava de saúde não se aplica à base, e a convergência ao ciclo opera nos dois sentidos. A vantagem competitiva residual não tem trava de saúde desde a decisão 36: quem decide é a persistência medida do excedente.",
+    "Crescimento fundamental não identificável: os dois estimadores discordam em 7.5 pontos percentuais (4.0 erros-padrão), acima do que a série sustenta. Adotada a inflação de 5.0%, que a retenção observada de 17.7% financia.",
+    "A despesa financeira de UNIP6 não está publicada: a cobertura de juros não é medível, e o prêmio de crédito sai só da alavancagem (2.16x de dívida líquida sobre EBITDA). Custo da dívida adotado: 16.4% a.a.",
+    "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 14/09/2026: 13.7% a.a. no primeiro ano, 14.4% a.a. no ano 10 e 14.4% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
+    "O lucro operacional é tributado à alíquota estrutural do ativo, 31.6%, e não aos 34.0% estatutários que a fonte embute em todo NOPAT publicado. É a mediana dos exercícios, não a do último: JCP, incentivo regional e lucro presumido são regime no Brasil, e regime é o que se projeta. O escudo fiscal do WACC continua na estatutária, que é a alíquota da margem.",
+    "O custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz: o WACC vai de 14.1% no primeiro ano a 14.7% no ano 10, e a perpetuidade é descontada a 14.7%. A participação do capital próprio sai de 78.5% para 76.2% no mesmo intervalo — e é justamente o que a taxa única não enxergava. Ponto fixo em 28 iterações, e o veredito da perpetuidade fechou em 5 passes.",
+    "Vantagem competitiva residual: retorno do ciclo de 30.0% contra custo de capital de equilíbrio de 14.7%, com excedente decaindo 76.5% ao ano — persistência medida na própria série do ativo, sobre 15 pares. Em 10 anos sobram 0.0% do excedente, e o retorno terminal fica em 14.7% em vez do estado estacionário. O valor terminal volta a depender do crescimento perpétuo.",
+    "A leitura por múltiplos de pares diverge do fluxo descontado: R$ 37.46 contra R$ 75.38, -50.3% de diferença. Saiu de P/L 13.02× (18 pares, materiais-basicos); P/VP 0.85× (21 pares, materiais-basicos); EV/EBITDA 6.44× (21 pares, materiais-basicos). **O preço justo continua sendo o do fluxo descontado** — a segunda leitura é teste de sanidade sobre o nível, e a divergência fica declarada em vez de reconciliada."
+   ]
+  },
+  "executionTimeMs": 4,
+  "calculations": [
+   {
+    "formulaName": "Razão da unidade negociada",
+    "latexRepresentation": "u = \\mathrm{round}\\!\\left(\\frac{N_{ações} \\cdot P_{mkt}}{VM}\\right)",
+    "mappedVariables": {
+     "N_ações": 113173264,
+     "P_mkt (R$)": 57.04,
+     "VM (R$)": 5771836464,
+     "u_declarada": null,
+     "u_medida": 1
+    },
+    "intermediateSteps": [
+     "Passo 1: razão medida → 113173264 × 57.04 ÷ 5771836464 = 1.1184",
+     "Passo 2: arredondamento e teste de plausibilidade (1 ≤ u ≤ 10, desvio relativo ≤ 5%) → u medida = 1",
+     "Passo 3: sem composição declarada para este papel; vale a razão medida, e a avaliação declara que ela foi inferida"
+    ],
+    "finalValue": 1,
+    "unit": "ações por papel negociado"
+   },
+   {
+    "formulaName": "Custo do capital próprio (CAPM)",
+    "latexRepresentation": "K_e = R_f + \\beta \\cdot (R_m - R_f)",
+    "mappedVariables": {
+     "R_f (% a.a.)": 14.05,
+     "beta": 0.8203,
+     "R_m - R_f (% a.a.)": 1.21,
+     "origem do prêmio": "impliedNormalized",
+     "origem do beta": "shrunk",
+     "retorno do beta": "total, 19 proventos reinvestidos"
+    },
+    "intermediateSteps": [
+     "Passo 0: o prêmio de mercado → 1.2%, a média de dez anos do prêmio implícito no preço da bolsa: o retorno que o valor de mercado das listadas embute, dado o dinheiro que elas distribuem, menos o prefixado de dez anos (decisão 142)",
+     "Passo 1: prêmio ajustado ao risco sistemático → 0.8203 × 1.2% = 1.0%",
+     "Passo 2: soma à taxa livre de risco → 14.0% + 1.0% = 15.0%",
+     "Passo 3: este é o K_e sobre o CDI de hoje — o do WACC do dia e o do retorno esperado da tela de metas. O desconto de cada ano usa a taxa livre de risco daquele ano, da curva do Tesouro, e a alavancagem que a avaliação produz: ver a estrutura a termo e o desconto do período explícito."
+    ],
+    "finalValue": 15.04,
+    "unit": "% a.a."
+   },
+   {
+    "formulaName": "Contagem de papéis da ponte",
+    "latexRepresentation": "N_{ponte} = \\max\\!\\left(\\frac{VM}{P_{mkt}},\\; \\frac{N_{conciliado}}{u}\\right)\\;\\;\\text{na divergência};\\;\\; \\frac{VM}{P_{mkt}}\\;\\;\\text{fora dela}",
+    "mappedVariables": {
+     "VM (R$)": 5771836464,
+     "P_mkt (R$)": 57.04,
+     "N pelo mercado": 101189279,
+     "N pelas demonstrações": 113173264,
+     "divergência (x)": 1.118,
+     "N oficial da B3, líquido de tesouraria": 111622153
+    },
+    "intermediateSteps": [
+     "Passo 1: contagem implícita no valor de mercado → 5771836464 ÷ 57.04 = 101189279",
+     "Passo 2: contagem conciliada pelas demonstrações, na unidade negociada → 113173264",
+     "Passo 3: as duas concordam dentro da banda de 1.5x; adotada a do mercado → contagem oficial da B3, líquida de tesouraria",
+     "Passo 4: registro oficial da B3 de 14/09/2026 → adotado; ele arbitra a divergência da fonte"
+    ],
+    "finalValue": 111622153,
+    "unit": "papéis na unidade negociada"
+   },
+   {
+    "formulaName": "Roteamento por porta",
+    "latexRepresentation": "\\text{via} = f(\\text{setor},\\, D_{bruta},\\, \\Pr[NOPAT > 0])",
+    "mappedVariables": {
+     "setor": "materiais-basicos",
+     "dívida bruta (R$)": 3702547000,
+     "Porta 1 (financeira)": "não",
+     "Porta 3 (fluxo sustentado)": "sim"
+    },
+    "intermediateSteps": [
+     "Porta 1: setor financeiro → segue para a Porta 3",
+     "Porta 3: NOPAT positivo em ao menos 60.0% dos exercícios → via da firma"
+    ],
+    "finalValue": 1,
+    "unit": "via da firma"
+   },
+   {
+    "formulaName": "Base do fluxo: normalização pelo ciclo",
+    "latexRepresentation": "fluxo_0 = NOPAT_{atual} \\cdot \\frac{r_{ciclo}}{r_{atual}}",
+    "mappedVariables": {
+     "retorno atual (% a.a.)": 12.36,
+     "mediana do ciclo (% a.a.)": 30.02,
+     "inclinação da tendência (p.p./ano)": 1.35,
+     "t de Newey-West": 0.7,
+     "capital externo / base (Φ)": 0.57,
+     "guarda 1 — tendência": "não domina",
+     "guarda 3 — desvio do ciclo": "destoa",
+     "precedência do ciclo (setor cíclico)": true,
+     "fator bruto": 2.429,
+     "fator saturado": false,
+     "queda no triênio (%)": 59.42,
+     "teto travado pela saúde": false,
+     "isento da trava por setor cíclico": true,
+     "resultado da normalização": "paraCima",
+     "razão último ÷ típico": 0.412,
+     "desvios robustos": 0.95
+    },
+    "intermediateSteps": [
+     "Guarda 1 — tendência: sem tendência",
+     "Guarda 2 — comparabilidade (declara, não barra): expansão orgânica, base comparável",
+     "Guarda 3 — desvio do ciclo: o exercício destoa",
+     "Base normalizada por 2.43x (para cima): o lucro publicado vezes o fator, já no ano zero; o que converge ao longo da projeção é o retorno sobre o capital, até o custo do capital",
+     "Saúde operacional: queda de 59.4% no triênio, mas o setor é cíclico — isento da trava na Porta 2a. A vantagem residual não tem trava de saúde (decisão 36; item B39)"
+    ],
+    "finalValue": 2.429,
+    "unit": "fator sobre o lucro observado",
+    "sample": {
+     "title": "Retorno sobre o capital investido, por exercício",
+     "points": [
+      {
+       "label": "2018",
+       "value": 37.63,
+       "definesResult": false,
+       "isObserved": false
+      },
+      {
+       "label": "2019",
+       "value": 16.87,
+       "definesResult": false,
+       "isObserved": false
+      },
+      {
+       "label": "2020",
+       "value": 31.12,
+       "definesResult": false,
+       "isObserved": false
+      },
+      {
+       "label": "2021",
+       "value": 150.51,
+       "definesResult": false,
+       "isObserved": false
+      },
+      {
+       "label": "2022",
+       "value": 75.18,
+       "definesResult": false,
+       "isObserved": false
+      },
+      {
+       "label": "2023",
+       "value": 28.92,
+       "definesResult": true,
+       "isObserved": false
+      },
+      {
+       "label": "2024",
+       "value": 18.04,
+       "definesResult": false,
+       "isObserved": false
+      },
+      {
+       "label": "2025",
+       "value": 15.31,
+       "definesResult": false,
+       "isObserved": false
+      },
+      {
+       "label": "2026",
+       "value": 12.36,
+       "definesResult": false,
+       "isObserved": true
+      }
+     ],
+     "summary": 30.02,
+     "summaryLabel": "mediana do ciclo",
+     "lowerBound": null,
+     "upperBound": null,
+     "selected": 30.02,
+     "unit": "%"
+    },
+    "explanation": [
+     "Por que normalizar: um ano só pode ter sido um pico ou um vale, e o preço justo é proporcional ao lucro de partida. O motor compara o retorno sobre o capital investido do último exercício com o retorno típico da empresa — a mediana dos 8 exercícios anteriores, de 2018 a 2025 — e só parte de outro lucro quando os dois destoam.",
+     "Para cima: em 2026 a empresa rendeu 12.4%, abaixo do típico de 30.0%. O motor lê o último ano como um vale e parte do lucro que a empresa de hoje teria rendendo o típico: fator de 2.43x sobre o lucro publicado.",
+     "O teste de destoar: o último ano sobre o típico dá 0.41 (o normal vai de 0.75 a 1.33), e a distância entre os dois é de 0.95 desvios típicos da janela (o normal vai até 1.5). Destoou pela razão.",
+     "A conta: R$ 527.6 milhões × 2.43 = R$ 1281.5 milhões — o mesmo que o capital com que a empresa começou 2026 rendendo o típico de 30.0%.",
+     "O lucro ou o EBITDA caiu 59.4% em 3 anos, mas em commodity a queda entre pico e vale é do preço do insumo, e não mudança de patamar: a trava que impede subir não se aplica (decisão 30)."
+    ]
+   },
+   {
+    "formulaName": "Crescimento explícito",
+    "latexRepresentation": "g = \\mathrm{mediana}\\left(\\frac{\\Delta \\text{base}_t}{\\text{base}_{t-1}}\\right)",
+    "mappedVariables": {
+     "g pela mediana (% a.a.)": 7.33,
+     "g pela regressão (% a.a.)": 14.87,
+     "erro-padrão de ĝ (p.p.)": 1.86,
+     "discordância D": 4.05,
+     "D crítico": 1.76,
+     "retenção observada (%)": 17.74
+    },
+    "intermediateSteps": [
+     "Passo 1: precisão e concordância → os dois estimadores discordam em 7.5 pontos percentuais (4.0 erros-padrão), acima do que a série sustenta",
+     "Passo 2: a inflação de 5.0% exigiria reter 16.5% contra 17.7% observados → âncora aceita",
+     "Origem adotada: âncora de inflação, financiável pela retenção observada"
+    ],
+    "finalValue": 4.96,
+    "unit": "% a.a."
+   },
+   {
+    "formulaName": "Custo médio ponderado de capital (WACC)",
+    "latexRepresentation": "WACC = \\frac{E}{E+D_{liq}}\\,K_e + \\frac{D_{bruta}}{E+D_{liq}}\\,K_d\\,(1 - t) - \\frac{C}{E+D_{liq}}\\,R_f\\,(1 - \\tau)",
+    "mappedVariables": {
+     "E (R$)": 6366927607.12,
+     "D líquida (R$)": 2331252000,
+     "D bruta (R$)": 3702547000,
+     "C — caixa (R$)": 1371295000,
+     "K_e (% a.a.)": 15.04,
+     "K_d (% a.a.)": 16.45,
+     "R_f (% a.a.)": 14.05,
+     "t (%)": 34
+    },
+    "intermediateSteps": [
+     "Passo 1: participação do capital próprio → 6366927607.12 ÷ 8698179607.12 = 0.732",
+     "Passo 2: participação da dívida bruta → 3702547000 ÷ 8698179607.12 = 0.4257; e do caixa → 1371295000 ÷ 8698179607.12 = 0.1577. A diferença das duas é a participação da dívida líquida, 0.268 — o que a separação muda é a **taxa** de cada metade, e não o peso",
+     "Passo 3: K_d = R_f + prêmio sintético → prêmio pela alavancagem (2.16× dívida líquida ÷ EBITDA) = 2.4%; a despesa financeira não está publicada, e a cobertura sai da conta → 14.0% + 2.4% = 16.4%. O observado não entra na taxa",
+     "Passo 4: benefício fiscal da dívida → 16.4% × (1 − 0.34) = 10.9%",
+     "Passo 5: o caixa rende a taxa livre de risco, tributada → 14.0% × (1 − 0.34) = 9.3%. Soma ponderada → 0.732 × 15.0% + 0.4257 × 10.9% − 0.1577 × 9.3% = 11.0% + 3.2% = 14.2%",
+     "Passo 6: WACC acima da taxa livre de risco; nenhum piso aplicado"
+    ],
+    "finalValue": 14.17,
+    "unit": "% a.a."
+   },
+   {
+    "formulaName": "Crescimento na perpetuidade",
+    "latexRepresentation": "g_\\infty = \\mathrm{clamp}\\big(\\min(g,\\, g_{eco}),\\, -5\\%,\\, g_{eco}\\big)",
+    "mappedVariables": {
+     "g (% a.a.)": 4.96,
+     "g_eco nominal (% a.a.)": 6.83
+    },
+    "intermediateSteps": [
+     "Passo 1: menor entre o crescimento explícito e o da economia → min(5.0%, 6.8%) = 5.0%",
+     "Passo 2: confinado a [-5.0%, 6.8%] — uma empresa não cresce acima da economia para sempre, nem encolhe mais de 5% ao ano para sempre (decisão 56) → 5.0%. O teto é **nominal**: composto do crescimento real da atividade com a inflação observada, porque a taxa de desconto também é nominal, por sair do CDI. Não é o PIB real."
+    ],
+    "finalValue": 4.96,
+    "unit": "% a.a."
+   },
+   {
+    "formulaName": "Estrutura a termo da taxa de desconto",
+    "latexRepresentation": "R_{f,t} = f_{t-1,\\,t} \\quad;\\quad r_t = C(R_{f,t})\\quad;\\quad r_\\infty = C(f_{N,\\,N+1})",
+    "mappedVariables": {
+     "curva": "prefixados do Tesouro de 14/09/2026",
+     "R_f do ano 1 (% a.a.)": 13.67,
+     "R_f do ano N (% a.a.)": 14.38,
+     "R_f da perpetuidade (% a.a.)": 14.38,
+     "r_1 (% a.a.)": 13.83,
+     "r_N (% a.a.)": 14.47,
+     "r_inf (% a.a.)": 14.47,
+     "N (anos)": 10
+    },
+    "intermediateSteps": [
+     "Passo 1: a taxa livre de risco de cada ano é o forward de um ano da curva dos prefixados de 14/09/2026 → ano 1: 13.7%; ano 2: 14.2%; ano 3: 14.5%; ano 4: 14.5%; ano 5: 14.7%; ano 6: 14.6%; ano 7: 14.5%; ano 8: 14.4%; ano 9: 14.4%; ano 10: 14.4%",
+     "Passo 2: o custo de capital de cada ano é remontado sobre ela, com o beta, o prêmio e a estrutura de capital de hoje → ano 1: 13.8%; ano 2: 14.3%; ano 3: 14.6%; ano 4: 14.6%; ano 5: 14.8%; ano 6: 14.7%; ano 7: 14.5%; ano 8: 14.5%; ano 9: 14.5%; ano 10: 14.5%",
+     "Passo 3: a perpetuidade usa o forward depois do ano 10, 14.4%, e é descontada a 14.5%",
+     "Passo 4: quando o custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz, este caminho é o ponto de partida, e o resolvido o substitui — ver o desconto do período explícito"
+    ],
+    "finalValue": 14.47,
+    "unit": "% a.a."
+   },
+   {
+    "formulaName": "Vantagem competitiva residual na perpetuidade",
+    "latexRepresentation": "ROIC_\\infty = WACC_\\infty + \\varphi^{N}(ROIC_{ciclo} - WACC_\\infty)",
+    "mappedVariables": {
+     "ROIC do ciclo (% a.a.)": 30.02,
+     "WACC de equilíbrio (% a.a.)": 14.69,
+     "excedente do ciclo (p.p.)": 15.33,
+     "Phi": 0.57,
+     "exercícios": 17,
+     "phi cru (AR(1))": 0.2347,
+     "phi aplicado": 0.2347,
+     "pares na regressão": 15,
+     "lambda": 0,
+     "condição que barrou": "nenhuma",
+     "condições que barraram": []
+    },
+    "intermediateSteps": [
+     "Passo 1: crescimento orgânico? Phi = 0.57 <= 0.6",
+     "Passo 2: histórico longo? 17 exercícios contra 8 exigidos",
+     "Passo 3: excedente positivo? ROIC do ciclo de 30.0% contra WACC de equilíbrio de 14.7%",
+     "Passo 4: persistência do excedente por AR(1) sobre 15 pares — phi cru 0.2347, confinado em 0.2347; lambda = phi^N = 0",
+     "Passo 5: há excedente e ele persiste — ROIC_inf = 14.7%, e o valor terminal volta a depender de g_inf, que é o preço declarado da exceção"
+    ],
+    "finalValue": 14.69,
+    "unit": "% a.a."
+   },
+   {
+    "formulaName": "Projeção do fluxo da firma (NOPAT)",
+    "latexRepresentation": "FCFF_t = NOPAT_t\\,(1 - b_t)\\quad;\\quad NOPAT_t = NOPAT_{t-1}(1 + g_t)\\quad;\\quad b_t = g_t / ROIC_t\\quad;\\quad ROIC_t \\to WACC_t",
+    "mappedVariables": {
+     "NOPAT_0": 1281502688.93,
+     "g_1 (% a.a.)": 4.96,
+     "g_N (% a.a.)": 4.96,
+     "ROIC_1 (% a.a.)": 30.02,
+     "WACC_1 (% a.a.)": 14.1,
+     "WACC_N (% a.a.)": 14.69,
+     "N (anos)": 10
+    },
+    "intermediateSteps": [
+     "Passo 0: o crescimento decai em linha reta até o perpétuo, e o retorno sobre o capital converge do observado ao WACC do ano, que sai do caminho ano a ano — o resolvido contra a alavancagem, ou o montado sobre a curva do Tesouro (ver a estrutura a termo). A retenção b = g ÷ ROIC é o que a firma reinveste para crescer g; o resto é o fluxo livre. O WACC aqui não desconta nada: ele é o destino do retorno, e o desconto é do fluxo do acionista, no passo seguinte (decisão 102).",
+     "Passo 1: ano 1 → g = 5.0%, ROIC = 30.0%, retenção = 16.5%; NOPAT 1345123140.85 × (1 − retenção) → fluxo da firma 1122664196.16",
+     "Passo 2: ano 2 → g = 5.0%, ROIC = 28.3%, retenção = 17.5%; NOPAT 1411902042.56 × (1 − retenção) → fluxo da firma 1164208630.98",
+     "Passo 3: ano 3 → g = 5.0%, ROIC = 26.6%, retenção = 18.6%; NOPAT 1481996195.92 × (1 − retenção) → fluxo da firma 1205836712.21",
+     "Passo 4: ano 4 → g = 5.0%, ROIC = 25.0%, retenção = 19.9%; NOPAT 1555570187.26 × (1 − retenção) → fluxo da firma 1246240935.4",
+     "Passo 5: ano 5 → g = 5.0%, ROIC = 23.3%, retenção = 21.3%; NOPAT 1632796773.8 × (1 − retenção) → fluxo da firma 1285605648.86",
+     "Passo 6: ano 6 → g = 5.0%, ROIC = 21.6%, retenção = 23.0%; NOPAT 1713857289.35 × (1 − retenção) → fluxo da firma 1320245695.35",
+     "Passo 7: ano 7 → g = 5.0%, ROIC = 19.9%, retenção = 25.0%; NOPAT 1798942070.07 × (1 − retenção) → fluxo da firma 1349237240.76",
+     "Passo 8: ano 8 → g = 5.0%, ROIC = 18.1%, retenção = 27.4%; NOPAT 1888250901.38 × (1 − retenção) → fluxo da firma 1371694819.65",
+     "Passo 9: ano 9 → g = 5.0%, ROIC = 16.4%, retenção = 30.3%; NOPAT 1981993487.12 × (1 − retenção) → fluxo da firma 1382323261.98",
+     "Passo 10: ano 10 → g = 5.0%, ROIC = 14.7%, retenção = 33.8%; NOPAT 2080389941.88 × (1 − retenção) → fluxo da firma 1377330832.55"
+    ],
+    "finalValue": 1377330832.5459325,
+    "unit": "R$"
+   },
+   {
+    "formulaName": "Fluxo do acionista e desconto ao K_e (período explícito)",
+    "latexRepresentation": "FCFE_t = FCFF_t - S_t\\quad;\\quad S_t = D^b_{t-1} K_{d,t}(1-\\tau) - C_{t-1} R_{f,t}(1-\\tau) - D_{t-1}\\,g_t\\quad;\\quad VP = \\sum_{t=1}^{N} \\frac{FCFE_t\\,\\sqrt{1 + k_t}}{\\prod_{s=1}^{t}(1 + k_s)},\\; k_t = K_{e,t}",
+    "mappedVariables": {
+     "K_e,1 (% a.a.)": 14.8,
+     "K_e,N (% a.a.)": 15.53,
+     "τ (escudo fiscal)": 0.34,
+     "N (anos)": 10
+    },
+    "intermediateSteps": [
+     "Passo 0: o acionista recebe o fluxo da firma menos o serviço da dívida — o juro da dívida bruta depois do imposto, menos o que o caixa rende depois do imposto, menos a dívida nova que mantém a alavancagem crescendo a g. O resultado é descontado ao custo do capital próprio de cada ano, e não ao WACC.",
+     "Passo 0b: o caixa do exercício chega ao longo do ano, e não no último dia dele. Cada fluxo é levantado por raiz de (1 + K_e do ano) — a convenção de meio de ano da decisão 48.",
+     "Passo 1: ano 1 → fluxo da firma 1122664196.16 − serviço da dívida 153278655.27 = fluxo do acionista 969385540.89; K_e = 14.8%, fator acumulado 1.147958, levantamento 1.071428 → valor presente 904760130.15",
+     "Passo 2: ano 2 → fluxo da firma 1164208630.98 − serviço da dívida 168829888.03 = fluxo do acionista 995378742.95; K_e = 15.3%, fator acumulado 1.323501, levantamento 1.07374 → valor presente 807538304.16",
+     "Passo 3: ano 3 → fluxo da firma 1205836712.21 − serviço da dívida 182560943.39 = fluxo do acionista 1023275768.83; K_e = 15.6%, fator acumulado 1.53011, levantamento 1.075224 → valor presente 719066853.55",
+     "Passo 4: ano 4 → fluxo da firma 1246240935.4 − serviço da dívida 192486717.12 = fluxo do acionista 1053754218.28; K_e = 15.7%, fator acumulado 1.769759, levantamento 1.075464 → valor presente 640355318.65",
+     "Passo 5: ano 5 → fluxo da firma 1285605648.86 − serviço da dívida 205199871.23 = fluxo do acionista 1080405777.63; K_e = 15.8%, fator acumulado 2.049985, levantamento 1.076263 → valor presente 567223898.46",
+     "Passo 6: ano 6 → fluxo da firma 1320245695.35 − serviço da dívida 213102229.9 = fluxo do acionista 1107143465.45; K_e = 15.7%, fator acumulado 2.372244, levantamento 1.075733 → valor presente 502052152.27",
+     "Passo 7: ano 7 → fluxo da firma 1349237240.76 − serviço da dívida 221258775.8 = fluxo do acionista 1127978464.97; K_e = 15.6%, fator acumulado 2.742429, levantamento 1.075197 → valor presente 442235296.37",
+     "Passo 8: ano 8 → fluxo da firma 1371694819.65 − serviço da dívida 231820648.36 = fluxo do acionista 1139874171.29; K_e = 15.6%, fator acumulado 3.169907, levantamento 1.075117 → valor presente 386603636.83",
+     "Passo 9: ano 9 → fluxo da firma 1382323261.98 − serviço da dívida 242242179.04 = fluxo do acionista 1140081082.94; K_e = 15.5%, fator acumulado 3.662558, levantamento 1.074902 → valor presente 334595575.09",
+     "Passo 10: ano 10 → fluxo da firma 1377330832.55 − serviço da dívida 253903964.4 = fluxo do acionista 1123426868.15; K_e = 15.5%, fator acumulado 4.231254, levantamento 1.074836 → valor presente 285376372.75",
+     "Passo 11: soma dos valores presentes do período explícito → 5589807538.27"
+    ],
+    "finalValue": 5589807538.274008,
+    "unit": "R$"
+   },
+   {
+    "formulaName": "Valor terminal (Gordon com reinvestimento), convertido para o acionista",
+    "latexRepresentation": "VT = \\frac{L_{N+1}\\,(1 - b_\\infty)}{r_\\infty - g_\\infty}\\quad;\\quad FCFF_{N+1} = VT^{\\infty}_{firma}\\,(r_\\infty - g_\\infty)\\quad;\\quad FCFE_{N+1} = FCFF_{N+1} - S_{N+1}\\quad;\\quad VT_{acionista} = \\frac{FCFE_{N+1}}{K_{e,\\infty} - g_\\infty}\\quad;\\quad VP = \\frac{VT_{acionista}\\,\\sqrt{1 + K_{e,\\infty}}}{\\prod_{s=1}^{N}(1+K_{e,s})}",
+    "mappedVariables": {
+     "NOPAT_N": 2080389941.88,
+     "g_inf (% a.a.)": 4.96,
+     "r_inf = WACC de equilíbrio (% a.a.)": 14.69,
+     "K_e,inf (% a.a.)": 15.53,
+     "ROIC_inf (% a.a.)": 14.69,
+     "ROIC implícito do instalado (% a.a.)": 25.55,
+     "N (anos)": 10,
+     "M (anos de contrato além de N)": null
+    },
+    "intermediateSteps": [
+     "Passo 1: valor terminal da firma no ano 10, ao WACC de equilíbrio — spread da perpetuidade → 14.7% − 5.0% = 9.7%; retenção perpétua = 33.8% → 14864737711.17",
+     "Passo 2: o fluxo da firma do ano N+1 que essa perpetuidade supõe → × (14.7% − 5.0%) = 1445709081.15",
+     "Passo 3: menos o serviço da dívida do ano N+1 → 1445709081.15 − 266509076.42 = fluxo do acionista 1179200004.73",
+     "Passo 4: capitalizado ao K_e de equilíbrio menos o crescimento perpétuo → 1179200004.73 ÷ (15.5% − 5.0%) = 11163740759.01",
+     "Passo 5: trazido a presente pelo fator acumulado do K_e 4.231254, levantado por 1.074836 de meio de ano → 2835848006.09",
+     "Passo 6: participação do valor terminal no capital próprio → 33.7%"
+    ],
+    "finalValue": 2835848006.0896673,
+    "unit": "R$"
+   },
+   {
+    "formulaName": "Capital próprio pelo fluxo do acionista derivado",
+    "latexRepresentation": "P_0 = \\frac{VP_{explícito} + VP(VT_{acionista}) - M}{N_{papéis}}",
+    "mappedVariables": {
+     "VP do fluxo explícito do acionista (R$)": 5589807538.27,
+     "VP do terminal do acionista (R$)": 2835848006.09,
+     "minoritários M (R$)": 12045000,
+     "dívida líquida inicial D_0 (R$)": 2331252000,
+     "N_papéis": 111622153,
+     "desconto": "caminho de K_e resolvido pela realavancagem"
+    },
+    "intermediateSteps": [
+     "Passo 1: a dívida líquida de 2331252000 não é subtraída aqui — ela já saiu do fluxo, ano a ano, no serviço da dívida dos dois passos anteriores",
+     "Passo 2: valor presente do fluxo explícito → 5589807538.27",
+     "Passo 3: valor presente do terminal do acionista → 2835848006.09",
+     "Passo 4: menos a parte dos não controladores → 5589807538.27 + 2835848006.09 − 12045000 = 8413610544.36",
+     "Passo 5: divisão pelo número de papéis negociados → 8413610544.36 ÷ 111622153 = 75.38"
+    ],
+    "finalValue": 75.37581311806157,
+    "unit": "R$ por papel"
+   },
+   {
+    "formulaName": "Margem de segurança e potencial de valorização",
+    "latexRepresentation": "P_{seg} = P_0\\,(1 - s) \\quad;\\quad upside = \\frac{P_0 - P_{mkt}}{P_{mkt}}",
+    "mappedVariables": {
+     "P_0 (R$)": 75.38,
+     "s (%)": 0,
+     "P_mkt (R$)": 57.04
+    },
+    "intermediateSteps": [
+     "Passo 1: preço justo com margem de segurança → 75.38 × (1 − 0) = 75.38",
+     "Passo 2: potencial de valorização total → (75.38 − 57.04) ÷ 57.04 = 32.2%",
+     "Passo 3: veredito → o preço de mercado está abaixo do preço com margem de segurança"
+    ],
+    "finalValue": 32.15,
+    "unit": "% (total, sem prazo)"
+   }
+  ]
+ }
+}

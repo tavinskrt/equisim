@@ -31,7 +31,7 @@ import { Frozen } from './validation/frozen';
 
 export async function main(args: string[]): Promise<void> {
   const output = args.length === 0 ? 'docs/estudo/casos/dados' : args[0]!;
-  const targets = (args.length > 1 ? args.slice(1) : ['WEGE3', 'ITUB4', 'VALE3', 'SAPR11', 'RENT3']).map((s) => Ticker.parse(s));
+  const targets = (args.length > 1 ? args.slice(1) : ['WEGE3', 'ITUB4', 'UNIP6', 'SAPR11', 'RAPT4']).map((s) => Ticker.parse(s));
   const c = await Frozen.build();
   const pairs = PeerMultipleCodec.decode(readJson<JsonObject>('public/assets/mercado/multiplos_setoriais.json'));
   const bands = CalibratedBandCodec.decode(readJson<JsonObject>('public/assets/validacao/banda_calibrada.json'));

@@ -72,12 +72,18 @@ etc.) existem só para medição e testes; o aplicativo não as usa.
 
 ## 2.6 As recusas, contadas
 
-Na entrada congelada de 14/09/2026 (gabarito, montagem do aplicativo), de 376
-ativos: 191 recusados por liquidez, 35 por histórico, 2 por patrimônio negativo;
-os outros 38 recusados por falta de demonstrativo, por dado que não sustenta via
-ou por estrutura de capital. **110 avaliados** (motor de 02/10/2026): 90 pela via
-da firma, 20 pela do acionista (19 financeiras e uma não financeira). Até
-02/10/2026, cinco companhias com patrimônio positivo na CVM saíam recusadas como
-insolventes, porque a fonte de mercado devolvia a contagem do exercício zerada
-(item B47, decisão 146). Ver o [caso RENT3](../estudo/casos/rent3.md)
-para uma recusa por estrutura de capital.
+Na entrada congelada de 14/09/2026 (gabarito, montagem do aplicativo, motor de
+03/11/2026, com o ano corrente anualizado da decisão 153), de 379 ativos: 195
+recusados por liquidez, 34 por histórico, 3 por patrimônio não positivo; os
+outros 26, por estrutura de capital na via da firma (13), por fluxo do
+acionista que não sustenta capital próprio positivo (3: ANIM3, CSAN3 e RAPT4),
+por dado que não sustenta via (5) ou sem preparo, sem demonstrativo ou sem
+cotação (5). **121 avaliados**: 101 pela via da firma, 20 pela do acionista (18
+financeiras e duas não financeiras, AZEV4 e HBSA3). Na contagem anterior, com o
+motor de 02/10/2026, eram 376 ativos e 110 avaliados (90 e 20); a diferença vem
+da decisão 153 e da base reconstruída em 02/11/2026. Até 02/10/2026, cinco
+companhias com patrimônio positivo na CVM saíam recusadas como insolventes,
+porque a fonte de mercado devolvia a contagem do exercício zerada (item B47,
+decisão 146). A RENT3, que a contagem anterior recusava por estrutura de
+capital, passa a ser avaliada, e o caso de estudo da recusa passa a ser o da
+RAPT4 ([caso RAPT4](../estudo/casos/rapt4.md)).

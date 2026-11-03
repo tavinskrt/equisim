@@ -114,7 +114,8 @@ preço justo     = capital próprio ÷ papéis da ponte
   (decisão 127); **sem** resolução e com curva, idem (item B37).
 - Minoritários não negativos são subtraídos (decisão 49).
 - **Por que não `EV − D`:** com capital próprio fino, a diferença de dois
-  números grandes amplifica o erro por `1 ÷ participação` — 138 vezes na RENT3
+  números grandes amplifica o erro por `1 ÷ participação` — 138 vezes na RENT3,
+  na contagem em que ela era recusada
   (decisões 43 e 102).
 - **A identidade:** com alavancagem constante e pesos do próprio modelo,
   `FCFE_{N+1} = E·(Ke − g)`, e o terminal do acionista é o terminal da firma

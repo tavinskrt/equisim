@@ -182,11 +182,11 @@ Exemplo: se o título de 1 ano paga 13,6% e o de 2 anos paga 13,9% ao ano, o
 mercado está embutindo uma taxa de 1,139² ÷ 1,136 − 1 ≈ 14,2% para o segundo
 ano.
 
-Na data dos casos deste guia (14/09/2026), os forwards anuais eram:
+Na data dos casos deste guia (14/09/2026), os forwards anuais da curva daquele dia eram:
 
 | Ano | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | depois do 10 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| Taxa | 13,62% | 14,13% | 14,46% | 14,51% | 14,63% | 14,53% | 14,42% | 14,40% | 14,32% | 14,29% | 14,29% |
+| Taxa | 13,67% | 14,16% | 14,48% | 14,53% | 14,70% | 14,58% | 14,46% | 14,44% | 14,40% | 14,38% | 14,38% |
 
 ![Os forwards da curva do Tesouro em 14/09/2026](img/curva-forwards.svg)
 
@@ -219,7 +219,9 @@ retorno implícito = rendimento × (1 + crescimento) + crescimento
 ```
 
 Em 14/09/2026: as listadas pagaram 6,05% do valor delas nos doze meses
-anteriores, e a economia cresce 6,78% ao ano em termos nominais; o retorno que o
+anteriores, e a economia cresce 6,78% ao ano em termos nominais (o número do
+pacote do prêmio, medido em 01/10/2026; o teto de crescimento refeito em
+03/11/2026 é 6,83%, e o pacote não foi refeito); o retorno que o
 preço embute é 6,05% × 1,0678 + 6,78% = **13,24%**. O título prefixado de dez
 anos do Tesouro pagava 14,38%. O **prêmio implícito** daquele dia é a
 diferença: 13,24% − 14,38% = **−1,14%**. O mercado estava pagando menos na bolsa
@@ -271,11 +273,11 @@ ficar com aquela ação.
 Exemplo, com os números da WEG em 14/09/2026:
 
 ```
-Ke = 14,09% + 0,714 × 1,21% = 14,09% + 0,86% = 14,95%
+Ke = 14,05% + 0,714 × 1,21% = 14,05% + 0,86% = 14,91%
 ```
 
 Quem compra WEG exige, em média, 15% ao ano. Uma empresa com β = 1,3 exigiria
-14,09% + 1,57% = 15,66%. Com um prêmio pequeno, o beta muda pouco o Ke: quase
+14,05% + 1,57% = 15,62%. Com um prêmio pequeno, o beta muda pouco o Ke: quase
 todo ele é a taxa do Tesouro.
 
 **Dois usos do mesmo Ke:**
