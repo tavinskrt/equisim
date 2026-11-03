@@ -539,79 +539,79 @@
    {
     "meses": 12,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.509,
-    "a": 0.07808,
-    "b": 0.020198,
-    "zInf": -0.543877,
-    "zSup": 0.647474,
+    "coberturaForaDaAmostra": 0.511,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -0.533175,
+    "zSup": 0.655369,
     "faixa": [
-     39.73,
-     53.28
+     39.79,
+     53.32
     ]
    },
    {
     "meses": 12,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.797,
-    "a": 0.07808,
-    "b": 0.020198,
-    "zInf": -1.179494,
-    "zSup": 1.240397,
+    "coberturaForaDaAmostra": 0.79,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -1.202221,
+    "zSup": 1.230679,
     "faixa": [
-     33.97,
-     61.66
+     33.74,
+     61.44
     ]
    },
    {
     "meses": 12,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.879,
-    "a": 0.07808,
-    "b": 0.020198,
-    "zInf": -1.60803,
-    "zSup": 1.668198,
+    "coberturaForaDaAmostra": 0.876,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -1.603031,
+    "zSup": 1.690225,
     "faixa": [
      30.57,
-     68.51
+     68.8
     ]
    },
    {
     "meses": 36,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.503,
-    "a": 0.131838,
-    "b": 0.061521,
-    "zInf": -0.729987,
-    "zSup": 0.989521,
+    "coberturaForaDaAmostra": 0.526,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -0.726209,
+    "zSup": 0.970106,
     "faixa": [
-     39.4,
-     60.18
+     40,
+     60.74
     ]
    },
    {
     "meses": 36,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.787,
-    "a": 0.131838,
-    "b": 0.061521,
-    "zInf": -1.797151,
-    "zSup": 2.015375,
+    "coberturaForaDaAmostra": 0.791,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -1.778078,
+    "zSup": 2.033321,
     "faixa": [
-     30.29,
-     77.48
+     30.87,
+     78.93
     ]
    },
    {
     "meses": 36,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.881,
-    "a": 0.131838,
-    "b": 0.061521,
-    "zInf": -2.61931,
-    "zSup": 2.698896,
+    "coberturaForaDaAmostra": 0.878,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -2.579071,
+    "zSup": 2.680883,
     "faixa": [
-     24.74,
-     91.69
+     25.34,
+     92.58
     ]
    }
   ],
@@ -655,8 +655,8 @@
   }
  },
  "rastro": {
-  "transactionId": "a09c9c83-4005-4b63-8fca-4cc9795c23d2",
-  "timestamp": "2026-11-03T00:59:42.521Z",
+  "transactionId": "89cd87b2-a438-4dd8-93d8-bb93c54bfb48",
+  "timestamp": "2026-11-03T18:53:46.187Z",
   "endpoint": "/core/valuation/ITUB4",
   "inputPayload": {
    "ticker": "ITUB4",

@@ -2,7 +2,7 @@
 
 Uso, da raiz do repositório, depois de `npm run tool -- study-cases`:
 
-    python tool/tabelas_casos.py WEGE3 ITUB4 VALE3 SAPR11 RENT3
+    python tool/tabelas_casos.py WEGE3 ITUB4 UNIP6 SAPR11 RAPT4
 
 Imprime, em Markdown, as tabelas ano a ano que os casos de docs/estudo/casos/
 reproduzem.

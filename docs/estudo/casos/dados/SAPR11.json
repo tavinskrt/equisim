@@ -539,79 +539,79 @@
    {
     "meses": 12,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.509,
-    "a": 0.07808,
-    "b": 0.020198,
-    "zInf": -0.543877,
-    "zSup": 0.647474,
+    "coberturaForaDaAmostra": 0.511,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -0.533175,
+    "zSup": 0.655369,
     "faixa": [
-     31.59,
-     45.7
+     31.68,
+     45.8
     ]
    },
    {
     "meses": 12,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.797,
-    "a": 0.07808,
-    "b": 0.020198,
-    "zInf": -1.179494,
-    "zSup": 1.240397,
+    "coberturaForaDaAmostra": 0.79,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -1.202221,
+    "zSup": 1.230679,
     "faixa": [
-     25.94,
-     54.93
+     25.75,
+     54.75
     ]
    },
    {
     "meses": 12,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.879,
-    "a": 0.07808,
-    "b": 0.020198,
-    "zInf": -1.60803,
-    "zSup": 1.668198,
+    "coberturaForaDaAmostra": 0.876,
+    "a": 0.078994,
+    "b": 0.02561,
+    "zInf": -1.603031,
+    "zSup": 1.690225,
     "faixa": [
-     22.71,
-     62.72
+     22.74,
+     63.13
     ]
    },
    {
     "meses": 36,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.503,
-    "a": 0.131838,
-    "b": 0.061521,
-    "zInf": -0.729987,
-    "zSup": 0.989521,
+    "coberturaForaDaAmostra": 0.526,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -0.726209,
+    "zSup": 0.970106,
     "faixa": [
-     31.17,
-     53.13
+     31.63,
+     53.53
     ]
    },
    {
     "meses": 36,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.787,
-    "a": 0.131838,
-    "b": 0.061521,
-    "zInf": -1.797151,
-    "zSup": 2.015375,
+    "coberturaForaDaAmostra": 0.791,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -1.778078,
+    "zSup": 2.033321,
     "faixa": [
-     22.39,
-     73.03
+     22.83,
+     74.43
     ]
    },
    {
     "meses": 36,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.881,
-    "a": 0.131838,
-    "b": 0.061521,
-    "zInf": -2.61931,
-    "zSup": 2.698896,
+    "coberturaForaDaAmostra": 0.878,
+    "a": 0.14437,
+    "b": 0.057353,
+    "zInf": -2.579071,
+    "zSup": 2.680883,
     "faixa": [
-     17.35,
-     90.27
+     17.81,
+     90.98
     ]
    }
   ],
@@ -667,8 +667,8 @@
   }
  },
  "rastro": {
-  "transactionId": "2665c2f2-0fde-4a91-8cfa-6807be560667",
-  "timestamp": "2026-11-03T00:59:42.684Z",
+  "transactionId": "78cd395c-aeca-4d87-bc3f-18282c609227",
+  "timestamp": "2026-11-03T18:53:46.343Z",
   "endpoint": "/core/valuation/SAPR11",
   "inputPayload": {
    "ticker": "SAPR11",
@@ -969,7 +969,7 @@
     "A leitura por múltiplos de pares diverge do fluxo descontado: R$ 66.49 contra R$ 27.76, 139.5% de diferença. Saiu de P/VP 1.87× (32 pares, utilidade-publica); EV/EBITDA 7.27× (32 pares, utilidade-publica). **O preço justo continua sendo o do fluxo descontado** — a segunda leitura é teste de sanidade sobre o nível, e a divergência fica declarada em vez de reconciliada."
    ]
   },
-  "executionTimeMs": 2,
+  "executionTimeMs": 1,
   "calculations": [
    {
     "formulaName": "Razão da unidade negociada",
