@@ -12,7 +12,8 @@ depois que o Dart saiu do repositório.
    `--no-minify` para que os nomes de tipo do rastro de auditoria saiam
    legíveis.
 2. A entrada é a dos pacotes versionados de `public/assets/` (CVM, B3, Tesouro,
-   mercado, validação) mais um **mercado sintético determinístico**: Ibovespa,
+   mercado, validação; os de validação hoje ficam fixados em `golden/validacao/`,
+   ver abaixo) mais um **mercado sintético determinístico**: Ibovespa,
    cotações com volume, CDI, IPCA e IBC-Br sorteados por `Random(seed)` e
    ancorados no patrimônio publicado de cada companhia. Sintético porque as
    cotações reais vêm da brapi pela rede, e o gabarito tem de se reproduzir
@@ -42,6 +43,22 @@ tradução linha a linha de `harness.dart` para o núcleo TypeScript, e exige
 
 Na gravação, em 23/10/2026, a comparação deu **zero divergências**: as 4.823
 montagens da cascata, os 3.894 rastros byte a byte e todos os serviços.
+
+## Os pacotes de validação ficam fixados
+
+A faixa calibrada (`banda_calibrada.json`) e a leitura de habilidade
+(`habilidade.json`) são medidas pelo backtest, e `public/assets/validacao/`
+muda a cada rodada dele. São dado, e não método: a paridade confere o porte das
+regras, e não o resultado de uma medição nova. Por isso o oráculo lê as cópias
+de `golden/validacao/`, idênticas às de `public/assets/validacao/` no commit
+`371e6a2`, que são as da gravação de 23/10/2026. Os outros pacotes continuam
+lidos de `public/assets/`, e regerar um deles muda a entrada da paridade.
+
+A igualdade exata também supõe o Node em que a suíte foi conferida, o 22
+(22.22.0, em 03/11/2026, 25 de 25). No Node 24 (24.15), a taxa livre de risco
+do mercado sintético já sai diferente no 15º dígito (`0.07146798479902783`
+esperado, `0.07146798479902805` obtido) e a diferença se espalha pelas
+avaliações.
 
 ## Para regravar
 
