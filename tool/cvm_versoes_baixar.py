@@ -130,8 +130,10 @@ def convert(package: bytes, cnpj: str, refer: str, version: int, name: str):
     internal = [n for n in z.namelist() if n.lower().endswith((".dfp", ".itr"))]
     if not internal:
         # A partir de 2023 o pacote traz um XML único no lugar do .dfp/.itr.
+        # Alguns trazem também a hora no nome ("...31-12-2022 0_00_00v3.xml").
         single = [n for n in z.namelist()
-                 if re.fullmatch(r"\d+(DFP|ITR)[\d-]+v\d+\.xml", n)]
+                 if re.fullmatch(
+                     r"\d+(DFP|ITR)[\d-]+(?: \d+_\d+_\d+)?v\d+\.xml", n)]
         if single:
             return convert_single_xml(z.read(single[0]), cnpj, refer, version,
                                        name)
