@@ -128,8 +128,8 @@ mexido, e não o resultado, e o cartão avisa a inversão (decisão 148).
 
 **14. O motor tem habilidade?**
 "Habilidade testada, com o poder declarado" (decisão 140): o teste fixado antes
-não passou (t de 0,40 contra 2,70), e o menor efeito que ele detectaria é nove
-vezes o medido. "Comprovada" depende da réplica selada, com leituras em 2029 e
+não passou (t de 0,25 contra 2,70, na remedição de 03/11/2026), e o menor efeito
+que ele detectaria é cerca de catorze vezes o medido. "Comprovada" depende da réplica selada, com leituras em 2029 e
 2031.
 
 ### Sobre confiabilidade
