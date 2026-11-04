@@ -60,7 +60,7 @@ describe('Confirmar o valuation (decisão 150)', () => {
       save: async () => err(new ComputationFailure('permissão negada')),
       delete: async () => ok(undefined),
     };
-    testRuntime({ cloudStores: { portfolios: memoryStores().portfolios, valuations: failing } });
+    testRuntime({ cloudStores: { ...memoryStores(), valuations: failing } });
     const r = divergent();
     const result = await SavedValuationsActions.confirm(r);
     expect(result.isErr).toBe(true);

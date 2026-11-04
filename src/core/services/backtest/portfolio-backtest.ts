@@ -375,6 +375,15 @@ function affordable(available: number, priceCents: number, c: TransactionCosts):
 }
 
 /**
+ * O maior número de ações inteiras a [priceCents] que, com a tarifa e a
+ * corretagem de [costs], cabe em [availableCents]. A mesma conta das compras
+ * do backtest, para o acompanhamento da Meta (decisão 159) não ter outra.
+ */
+export function affordableShares(availableCents: number, priceCents: number, costs: TransactionCosts): number {
+  return affordable(availableCents, priceCents, costs);
+}
+
+/**
  * Reparte [totalCents] entre [weights] **distribuindo o resto**.
  *
  * Cada destino recebe o piso de `magnitude × peso`, e os centavos que

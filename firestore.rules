@@ -36,6 +36,40 @@ service cloud.firestore {
                           && resource.data.userId == request.auth.uid;
     }
 
+    // Acompanhamentos da carteira na Meta (decisão 159): o plano congelado no
+    // dia em que começou. Não se altera: regravar o mesmo documento (a nova
+    // tentativa depois de uma falha de rede) passa, e qualquer mudança é
+    // recusada. Mudou o plano, começa-se outro acompanhamento.
+    match /trackings/{trackingId} {
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data == resource.data;
+
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+    }
+
+    // As compras de cada acompanhamento. **Só se acrescentam**: a compra
+    // gravada é a prova de que a decisão usou só o que se sabia no dia, e por
+    // isso a alteração é recusada — como no plano, só a regravação idêntica
+    // passa. A criação confere que o acompanhamento citado é de quem grava.
+    match /trackingOrders/{orderId} {
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.trackingId is string
+                    && getAfter(/databases/$(database)/documents/trackings/$(request.resource.data.trackingId)).data.userId == request.auth.uid;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data == resource.data;
+
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+    }
+
     // Coleção do escopo anterior (uma ação × um FII).
     //
     // Mantida somente leitura e exclusão: a aplicação não escreve mais aqui,

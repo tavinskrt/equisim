@@ -163,7 +163,7 @@ describe('O estudo — persistência', () => {
 
   it('salvar guarda o identificador devolvido', async () => {
     const store = new FakePortfolioStore();
-    testRuntime({ cloudStores: { portfolios: store, valuations: memoryStores().valuations } });
+    testRuntime({ cloudStores: { ...memoryStores(), portfolios: store } });
     StudyActions.addAsset(assetOf('PETR4', 'energia'), true);
     expect(await StudyActions.save()).toBe(true);
     expect(state().study.id).toBe('estudo-1');
@@ -173,7 +173,7 @@ describe('O estudo — persistência', () => {
   it('falha ao salvar não perde o estado editado', async () => {
     const store = new FakePortfolioStore();
     store.shouldFail = true;
-    testRuntime({ cloudStores: { portfolios: store, valuations: memoryStores().valuations } });
+    testRuntime({ cloudStores: { ...memoryStores(), portfolios: store } });
     StudyActions.addAsset(assetOf('PETR4', 'energia'), true);
     expect(await StudyActions.save()).toBe(false);
     expect(state().study.principal.length).toBe(1);

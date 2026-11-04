@@ -44,6 +44,9 @@ export const AssetPaths = {
   /** Faixa calibrada (item C2). */
   calibratedBand: 'assets/validacao/banda_calibrada.json',
 
+  /** Preço justo ponto no tempo das coortes trimestrais (decisão 159). */
+  upsideCohorts: 'assets/validacao/upside_coortes.json',
+
   /** Leitura da habilidade (item B1.0). */
   skillReading: 'assets/validacao/habilidade.json',
 

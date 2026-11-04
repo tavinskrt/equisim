@@ -382,15 +382,24 @@ async function captureAll(browser: Browser, base: string, theme: ThemeName, widt
     await page.waitForTimeout(5000);
     await shot(page, 5, 'meta');
   });
+  await step(errors, `${tag} acompanhamento`, async () => {
+    // O acompanhamento da carteira (decisão 159), começado no passado: as
+    // compras saem das coortes ponto no tempo, contra o mercado sintético.
+    await page.getByLabel('Início da carteira').fill('2021-04-01');
+    await page.getByRole('button', { name: 'Iniciar acompanhamento' }).click();
+    await page.getByText('Carteira realizada contra a meta').waitFor({ timeout: 60_000 });
+    await page.waitForTimeout(1500);
+    await shot(page, 6, 'meta-acompanhamento');
+  });
   await step(errors, `${tag} backtest`, async () => {
     await page.goto(`${base}/backtest`);
     await page.waitForTimeout(12_000);
-    await shot(page, 6, 'backtest');
+    await shot(page, 7, 'backtest');
   });
   await step(errors, `${tag} logs`, async () => {
     await logs.bringToFront();
     await logs.waitForTimeout(500);
-    await shot(logs, 7, 'logs');
+    await shot(logs, 8, 'logs');
   });
   await context.close();
   return saved;

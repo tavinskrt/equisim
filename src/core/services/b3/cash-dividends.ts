@@ -119,6 +119,21 @@ export class CashDividend {
       ? this.amount * (1 - B3CashDividends.jcpWithholding)
       : this.amount;
   }
+
+  /**
+   * Como [netAmount], com a retenção vigente na **data-com**: 15% até 2025 e
+   * 17,5% desde 01/01/2026 (decisão 159). É o que o acompanhamento da
+   * carteira credita.
+   *
+   * [netAmount] fica com os 15% de sempre porque alimenta as coortes de
+   * validação e o beta, cujos números o gabarito trava; trocar a alíquota ali
+   * pede decisão própria.
+   */
+  get netAmountOnRecordDate(): number {
+    return this.kind === CashDividendKind.interestOnEquity
+      ? this.amount * (1 - B3CashDividends.jcpWithholdingOn(this.lastDateWithRights))
+      : this.amount;
+  }
 }
 
 const LABELS: ReadonlyMap<string, CashDividendKind> = new Map([
@@ -132,6 +147,19 @@ const LABELS: ReadonlyMap<string, CashDividendKind> = new Map([
 export const B3CashDividends = {
   /** Imposto retido na fonte sobre juros sobre capital próprio. */
   jcpWithholding: 0.15,
+
+  /**
+   * O imposto retido sobre o JCP pago ou creditado em [date]: 15% pela Lei
+   * 9.249/1995 (art. 9º, § 2º) e 17,5% desde 01/01/2026, pela Lei
+   * Complementar 224/2025.
+   *
+   * O fato gerador é o pagamento ou o crédito ao acionista. A B3 não informa
+   * nenhum dos dois; a data-com, quando a base de acionistas fica definida e a
+   * companhia já deliberou o crédito, é a aproximação usada.
+   */
+  jcpWithholdingOn(date: DateTime): number {
+    return date.year >= 2026 ? 0.175 : 0.15;
+  },
 
   /**
    * Lê a lista `results` do `GetListedCashDividends`.

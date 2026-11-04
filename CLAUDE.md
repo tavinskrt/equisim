@@ -246,7 +246,7 @@ stderr quando troca.
 ### A lente `tela` exige capturas
 
 ```bash
-npm run ui:capturar   # 42 PNGs em docs/telas/, ignorado pelo git
+npm run ui:capturar   # 48 PNGs em docs/telas/, ignorado pelo git
 npm run conselho -- --lente tela --largura 1024 --tema escuro
 ```
 

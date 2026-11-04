@@ -8,6 +8,7 @@ import { useSession } from '../../src/app/state/session-store';
 import { MemoryKeyValueStore } from '../../src/data/cache/key-value-store';
 import { KeyValueManualValuationStore } from '../../src/data/persistence/manual-valuation-store';
 import { LocalPortfolioStore } from '../../src/data/persistence/portfolio-store';
+import { KeyValueTrackingStore } from '../../src/data/persistence/tracking-store';
 import { HttpError } from '../../src/data/network/http';
 
 /** Lê um arquivo de `public/`, como o navegador o serviria. */
@@ -21,6 +22,7 @@ export function memoryStores(): UserStores {
   return {
     portfolios: new LocalPortfolioStore(new MemoryKeyValueStore(), () => 1_700_000_000_000 + n, () => `estudo-${++n}`),
     valuations: new KeyValueManualValuationStore(new MemoryKeyValueStore(), () => {}),
+    trackings: new KeyValueTrackingStore(new MemoryKeyValueStore(), () => {}),
   };
 }
 

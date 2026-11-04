@@ -2,12 +2,14 @@ import { auditBus, auditEnabled } from '../audit/audit-bus';
 import { IdbKeyValueStore, type KeyValueStore, MemoryKeyValueStore } from '../data/cache/key-value-store';
 import { KeyValueManualValuationStore, FirestoreManualValuationStore } from '../data/persistence/manual-valuation-store';
 import { FirestorePortfolioStore, LocalPortfolioStore } from '../data/persistence/portfolio-store';
+import { FirestoreTrackingStore, KeyValueTrackingStore } from '../data/persistence/tracking-store';
 import { FirebaseAuthGateway, initFirebase } from './auth';
 import { browserPreferences, configureRuntime } from './runtime';
 import { Services, type UserStores } from './services';
 import { PreferencesActions, usePreferences } from './state/preferences-store';
 import { SavedValuationsActions } from './state/saved-valuations-store';
 import { startSession, useSession } from './state/session-store';
+import { TrackingActions } from './state/tracking-store';
 import { readDraft, StudyActions } from './state/study-store';
 
 /**
@@ -63,11 +65,13 @@ export async function bootOperator(): Promise<() => void> {
   const localStores: UserStores = {
     portfolios: new LocalPortfolioStore(localStore),
     valuations: new KeyValueManualValuationStore(localStore),
+    trackings: new KeyValueTrackingStore(localStore),
   };
   const cloudStores: UserStores | null = firebase.ok
     ? {
         portfolios: new FirestorePortfolioStore(firebase.firestore),
         valuations: new FirestoreManualValuationStore(firebase.firestore),
+        trackings: new FirestoreTrackingStore(firebase.firestore),
       }
     : null;
 
@@ -91,14 +95,15 @@ export async function bootOperator(): Promise<() => void> {
   const stopSession = startSession();
 
   // Ao entrar (ou mudar de conta), recarrega o que é do usuário: estudos,
-  // valuations confirmados — que vão ao painel de logs — e a preferência de
-  // tema da conta.
+  // valuations confirmados — que vão ao painel de logs —, acompanhamentos da
+  // Meta e a preferência de tema da conta.
   let lastUid: string | null = null;
   const reactToSession = (uid: string | null, local: boolean) => {
     if (uid === lastUid) return;
     lastUid = uid;
     void StudyActions.refreshSaved();
     void SavedValuationsActions.load();
+    void TrackingActions.load();
     if (uid !== null && !local) void PreferencesActions.syncThemeWithAccount(uid);
   };
   const initial = useSession.getState();

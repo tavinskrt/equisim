@@ -28,7 +28,7 @@ seguido até a linha que o produziu e até o livro ou artigo que o justifica.
 | 4 | [Custo de capital](04-custo-de-capital.md) | CAPM, beta encolhido, Hamada, custo da dívida, WACC, curva, ponto fixo |
 | 5 | [Projeção, desconto e terminal](05-projecao-desconto-e-terminal.md) | as fórmulas do DCF, as três formas de terminal, a passagem da firma ao acionista |
 | 6 | [Resultado e tela de avaliação](06-resultado.md) | cenários, Monte Carlo, faixa calibrada, múltiplos, ressalvas, avisos, rastro |
-| 7 | [O resto do aplicativo](07-aplicativo.md) | carteiras, meta, retorno esperado, simulação com aportes |
+| 7 | [O resto do aplicativo](07-aplicativo.md) | carteiras, meta, retorno esperado, simulação com aportes, acompanhamento da carteira realizada |
 | 8 | [Como o motor é verificado e validado](08-verificacao-e-validacao.md) | gate de QA, lentes, gabarito, testes, R1–R3, réplica selada |
 | — | [Referências](referencias.md) | bibliografia citada |
 

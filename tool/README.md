@@ -65,7 +65,7 @@ alguns valores, e a decisão 152 lista cada caso. Os que mais aparecem:
   JavaScript: um gabarito gravado pelo Dart não confere, e precisa ser
   regravado sob o TypeScript antes de `--conferir`.
 
-## Ferramentas (76)
+## Ferramentas (77)
 
 | Antes (Dart) | Agora (TypeScript) | Comando | O que faz |
 |---|---|---|---|
@@ -144,6 +144,7 @@ alguns valores, e a decisão 152 lista cada caso. Os que mais aparecem:
 | `unit_empacotar.dart` | [`unit-package.ts`](unit-package.ts) | `npm run tool -- unit-package` | B16 — empacota a composição declarada das units para o aplicativo. |
 | `unit_vs_classe.dart` | [`unit-vs-class.ts`](unit-vs-class.ts) | `npm run tool -- unit-vs-class` | A unit e a classe que a compõe têm de concordar. |
 | `unidade.dart` | [`unit.ts`](unit.ts) | `npm run tool -- unit` | A razão de unidade e a tolerância que aperta onde deveria afrouxar. |
+| — | [`upside-cohorts-package.ts`](upside-cohorts-package.ts) | `npm run tool -- upside-cohorts-package` | Decisão 159 — empacota, das coortes trimestrais da validação, o potencial e o preço de cada ativo avaliado: o preço justo ponto no tempo do acompanhamento da carteira na Meta. |
 | `validate.dart` | [`validate.ts`](validate.ts) | `npm run tool -- validate` | Executor de validação: invariantes, sensibilidade, exportação para Python e inferência. |
 
 ## Bibliotecas (21)

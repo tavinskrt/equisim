@@ -5,14 +5,14 @@ ativo. O **Raio-X** de um ativo é o motor dos capítulos 1 a 6: tem página
 própria, `/ativo/<ATIVO>` (decisão 155), aberta pela busca (Ctrl/⌘ + K) ou pelo
 ativo de uma carteira, e o Voltar dela devolve à área de onde veio. Este
 capítulo descreve as áreas e as contas que elas fazem, e a tela que abre a
-conta do motor para o usuário refazer com os números dele (7.5) e guardar o
-resultado (7.6).
+conta do motor para o usuário refazer com os números dele (7.5), guardar o
+resultado (7.6) e acompanhar a carteira realizada contra a meta (7.7).
 
 | Área | Tela | O que faz |
 |---|---|---|
 | **Estudo** | [builder-page.tsx](../../src/features/study/builder-page.tsx) | monta as carteiras Principal e Reserva e mostra o potencial de cada ativo |
 | **Raio-X** (`/ativo/<ATIVO>`) | [asset-page.tsx](../../src/features/asset/asset-page.tsx); [asset-xray.tsx](../../src/features/asset/asset-xray.tsx) | a avaliação de um ativo (capítulo 6), em dois modos — **Essencial**, a leitura e a régua de preço, e **Completo**, com o modelo, a taxa, a normalização, a sensibilidade e a projeção —, e o botão **Simular minhas premissas**, que abre a conta do motor para o usuário refazê-la (7.5); no computador, um índice lateral leva a cada seção. O endereço antigo, `?ativo=<ATIVO>` sobre qualquer área, redireciona para a página |
-| **Meta** | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | a rentabilidade que um plano patrimonial exige, e a carteira frente a ela; a curva de acumulação ([accumulation-chart.tsx](../../src/features/goal/accumulation-chart.tsx)) é o piloto dos gráficos da Bklit UI (decisão 156) |
+| **Meta** | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | a rentabilidade que um plano patrimonial exige, e a carteira frente a ela; a curva de acumulação ([accumulation-chart.tsx](../../src/features/goal/accumulation-chart.tsx)) é o piloto dos gráficos da Bklit UI (decisão 156); o **acompanhamento da carteira** ([tracking-panel.tsx](../../src/features/goal/tracking-panel.tsx)) mostra o que a carteira fez desde a data de início, comprando a cada aporte o maior potencial (7.7; decisão 159) |
 | **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras sob o mesmo plano de aportes; a evolução comparada ([evolution-chart.tsx](../../src/features/backtest/evolution-chart.tsx)) é desenhada pelo gráfico de linha da Bklit UI, e o risco × retorno segue no Recharts (decisão 158) |
 | **Meus valuations** | [valuations-page.tsx](../../src/features/valuations/valuations-page.tsx) | os valuations que o usuário confirmou, de todos os ativos (7.6) |
 
@@ -140,9 +140,47 @@ digitadas, as do motor de que elas partiram, e o resultado inteiro que
 | Gravação recusada vai ao painel como falha, com o motivo, e a tela diz o motivo | `SavedValuationsActions.confirm` | idem |
 | No Raio-X, o cartão "Seus valuations salvos" do ativo, do mais recente ao mais antigo, com as premissas e o resultado do dia, e os botões de reabrir na simulação e de apagar; em **Meus valuations**, os de todos os ativos | [saved-for-asset.tsx](../../src/features/asset/saved-for-asset.tsx); [valuations-page.tsx](../../src/features/valuations/valuations-page.tsx) | idem |
 
+## 7.7 Meta: o acompanhamento da carteira realizada
+
+A curva de acumulação (7.3) diz o que o plano exige sob taxas constantes. O
+**acompanhamento** diz o que a carteira fez (decisão 159): desde uma data de
+início, cada aporte da meta compra o ativo da Principal com o maior potencial
+do dia, e o patrimônio resultante é comparado, com os mesmos aportes nas
+mesmas datas, ao caminho exigido, ao esperado, ao CDI e ao Ibovespa.
+
+O cálculo inteiro é `PortfolioTracker.run`, no núcleo, sem relógio nem rede:
+recebe o plano, as cotações, os proventos, as compras já gravadas, a data final
+e as duas fontes de preço justo, e devolve o patrimônio dia a dia e as compras.
+
+| Regra | Código | Evidência |
+|---|---|---|
+| O plano congela, no dia do início, a meta (aporte inicial, mensal, valor desejado, prazo) e os ativos da Principal; dia do aporte de 1 a 28 (padrão 5). Mudou a carteira, começa-se outro acompanhamento | [portfolio-tracking.ts, `TrackingPlan`, `TrackingRecord`](../../src/core/services/goal/portfolio-tracking.ts) | — |
+| Calendário: o inicial no primeiro pregão a partir do início; cada mensal, a partir do mês seguinte, no primeiro pregão a partir do dia pedido, ou no último pregão do mês **só se o mês já acabou** — o mês em curso espera o dia chegar | `schedule` | teste "mês em curso" |
+| **A regra do aporte**: o ativo de maior potencial, `preço justo ÷ preço do dia − 1`, **entre os que pesam menos que o teto** `2/N` (limitado a 100%); peso = posição ÷ total em ações, antes da compra. Nenhum abaixo do teto: o maior potencial geral, e a compra marca "teto ignorado". Empate pela ordem da carteira | `TopUpsidePolicy.choose`, `TopUpsidePolicy.defaultCap` | líder de potencial repetido em 60% dos trimestres (decisão 159) |
+| O caixa compra **ações inteiras** — lote de uma, como no fracionário — do escolhido; se o caixa não paga uma ação com a tarifa, passa ao seguinte; se nenhum cabe, não há compra. A sobra fica no caixa, comum à carteira | `affordableShares` ([portfolio-backtest.ts](../../src/core/services/backtest/portfolio-backtest.ts)); `TransactionCosts.b3` | decisão 126 |
+| **Preço justo retrospectivo**: aporte agendado antes do dia da criação compra no próprio pregão, com a coorte trimestral vigente — o motor ponto no tempo da validação —, na base da série: `(1 + u_c) · P(c)`, com `P(c)` o fechamento da série na data da coorte | `UpsideCohorts.readingAt`; pacote [upside_coortes.json](../../public/assets/validacao/upside_coortes.json), gerado por [upside-cohorts-package.ts](../../tool/upside-cohorts-package.ts) | decisões 97 e 128; 31 coortes, 31/03/2018 a 30/09/2025 |
+| Coorte com mais de 122 dias é velha: a compra usa a última coorte contra o preço do dia, e a tela conta quantas | `UpsideCohorts.staleAfterDays`; `TrackingOutcome.staleOrders` | — |
+| **Preço justo ao vivo**: aporte a partir da criação compra com a avaliação do motor de hoje, no último pregão disponível; sem a avaliação, o aporte fica pendente e o caixa espera. A primeira passada roda sem o motor e só pede as avaliações se houver aporte ao vivo vencido | `PortfolioTracker.run` (`live`, `pendingLive`); [tracking.ts, `computeTracking`](../../src/app/tracking.ts) | teste "aporte ao vivo" |
+| **Proventos** no caixa na data ex, sobre as ações da data-com: `ações × P_com(série) × D_líquido ÷ P_com(B3)`, a mesma identidade do índice de retorno total; JCP líquido da retenção da data-com — 15% até 2025, 17,5% desde 2026 | `CashDividend.netAmountOnRecordDate`; `B3CashDividends.jcpWithholdingOn` | Lei 9.249/1995, art. 9º, § 2º; LC 224/2025 |
+| **Compra gravada não muda**: ao reabrir, vale como está, e só o aporte sem registro é decidido. Coleção `trackingOrders`, documento `<acompanhamento>-<aporte em 4 dígitos>`; as regras do Firestore só deixam criar pelo dono do acompanhamento e só regravar idêntico | `recorded`; [tracking-store.ts](../../src/data/persistence/tracking-store.ts); [firestore.rules](../../firestore.rules) | [tracking.test.ts](../../test/app/tracking.test.ts) |
+| Patrimônio em centavos inteiros, fechando `aportado + proventos − pago − tarifa = caixa` | `PortfolioTracker.run` | teste de identidade |
+| Retorno da carteira: XIRR sobre os aportes e o patrimônio final; TWR à parte | `TrackingOutcome.moneyWeightedReturn`, `timeWeightedReturn` | — |
+| Exigido e esperado com os mesmos aportes: `V_k = V_{k−1}·(1+a)^(Δdias/365) + aporte_k`, base de 365 dias, a do XIRR — a carteira com XIRR igual a `a` termina sobre a curva | `FlowBenchmarks.atAnnualRate` | teste |
+| CDI: o saldo do pregão anterior recebe as taxas diárias do Banco Central dos dias `[d_{k−1}, d_k)` | `FlowBenchmarks.onDailyRates` | — |
+| Ibovespa: cada aporte compra cotas do índice no fechamento do dia | `FlowBenchmarks.onIndex` | índice de retorno total na metodologia da B3 |
+| O exigido é o da meta (7.3); o esperado é o da Meta no dia da criação, congelado e rotulado com a data. O custo de capital das coortes não é usado | [tracking-store.ts (app), `TrackingActions.start`](../../src/app/state/tracking-store.ts) | decisão 159 |
+| No ritmo de agora: o patrimônio de hoje e os aportes que faltam ao XIRR atual, pela fórmula da curva de acumulação | `projectedEndValue` | — |
+| Data de início: hoje, ou no passado desde a primeira coorte; futuro recusado | `startDateProblem` | — |
+
+A tela diz que retrospecto não é prova de habilidade (decisões 96 e 103) e,
+ao escolher data passada, que a Principal de hoje carrega viés de
+sobrevivência.
+
 ## Limitações deste capítulo
 
-- A simulação é de preço: quem recebe provento obtém mais.
+- A simulação é de preço: quem recebe provento obtém mais. O acompanhamento
+  (7.7) é a exceção: credita e reinveste provento, porque é comparado a
+  medidas de retorno total.
 - Sem rebalanceamento, a carteira simulada pode ficar muito diferente dos pesos
   escolhidos em janelas longas.
 - O retorno esperado da carteira não usa o preço justo (nenhuma ordenação foi
@@ -152,6 +190,12 @@ digitadas, as do motor de que elas partiram, e o resultado inteiro que
 - O valuation salvo é o retrato do dia: reabri-lo aplica os números dele à
   conta congelada **de hoje**, que pode ter mudado com dados novos, e por isso
   o preço reaberto pode diferir do gravado.
+- O acompanhamento compra com o preço justo da época, mas os ativos são os da
+  Principal de hoje: no passado, o resultado é favorecido pelo viés de
+  sobrevivência. E o potencial do motor não comprovou ordenar retornos; o
+  acompanhamento mostra o que a regra fez, e não que ela funciona.
+- Depois da última coorte, enquanto o pacote não for refeito, a compra
+  retrospectiva usa um preço justo de até um ano antes.
 - O painel de logs só existe com a auditoria ligada (servidor de
   desenvolvimento, ou `VITE_EQUISIM_AUDIT=true` no build); sem ela, o
   valuation é gravado do mesmo jeito e só não vai ao painel.
