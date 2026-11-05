@@ -312,6 +312,20 @@ describe('PortfolioTracker', () => {
     expect(done.newOrders[0]!.delayDays).toBe(29);
   });
 
+  it('aporte sem preço justo para nenhum ativo guarda o caixa e não é gravado; com o preço, compra', () => {
+    const none = PortfolioTracker.run({ plan: plan(), prices, until: end, retro: () => null }).unwrap();
+    expect(none.orders.length).toBeGreaterThan(0);
+    expect(none.orders.every((o) => o.ticker === null)).toBe(true);
+    // Nada vai à gravação: a falta é de dado, e não decisão de não comprar.
+    expect(none.newOrders).toHaveLength(0);
+    expect(none.cashCents).toBe(none.totalContributedCents);
+    expect(none.warnings.some((w) => w.includes('nenhum ativo tinha preço justo'))).toBe(true);
+    // Na abertura seguinte, com o preço justo de volta, os mesmos aportes compram.
+    const later = PortfolioTracker.run({ plan: plan(), prices, recorded: none.newOrders, until: end, retro: fixedFair(fair) }).unwrap();
+    expect(later.newOrders.length).toBe(none.orders.length);
+    expect(later.newOrders[0]!.ticker).not.toBeNull();
+  });
+
   it('o mês em curso só tem aporte quando o dia dele chega', () => {
     const r = PortfolioTracker.run({ plan: plan({ contributionDay: 20 }), prices, until: day(2024, 4, 15), retro: fixedFair(fair) }).unwrap();
     expect(r.orders.map((o) => `${o.scheduledOn.month}/${o.scheduledOn.day}`)).toEqual(['1/2', '2/20', '3/20']);

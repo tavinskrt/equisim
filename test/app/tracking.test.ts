@@ -4,6 +4,7 @@ import { TrackingActions, useTrackings } from '../../src/app/state/tracking-stor
 import { computeTracking, startDateProblem, type TrackingView } from '../../src/app/tracking';
 import type { Services } from '../../src/app/services';
 import {
+  DateRange,
   DateTime,
   Duration,
   FinancialGoal,
@@ -74,7 +75,22 @@ function fakeServices(): Services {
   ]);
   const rates = new RateSeries(series(A, day(2023, 12, 1), end, 0).points.map((p) => new RatePoint({ date: p.date, rate: 0.0004 })));
   return {
-    prices: { dailyBatch: async () => ok(prices) },
+    // Como a fonte real, devolve só a janela pedida: a falta da cotação da
+    // coorte fora dela é o que impedia a compra depois da última coorte.
+    prices: {
+      dailyBatch: async (tickers: readonly Ticker[], range: DateRange) =>
+        ok(
+          new Map(
+            tickers.map((t) => [
+              t,
+              new PriceSeries({
+                ticker: t,
+                points: prices.get(t)!.points.filter((p) => !p.date.isBefore(range.start) && !p.date.isAfter(range.end)),
+              }),
+            ]),
+          ),
+        ),
+    },
     upsideCohorts: async () => cohorts,
     dividends: async () => [],
     macro: { riskFreeDaily: async () => ok(rates) },
@@ -130,6 +146,25 @@ describe('computeTracking', () => {
     const cdi = view.curves.find((c) => c.key === 'cdi')!;
     expect(cdi.annual!).toBeGreaterThan(0.09);
     expect(view.required).not.toBeNull();
+  });
+
+  it('depois da última coorte, a compra retrospectiva usa a última coorte, mesmo meses depois dela', async () => {
+    // A coorte é de 31/12/2023 e o início, 03/06/2024: mais de cinco meses
+    // depois, como um início em julho de 2026 contra a coorte de 30/09/2025.
+    const r = await computeTracking({
+      services: fakeServices(),
+      stored: { record: record({ start: day(2024, 6, 3), createdOn: day(2024, 7, 1) }), orders: [] },
+      today: day(2024, 6, 28),
+      live: async () => new Map(),
+    });
+    const view = r.unwrap() as TrackingView;
+    expect(view.outcome.orders).toHaveLength(1);
+    const order = view.outcome.orders[0]!;
+    expect(order.ticker).toBe(A);
+    expect(order.origin).toBe('coorte');
+    expect(order.fairValueAsOf!.month).toBe(12);
+    expect(view.outcome.staleOrders).toBe(1);
+    expect(view.outcome.newOrders).toHaveLength(1);
   });
 
   it('o aporte ao vivo vencido pede a avaliação de hoje e compra com ela', async () => {

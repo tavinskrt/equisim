@@ -60,8 +60,14 @@ export interface TrackingWaiting {
   readonly waiting: true;
 }
 
-/** Folga de cotação antes do início: a coorte vigente na data de início pode ser de até um trimestre antes. */
-const PRICE_LEAD_DAYS = 130;
+/**
+ * Folga da cotação antes da data da coorte vigente no início. O preço justo
+ * da coorte, na base da série, é `(1 + u) · P(c)`, e `P(c)` é o fechamento da
+ * série **na data da coorte**: sem cotação até ela, o ativo fica sem preço
+ * justo e o aporte não compra. A coorte pode cair em fim de semana ou feriado,
+ * e o fechamento é o último até ela.
+ */
+const COHORT_PRICE_SLACK_DAYS = 10;
 
 /** Preço justo de hoje pelo motor, para os aportes ao vivo. */
 export function liveReading(v: ValuationResult): FairValueReading {
@@ -92,7 +98,15 @@ export async function computeTracking(args: {
   const { services, stored, today } = args;
   const { record } = stored;
   const plan = record.plan;
-  const range = new DateRange(plan.start.subtract(new Duration({ days: PRICE_LEAD_DAYS })), today);
+
+  // As cotações começam antes da coorte vigente no início, e não a um
+  // trimestre fixo do início: depois da última coorte, a vigente pode ser de
+  // muitos meses antes, e sem o fechamento da data dela nenhum ativo tem
+  // preço justo.
+  const cohorts = await services.upsideCohorts();
+  const inForce = cohorts?.cohortAsOf(plan.start)?.date ?? null;
+  const anchor = inForce !== null && inForce.isBefore(plan.start) ? inForce : plan.start;
+  const range = new DateRange(anchor.subtract(new Duration({ days: COHORT_PRICE_SLACK_DAYS })), today);
 
   const batch = await services.prices.dailyBatch(plan.tickers, range);
   if (batch.isErr) return err(batch.failureOrNull!);
@@ -100,10 +114,7 @@ export async function computeTracking(args: {
   const hasStartPrice = [...prices.values()].some((s) => !s.isEmpty && !s.points[s.points.length - 1]!.date.isBefore(plan.start));
   if (!hasStartPrice) return ok({ record, waiting: true });
 
-  const [cohorts, dividendLists] = await Promise.all([
-    services.upsideCohorts(),
-    Promise.all(plan.tickers.map(async (t) => [t, await services.dividends(t)] as const)),
-  ]);
+  const dividendLists = await Promise.all(plan.tickers.map(async (t) => [t, await services.dividends(t)] as const));
   const dividends = new Map<Ticker, readonly CashDividend[]>(dividendLists);
   const retro = (t: Ticker, d: DateTime) => cohorts?.readingAt(t, d, prices.get(t)) ?? null;
 

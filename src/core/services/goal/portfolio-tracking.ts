@@ -818,6 +818,9 @@ function schedule(plan: TrackingPlan, dates: readonly DateTime[]): ScheduledEven
  *   e o caixa os espera.
  * - [recorded] são as compras já gravadas: valem como estão, e só o aporte
  *   sem registro é decidido.
+ * - Aporte em que **nenhum** ativo tem preço justo não compra e não vai a
+ *   [TrackingOutcome.newOrders]: a falta é de dado, e a decisão se refaz na
+ *   abertura seguinte, em vez de ficar gravada como "não comprar".
  *
  * Tudo em centavos inteiros, como no backtest: o patrimônio fecha ao centavo
  * com `aportado + proventos − pago − tarifa = caixa`.
@@ -908,6 +911,10 @@ export const PortfolioTracker = {
     const allOrders: TrackingOrder[] = [];
     const newOrders: TrackingOrder[] = [];
     let pendingLive = 0;
+    // Aportes decididos sem preço justo para ativo nenhum: ficam fora de
+    // [newOrders], porque gravá-los congelaria uma falta de dado como se
+    // fosse a decisão de não comprar.
+    let unpriced = 0;
     let nextEvent = 0;
     const executedSeqs = new Set<number>();
     const lastIndex = dates.length - 1;
@@ -919,7 +926,16 @@ export const PortfolioTracker = {
       return c > 0 ? c : null;
     };
 
-    const decide = (event: ScheduledEvent, d: DateTime, reading: (t: Ticker) => FairValueReading | null): TrackingOrder => {
+    /**
+     * A compra do aporte, e se algum ativo tinha preço justo. Sem nenhum, a
+     * falta é de dado, e não de decisão: a compra não é gravada, e o aporte
+     * se decide de novo na próxima abertura (ver [unpriced]).
+     */
+    const decide = (
+      event: ScheduledEvent,
+      d: DateTime,
+      reading: (t: Ticker) => FairValueReading | null,
+    ): { order: TrackingOrder; priced: boolean } => {
       const values = new Map<Ticker, number>();
       let totalPositions = 0;
       for (const t of plan.tickers) {
@@ -945,18 +961,20 @@ export const PortfolioTracker = {
         cap: plan.weightCap,
         costs: plan.costs,
       });
+      const priced = candidates.length > 0;
       if (decision === null) {
-        return new TrackingOrder({
+        const idle = new TrackingOrder({
           seq: event.seq,
           scheduledOn: event.date,
           executedOn: d,
           contribution: new Money(event.amountCents),
           cashAfterCents: cash,
         });
+        return { order: idle, priced };
       }
       const c = decision.candidate;
       const traded = decision.quantity * c.priceCents;
-      return new TrackingOrder({
+      const bought = new TrackingOrder({
         seq: event.seq,
         scheduledOn: event.date,
         executedOn: d,
@@ -972,6 +990,7 @@ export const PortfolioTracker = {
         capOverridden: decision.capOverridden,
         cashAfterCents: cash - traded - decision.costCents,
       });
+      return { order: bought, priced };
     };
 
     const apply = (o: TrackingOrder): void => {
@@ -1051,9 +1070,10 @@ export const PortfolioTracker = {
           todays.push({
             seq: ev.seq,
             run: () => {
-              const o = decide(ev, d, (t) => args.retro(t, d));
-              newOrders.push(o);
-              apply(o);
+              const { order, priced } = decide(ev, d, (t) => args.retro(t, d));
+              if (priced) newOrders.push(order);
+              else unpriced++;
+              apply(order);
             },
           });
         } else if (ev.live && i === lastIndex) {
@@ -1064,9 +1084,10 @@ export const PortfolioTracker = {
           todays.push({
             seq: ev.seq,
             run: () => {
-              const o = decide(ev, d, live);
-              newOrders.push(o);
-              apply(o);
+              const { order, priced } = decide(ev, d, live);
+              if (priced) newOrders.push(order);
+              else unpriced++;
+              apply(order);
             },
           });
         }
@@ -1120,6 +1141,12 @@ export const PortfolioTracker = {
     const twr = Returns.timeWeighted(wealthPath);
     if (withoutPrice > 0) {
       warnings.push(`${withoutPrice} provento(s) ficaram de fora por falta do preço com direito publicado pela B3.`);
+    }
+    if (unpriced > 0) {
+      warnings.push(
+        `${unpriced} aporte(s) não compraram porque nenhum ativo tinha preço justo naquele dia: o dinheiro ficou em caixa, ` +
+          'e a decisão não foi gravada — ela se refaz na próxima abertura.',
+      );
     }
 
     allOrders.sort((a, b) => a.seq - b.seq);
