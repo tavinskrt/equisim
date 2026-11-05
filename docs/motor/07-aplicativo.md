@@ -42,17 +42,20 @@ janela própria), com o rastro de cada avaliação
 
 | Regra | Código | Evidência |
 |---|---|---|
-| **Principal**: a carteira vigente, até 15 ativos, com pesos que somam 100% | [portfolio.ts, `Portfolio.maxAssets`, `Portfolio.equalWeighted`, `Portfolio.hasValidWeights`](../../src/core/entities/portfolio.ts) | — |
+| **Principal**: a carteira vigente, até 15 ativos, **equiponderada**: incluir e tirar ativo reequipondera, a interface não escolhe peso, e um estudo gravado com outros pesos abre equiponderado | [portfolio.ts, `Portfolio.maxAssets`, `Portfolio.add`, `Portfolio.remove`](../../src/core/entities/portfolio.ts); [study-store.ts, `withEqualWeights`](../../src/app/state/study-store.ts) | decisão 160; [study-store.test.ts](../../test/app/study-store.test.ts) |
 | **Reserva**: candidatos a entrar na Principal; na simulação, vira carteira inteira sob os mesmos aportes, para comparação | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | — |
 | Coluna "potencial": o upside do preço justo de cada ativo | [hooks.ts, `useValuation`](../../src/app/hooks.ts); [potential-cell.tsx](../../src/features/study/potential-cell.tsx) | — |
 | **Com valuation do usuário que discorda do motor, a coluna é a dele**: o mais recente confirmado para o ativo, com algum campo trocado, dá o preço justo — marcado "seu" — e o potencial contra a cotação de hoje; confirmar os números do motor tal como estão devolve o ativo ao preço do motor. Vale na Principal e na Reserva, em qualquer estudo, porque o valuation é do usuário | [saved-valuations-store.ts, `userValuationOf`](../../src/app/state/saved-valuations-store.ts); [portfolio-column.tsx, `AssetRow`](../../src/features/study/portfolio-column.tsx); [potential-cell.tsx](../../src/features/study/potential-cell.tsx) | decisão 151; [saved-valuations.test.ts](../../test/app/saved-valuations.test.ts) |
-| "Esperado da carteira": média, pelos pesos, do retorno esperado de cada ativo com avaliação (7.2); não usa preço justo, nem o do motor nem o do usuário | [expected-return.ts](../../src/core/services/portfolio/expected-return.ts) | decisões 58 e 103 |
-| Concentração setorial declarada | [sector-concentration.ts](../../src/core/services/portfolio/sector-concentration.ts) | — |
+| Setores da Principal: a rosca e a tabela, com o nome do setor quebrando a linha em vez de alargar o cartão | [sector-donut.tsx](../../src/features/study/sector-donut.tsx) | decisão 160 |
+| Fora da tela desde a decisão 160: o "Esperado da carteira" (média, pelos pesos, do retorno esperado de cada ativo, 7.2) e o aviso de concentração setorial. Os cálculos seguem no núcleo | [expected-return.ts](../../src/core/services/portfolio/expected-return.ts); [sector-concentration.ts](../../src/core/services/portfolio/sector-concentration.ts) | decisões 58, 103 e 160 |
 | Estudos salvos no Firestore (Firebase), por usuário | [portfolio-store.ts](../../src/data/persistence/portfolio-store.ts) | — |
 
 ---
 
 ## 7.2 O retorno esperado de uma ação
+
+Desde a decisão 160, nenhuma tela mostra o retorno esperado da carteira; o
+estimador abaixo segue no núcleo.
 
 | Regra | Código | Evidência |
 |---|---|---|
@@ -70,7 +73,7 @@ janela própria), com o rastro de cada avaliação
 | Plano: aporte inicial, aporte mensal, valor desejado, prazo | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | — |
 | Taxa mensal que resolve `V_f = V₀(1+i)ⁿ + PMT·((1+i)ⁿ − 1)/i`, por Newton-Raphson com bisseção de resguardo (tolerância 10⁻¹²); anual = `(1 + i)^12 − 1` | [required-return.ts, `RequiredReturnSolver.solve`](../../src/core/services/goal/required-return.ts) | valor futuro de série uniforme; não há forma fechada |
 | Viabilidade: abaixo do CDI de dez anos → a renda fixa basta; até o retorno do Ibovespa de dez anos → plausível; até 2× → exigente; até 2,5× → muito exigente; acima → irrealista | [feasibility.ts, `GoalFeasibility.assess`](../../src/core/services/goal/feasibility.ts) | limiares relativos ao mercado da década, e não absolutos |
-| Carteira frente à meta: esperado da carteira (7.2) menos o exigido = folga | `planner-page.tsx` | — |
+| A carteira se confronta com a meta pelo que fez, no acompanhamento (7.7). O cartão "Carteira frente à meta" (esperado menos exigido) e a curva do esperado saíram com a decisão 160 | `planner-page.tsx` | decisão 160 |
 
 ---
 
@@ -166,10 +169,11 @@ e as duas fontes de preço justo, e devolve o patrimônio dia a dia e as compras
 | **Aporte sem preço justo para nenhum ativo não é gravado**: o dinheiro fica em caixa, a tela avisa, e a decisão se refaz na abertura seguinte — uma falta de dado não vira registro de "não comprar" | `PortfolioTracker.run` (`unpriced`) | [portfolio-tracking.test.ts](../../test/core/portfolio-tracking.test.ts) |
 | Patrimônio em centavos inteiros, fechando `aportado + proventos − pago − tarifa = caixa` | `PortfolioTracker.run` | teste de identidade |
 | Retorno da carteira: XIRR sobre os aportes e o patrimônio final; TWR à parte | `TrackingOutcome.moneyWeightedReturn`, `timeWeightedReturn` | — |
-| Exigido e esperado com os mesmos aportes: `V_k = V_{k−1}·(1+a)^(Δdias/365) + aporte_k`, base de 365 dias, a do XIRR — a carteira com XIRR igual a `a` termina sobre a curva | `FlowBenchmarks.atAnnualRate` | teste |
+| Exigido com os mesmos aportes: `V_k = V_{k−1}·(1+a)^(Δdias/365) + aporte_k`, base de 365 dias, a do XIRR — a carteira com XIRR igual a `a` termina sobre a curva | `FlowBenchmarks.atAnnualRate` | teste |
 | CDI: o saldo do pregão anterior recebe as taxas diárias do Banco Central dos dias `[d_{k−1}, d_k)` | `FlowBenchmarks.onDailyRates` | — |
 | Ibovespa: cada aporte compra cotas do índice no fechamento do dia | `FlowBenchmarks.onIndex` | índice de retorno total na metodologia da B3 |
-| O exigido é o da meta (7.3); o esperado é o da Meta no dia da criação, congelado e rotulado com a data. O custo de capital das coortes não é usado | [tracking-store.ts (app), `TrackingActions.start`](../../src/app/state/tracking-store.ts) | decisão 159 |
+| O exigido é o da meta (7.3). O esperado da carteira não é mais gravado nem desenhado: o registro guarda o campo, vazio desde a decisão 160, e o de acompanhamentos anteriores é ignorado | [tracking-store.ts (app), `TrackingActions.start`](../../src/app/state/tracking-store.ts); [tracking.ts, `computeTracking`](../../src/app/tracking.ts) | decisões 159 e 160 |
+| Todo aviso que fala de coorte diz o que ela é: a fotografia trimestral do preço justo, o motor de cada fim de trimestre com só os dados públicos até ali | [tracking.ts, `cohortMeaning`](../../src/app/tracking.ts) | decisão 160 |
 | No ritmo de agora: o patrimônio de hoje e os aportes que faltam ao XIRR atual, pela fórmula da curva de acumulação | `projectedEndValue` | — |
 | Data de início: hoje, ou no passado desde a primeira coorte; futuro recusado | `startDateProblem` | — |
 
@@ -184,8 +188,6 @@ sobrevivência.
   medidas de retorno total.
 - Sem rebalanceamento, a carteira simulada pode ficar muito diferente dos pesos
   escolhidos em janelas longas.
-- O retorno esperado da carteira não usa o preço justo (nenhuma ordenação foi
-  comprovada); é o custo de capital, que o mercado exige em média.
 - O cálculo do usuário não é validado: ele é a conta do motor com a opinião de
   quem a digita, e pode chegar a qualquer preço.
 - O valuation salvo é o retrato do dia: reabri-lo aplica os números dele à

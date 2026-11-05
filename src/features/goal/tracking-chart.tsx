@@ -22,7 +22,6 @@ const colors: Record<string, string> = {
   exigido: 'var(--chart-1)',
   cdi: 'var(--chart-2)',
   ibov: 'var(--chart-3)',
-  esperado: 'var(--chart-4)',
 };
 
 /** Os índices que o gráfico desenha: um a cada passo, mais o último pregão. */
@@ -47,8 +46,8 @@ function monthEnds(dates: readonly DateTime[]): number[] {
 /**
  * **A carteira realizada contra a Meta**: o patrimônio dia a dia da carteira
  * que compra o maior potencial, e os mesmos aportes, nas mesmas datas, no
- * caminho exigido pela meta, no esperado da carteira, no CDI e no Ibovespa
- * que de fato aconteceram (decisão 159).
+ * caminho exigido pela meta, no CDI e no Ibovespa que de fato aconteceram
+ * (decisão 159). O esperado da carteira saiu com a decisão 160.
  *
  * É a curva de acumulação da Meta com o eixo de datas reais: onde ela dizia
  * "em 5 anos", esta diz "de março de 2021 até hoje".
@@ -136,7 +135,7 @@ export function TrackingChart({ view }: { view: TrackingView }) {
           rows={ends.map((i) => [Fmt.date(outcome.dates[i]!), ...series.map((s) => Fmt.money(s.values[i] ?? 0))])}
         />
       }
-      footer="Carteira: ações a mercado mais o caixa, com proventos creditados na data ex (JCP líquido da retenção na fonte: 15% até 2025 e 17,5% desde 2026) e a tarifa da B3. Exigido e esperado: os aportes compostos à taxa anual, base de 365 dias. CDI: a série diária do Banco Central. Ibovespa: índice de retorno total da B3. Sem imposto sobre ganho de capital e sem spread de compra."
+      footer="Carteira: ações a mercado mais o caixa, com proventos creditados na data ex (JCP líquido da retenção na fonte: 15% até 2025 e 17,5% desde 2026) e a tarifa da B3. Exigido: os aportes compostos à taxa anual, base de 365 dias. CDI: a série diária do Banco Central. Ibovespa: índice de retorno total da B3. Sem imposto sobre ganho de capital e sem spread de compra."
     />
   );
 }

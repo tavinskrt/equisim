@@ -130,7 +130,8 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
   const labels = points.map((p) => Fmt.shortDate(p.source.date));
   const footer =
     measure === 'base100'
-      ? 'Índice ponderado pelo tempo (TWR): o retorno da composição, neutro ao cronograma de aportes. A série diária completa vai no CSV.'
+      ? 'Base 100: as duas carteiras partem de 100 no primeiro dia, e cada ponto diz no que esses 100 se transformaram — 150 é um ganho de 50%, 80 é uma perda de 20%. ' +
+        'É o índice ponderado pelo tempo (TWR): mede só o retorno da composição, e por isso os aportes não fazem a curva saltar. A série diária completa vai no CSV.'
       : 'Posições a mercado mais o caixa, incluindo os aportes — por isso a curva salta no dia de cada um. Para comparar composições, use a base 100.';
 
   return (

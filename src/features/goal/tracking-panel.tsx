@@ -5,7 +5,7 @@ import { fetchValuation, services } from '../../app/hooks';
 import { useQuery } from '../../app/query';
 import { usePreferences } from '../../app/state/preferences-store';
 import { TrackingActions, useTrackings } from '../../app/state/tracking-store';
-import { civilToday, computeTracking, startDateProblem, type TrackingView, validateStart } from '../../app/tracking';
+import { civilToday, cohortMeaning, computeTracking, startDateProblem, type TrackingView, validateStart } from '../../app/tracking';
 import {
   type FinancialGoal,
   isoDay,
@@ -35,7 +35,7 @@ import { TrackingChart } from './tracking-chart';
  * projeção e passa a confrontar o plano com o que a carteira de fato fez,
  * comprando a cada aporte o ativo de maior potencial do dia.
  */
-export function TrackingSection(props: { goal: FinancialGoal | null; principal: Portfolio; expected: number | null }) {
+export function TrackingSection(props: { goal: FinancialGoal | null; principal: Portfolio }) {
   const { status, items, error } = useTrackings();
   useEffect(() => {
     if (useTrackings.getState().status === 'idle') void TrackingActions.load();
@@ -57,11 +57,11 @@ export function TrackingSection(props: { goal: FinancialGoal | null; principal: 
     );
   }
   const current = items[0];
-  if (current === undefined) return <StartTracking goal={props.goal} principal={props.principal} expected={props.expected} />;
+  if (current === undefined) return <StartTracking goal={props.goal} principal={props.principal} />;
   return <TrackingDetail stored={current} />;
 }
 
-function StartTracking(props: { goal: FinancialGoal | null; principal: Portfolio; expected: number | null }) {
+function StartTracking(props: { goal: FinancialGoal | null; principal: Portfolio }) {
   const today = useMemo(() => civilToday(services().clock), []);
   const cohorts = useQuery('upside-cohorts', () => services().upsideCohorts());
   const busy = useTrackings((s) => s.busy);
@@ -92,7 +92,9 @@ function StartTracking(props: { goal: FinancialGoal | null; principal: Portfolio
       today,
       createdAt: services().clock(),
       contributionDay: day,
-      expectedReturn: props.expected,
+      // Sem retorno esperado da carteira desde a decisão 160: o campo do
+      // registro fica, para os acompanhamentos gravados antes, e vai vazio.
+      expectedReturn: null,
       cohortsGeneratedAt: cohortData?.generatedAt ?? null,
     });
     setFailure(created.isErr ? FailureCopy.of(created.failureOrNull!) : null);
@@ -128,9 +130,9 @@ function StartTracking(props: { goal: FinancialGoal | null; principal: Portfolio
         </p>
         {isPast && (
           <Banner tone="caution" icon={<History aria-hidden className="mt-0.5 size-4 shrink-0" />}>
-            Com data passada, cada compra usa o preço justo da coorte trimestral ponto no tempo vigente naquele dia — só o que era público
-            ali. Os ativos, porém, são os da carteira de hoje, escolhida por quem já sabe quais empresas sobreviveram: o resultado passado
-            tende a sair melhor que o de uma carteira montada naquela data.
+            Com data passada, cada compra usa o preço justo da coorte trimestral vigente naquele dia — só o que era público ali.{' '}
+            {cohortMeaning} Os ativos, porém, são os da carteira de hoje, escolhida por quem já sabe quais empresas sobreviveram: o
+            resultado passado tende a sair melhor que o de uma carteira montada naquela data.
           </Banner>
         )}
         {failure !== null && <Banner tone="negative">{failure}</Banner>}
@@ -221,13 +223,6 @@ function TrackingDetail({ stored }: { stored: StoredTracking }) {
   );
 }
 
-/** "motor 2026-10-23" vira "motor em 23/10/2026"; outra origem passa como veio. */
-function sourceLabel(source: string): string {
-  const m = /^motor (\d{4}-\d{2}-\d{2})$/.exec(source);
-  const day = m === null ? null : parseIsoDay(m[1]!);
-  return day === null ? source : `motor em ${Fmt.date(day)}`;
-}
-
 function Summary({ view }: { view: TrackingView }) {
   const { outcome } = view;
   const wealth = outcome.finalValueCents / 100;
@@ -238,7 +233,7 @@ function Summary({ view }: { view: TrackingView }) {
   const meets = xirr !== null && required !== null ? xirr >= required : null;
   return (
     <div className="space-y-4">
-      <MetricRow className="sm:grid-cols-4">
+      <MetricRow className="sm:grid-cols-3">
         <Metric label="Patrimônio" value={Fmt.money(wealth)} hint={`aportado ${Fmt.money(contributed)}`} />
         <Metric
           label="Retorno da carteira"
@@ -247,11 +242,6 @@ function Summary({ view }: { view: TrackingView }) {
           tone={meets === null ? 'neutral' : meets ? 'positive' : 'negative'}
         />
         <Metric label="Exigido pela meta" value={required === null ? '—' : Fmt.percent(required, { decimals: 1 })} hint="a.a." />
-        <Metric
-          label="Esperado da carteira"
-          value={view.expected === null ? '—' : Fmt.percent(view.expected, { decimals: 1 })}
-          hint={view.record.expectedSource === null ? 'sem avaliação no início' : `a.a., ${sourceLabel(view.record.expectedSource)}`}
-        />
       </MetricRow>
       <div className="space-y-2">
         {gapToRequired !== null && (
@@ -323,6 +313,11 @@ function Orders({ orders }: { orders: readonly TrackingOrder[] }) {
   ]);
   return (
     <Disclosure title="Compras" summary={`${orders.length} aporte(s), do mais recente ao primeiro — gravados e imutáveis`}>
+      {orders.some((o) => o.origin === 'coorte') && (
+        <p className="mb-2 text-caption leading-relaxed text-fg-3">
+          “Preço justo de” diz de onde veio o preço justo da compra: do motor no dia, ou de uma coorte. {cohortMeaning}
+        </p>
+      )}
       <div className="max-h-96 overflow-auto">
         <DataTable
           caption="Compras do acompanhamento"

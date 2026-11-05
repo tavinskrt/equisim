@@ -34,14 +34,20 @@ export interface TrackingCurve {
   readonly annual: number | null;
 }
 
+/**
+ * O que é uma coorte, para quem lê o acompanhamento: a frase vai junto de
+ * todo aviso que fala de coorte (decisão 160).
+ */
+export const cohortMeaning =
+  'Coorte é a fotografia trimestral do preço justo: no último dia de cada trimestre, de 2018 a 2025, o motor avaliou cada ativo só ' +
+  'com os dados públicos até aquela data, sem nada do que veio depois.';
+
 /** O acompanhamento pronto para a tela. */
 export interface TrackingView {
   readonly record: TrackingRecord;
   readonly outcome: TrackingOutcome;
   /** Taxa anual que a meta exige. */
   readonly required: number | null;
-  /** Retorno esperado da carteira congelado no início, ao ano. */
-  readonly expected: number | null;
   readonly curves: readonly TrackingCurve[];
   /** Patrimônio que o caminho exigido teria hoje, em reais. */
   readonly requiredNow: number | null;
@@ -145,7 +151,6 @@ async function assemble(args: {
 
   const solved = RequiredReturnSolver.solve(record.goal);
   const required = solved.isOk ? solved.unwrap().annual : null;
-  const expected = record.expectedReturn;
 
   const curves: TrackingCurve[] = [];
   let requiredNow: number | null = null;
@@ -153,14 +158,6 @@ async function assemble(args: {
     const values = FlowBenchmarks.atAnnualRate({ dates, flowCents, annual: required });
     requiredNow = values[values.length - 1] ?? null;
     curves.push({ key: 'exigido', label: 'Exigido pela meta', values, annual: required });
-  }
-  if (expected !== null && Number.isFinite(expected) && expected > -1) {
-    curves.push({
-      key: 'esperado',
-      label: 'Esperado da carteira',
-      values: FlowBenchmarks.atAnnualRate({ dates, flowCents, annual: expected }),
-      annual: expected,
-    });
   }
 
   const [cdi, ibov] = await Promise.all([services.macro.riskFreeDaily(window), services.benchmark.ibovespa(window)]);
@@ -199,7 +196,7 @@ async function assemble(args: {
   if (outcome.staleOrders > 0 && lastCohort !== null) {
     notes.push(
       `${outcome.staleOrders} compra(s) usaram o preço justo da última coorte (${isoDay(lastCohort)}) contra o preço do dia, ` +
-        'porque não há coorte mais recente.',
+        `porque não há coorte mais recente. ${cohortMeaning}`,
     );
   }
   if (outcome.pendingLive > 0) {
@@ -210,7 +207,6 @@ async function assemble(args: {
     record,
     outcome,
     required,
-    expected,
     curves,
     requiredNow,
     remainingMonths,
