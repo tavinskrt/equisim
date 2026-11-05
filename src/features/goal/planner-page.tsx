@@ -1,15 +1,12 @@
-import { Ban, CheckCircle2, Donut, PiggyBank, Ruler, TriangleAlert } from 'lucide-react';
+import { Ban, CheckCircle2, PiggyBank, TriangleAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
 
-import { FeasibilityLevel, type FeasibilityVerdict, FinancialGoal, type GoalAlignment, Money } from '../../core';
-import { FeasibilityCopy, Fmt, Lexicon, SkillCopy, trendOf } from '../../copy';
-import { useFeasibility, useGoalAlignment, useSkill } from '../../app/hooks';
+import { FeasibilityLevel, type FeasibilityVerdict, FinancialGoal, Money } from '../../core';
+import { Fmt, Lexicon } from '../../copy';
+import { useFeasibility } from '../../app/hooks';
 import { StudyActions, useStudy } from '../../app/state/study-store';
-import { Banner } from '../../ui/banner';
-import { Button } from '../../ui/button';
 import { Card, Panel } from '../../ui/card';
-import { EmptyState, Skeleton } from '../../ui/feedback';
+import { Skeleton } from '../../ui/feedback';
 import { Metric, MetricRow } from '../../ui/metric';
 import { Slider } from '../../ui/slider';
 import { toneBorder, toneText } from '../../ui/tone';
@@ -26,6 +23,10 @@ const defaults = { initial: 10000, monthly: 1000, target: 500000, months: 120 };
  * e onde ela fica contra o CDI e o Ibovespa da década. A viabilidade não
  * depende de avaliação nenhuma: o aviso de meta irreal aparece enquanto se
  * arrasta o controle, antes de escolher qualquer ativo.
+ *
+ * Sem o retorno esperado da carteira (decisão 160): ele era a média dos Ke
+ * ponderada pelo peso, e o peso saiu da interface. A carteira se confronta com
+ * a meta pelo que de fato fez, no acompanhamento.
  */
 export function PlannerPage() {
   const goal = useStudy((s) => s.study.goal);
@@ -55,8 +56,6 @@ export function PlannerPage() {
   }, [plan]);
 
   const verdict = useFeasibility(goal);
-  const alignment = useGoalAlignment(principal, goal);
-  const skill = useSkill();
 
   return (
     <div className="space-y-4">
@@ -94,37 +93,8 @@ export function PlannerPage() {
         </Panel>
         <div className="min-w-0 space-y-4">
           {verdict === null ? <VerdictSkeleton /> : <FeasibilityCard verdict={verdict} />}
-          {goal !== null && verdict !== null && <Chart verdict={verdict} alignment={alignment.status === 'success' ? alignment.data : null} />}
-          {principal.isEmpty ? (
-            <Card>
-              <EmptyState
-                icon={<Donut className="size-5" />}
-                title="Sem carteira para comparar"
-                message="Monte a carteira Principal para confrontar o retorno esperado com a rentabilidade exigida."
-                action={
-                  <Button asChild variant="secondary">
-                    <Link to="/estudo">Montar a carteira</Link>
-                  </Button>
-                }
-              />
-            </Card>
-          ) : alignment.status === 'pending' ? (
-            <Card className="space-y-3 p-5" aria-label="Avaliando a carteira">
-              <Skeleton className="h-5 w-48" />
-              <Skeleton className="h-10 w-full" />
-            </Card>
-          ) : alignment.status === 'success' && alignment.data !== null ? (
-            <AlignmentCard
-              alignment={alignment.data}
-              skillCaveat={skill.status === 'success' ? SkillCopy.caveat(skill.data) : null}
-              withPremium={skill.status === 'success' && skill.data?.premiumOrdering != null}
-            />
-          ) : null}
-          <TrackingSection
-            goal={goal}
-            principal={principal}
-            expected={alignment.status === 'success' && alignment.data !== null ? alignment.data.expectedReturn : null}
-          />
+          {goal !== null && verdict !== null && <Chart verdict={verdict} />}
+          <TrackingSection goal={goal} principal={principal} />
         </div>
       </div>
     </div>
@@ -167,16 +137,11 @@ function FeasibilityCard({ verdict }: { verdict: FeasibilityVerdict }) {
           <Metric label="Ibovespa" value={Fmt.percent(verdict.anchors.marketCagr, { decimals: 1 })} hint={`a.a., ${verdict.anchors.observedYears} anos`} />
         </MetricRow>
       )}
-      <p className="mt-3 text-body-sm leading-relaxed text-fg-2">{FeasibilityCopy.of(verdict)}</p>
-      <p className="mt-2 text-caption text-fg-3">
-        Referências dos últimos {verdict.anchors.observedYears} anos: CDI {Fmt.percent(verdict.anchors.riskFreeCagr)} a.a. · Ibovespa{' '}
-        {Fmt.percent(verdict.anchors.marketCagr)} a.a.
-      </p>
     </Card>
   );
 }
 
-function Chart({ verdict, alignment }: { verdict: FeasibilityVerdict; alignment: GoalAlignment | null }) {
+function Chart({ verdict }: { verdict: FeasibilityVerdict }) {
   const goal = useStudy((s) => s.study.goal)!;
   const rates: AccumulationRate[] = [];
   if (verdict.requiredAnnualRate !== null && Number.isFinite(verdict.requiredAnnualRate) && verdict.requiredAnnualRate > -1) {
@@ -184,38 +149,6 @@ function Chart({ verdict, alignment }: { verdict: FeasibilityVerdict; alignment:
   }
   rates.push({ key: 'cdi', label: 'CDI', annual: verdict.anchors.riskFreeCagr, color: 'var(--chart-2)' });
   rates.push({ key: 'ibov', label: 'Ibovespa', annual: verdict.anchors.marketCagr, color: 'var(--chart-3)' });
-  if (alignment !== null) rates.push({ key: 'carteira', label: Lexicon.expected, annual: alignment.expectedReturn, color: 'var(--chart-4)' });
   rates.push({ key: 'aportes', label: 'Só os aportes', annual: 0, color: 'var(--fg-3)', dashed: true });
   return <AccumulationChart goal={goal} rates={rates} />;
-}
-
-function AlignmentCard(props: { alignment: GoalAlignment; skillCaveat: string | null; withPremium: boolean }) {
-  const { alignment } = props;
-  const meets = alignment.meetsGoal;
-  return (
-    <Panel
-      title="Carteira frente à meta"
-      subtitle={props.withPremium ? 'Custo do capital próprio mais prêmio pela ordenação medida' : 'Custo do capital próprio, sem prêmio'}
-    >
-      <MetricRow className="sm:grid-cols-3">
-        <Metric
-          label={Lexicon.expected}
-          value={Fmt.percent(alignment.expectedReturn)}
-          hint="retorno total, com proventos reinvestidos"
-          tone={meets ? 'positive' : 'negative'}
-        />
-        <Metric label={Lexicon.required} value={Fmt.percent(alignment.required.annual)} hint={Lexicon.requiredPerYear} />
-        <Metric label={Lexicon.margin} value={Fmt.points(alignment.gap)} hint="sobre o exigido" tone={trendOf(alignment.gap)} />
-      </MetricRow>
-      <div className="mt-4 space-y-2">
-        {props.skillCaveat !== null && <Banner icon={<Ruler aria-hidden className="mt-0.5 size-4 shrink-0" />}>{props.skillCaveat}</Banner>}
-        {alignment.coverageIsWeak && (
-          <Banner tone="caution">
-            Apenas {Fmt.percent(alignment.valuationCoverage, { decimals: 0 })} do peso da carteira tem avaliação disponível. O retorno
-            esperado é pouco representativo.
-          </Banner>
-        )}
-      </div>
-    </Panel>
-  );
 }

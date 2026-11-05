@@ -52,11 +52,17 @@ export function sectorSlices(portfolio: Portfolio): Slice[] {
   return named;
 }
 
-/** A rosca setorial da Principal, com a tabela dos pesos ao lado — que é também a legenda. */
+/**
+ * A rosca setorial da Principal, com a tabela ao lado, que é também a legenda.
+ *
+ * A tabela tem layout fixo: no automático, o nome longo de setor ("Petróleo,
+ * Gás e Biocombustíveis") alarga a tabela além do cartão em vez de quebrar a
+ * linha. Fixa, a coluna do nome fica com a sobra e o nome quebra.
+ */
 export function SectorDonut({ portfolio }: { portfolio: Portfolio }) {
   const slices = sectorSlices(portfolio);
   return (
-    <Panel title="Setores da Principal" subtitle="Peso do aporte por setor da B3">
+    <Panel title="Setores da Principal" subtitle="Parte da carteira em cada setor da B3">
       {slices.length === 0 ? (
         <EmptyState title="Sem ativos" message="A rosca aparece quando a Principal tiver ativos." className="py-6" />
       ) : (
@@ -97,15 +103,20 @@ export function SectorDonut({ portfolio }: { portfolio: Portfolio }) {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <table className="w-full text-body-sm">
-            <caption className="sr-only">Peso da Principal por setor</caption>
+          <table className="w-full min-w-0 table-fixed text-body-sm">
+            <caption className="sr-only">Parte da Principal em cada setor</caption>
+            <colgroup>
+              <col />
+              <col className="w-[4.75rem]" />
+              <col className="w-16" />
+            </colgroup>
             <tbody>
               {slices.map((s) => (
                 <tr key={s.key} className="border-b border-divider last:border-0">
                   <th scope="row" className="py-1.5 text-left font-normal text-fg-2">
-                    <span className="flex items-center gap-2">
-                      <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
-                      <span className="truncate">{s.label}</span>
+                    <span className="flex items-start gap-2">
+                      <span aria-hidden className="mt-[0.4em] size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
+                      <span className="min-w-0 break-words">{s.label}</span>
                     </span>
                   </th>
                   <td className="num whitespace-nowrap py-1.5 pl-3 pr-2 text-right text-caption text-fg-3">

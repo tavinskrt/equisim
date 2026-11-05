@@ -10,24 +10,13 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { Landmark } from 'lucide-react';
 import { useState } from 'react';
 
-import type { ConcentrationReport, Ticker } from '../../core';
-import { Fmt } from '../../copy';
-import { concentrationOf, StudyActions, useStudy } from '../../app/state/study-store';
-import { Banner } from '../../ui/banner';
+import type { Ticker } from '../../core';
+import { StudyActions, useStudy } from '../../app/state/study-store';
 import { AssetPickerSheet } from './asset-picker-sheet';
 import { dropIds, PortfolioColumn } from './portfolio-column';
 import { SectorDonut } from './sector-donut';
-import { StudySummary } from './study-summary';
-
-function concentrationMessage(report: ConcentrationReport): string {
-  const parts = report.concentrated
-    .map((e) => `${e.sector.label} (${e.count} ativos, ${Fmt.percent(e.weight, { decimals: 0 })})`)
-    .join(' · ');
-  return `Concentração setorial na carteira Principal: ${parts}. É um aviso, não um impedimento.`;
-}
 
 const announcements: Announcements = {
   onDragStart: ({ active }) => `${(active.data.current?.['ticker'] as Ticker | undefined)?.value ?? 'Ativo'} pego.`,
@@ -42,12 +31,15 @@ const announcements: Announcements = {
 
 /**
  * **O Montador** da dupla carteira. O gesto central é arrastar um ativo entre
- * Principal e Reserva; como o recálculo de pesos e concentração custa
- * microssegundos, tudo responde no mesmo quadro do gesto.
+ * Principal e Reserva; como o recálculo da carteira custa microssegundos,
+ * tudo responde no mesmo quadro do gesto.
+ *
+ * Sem resumo de métricas nem aviso de concentração no alto (decisão 160): a
+ * contagem já está em cada coluna, a rosca mostra os setores, e o retorno
+ * esperado ponderado saiu com o peso.
  */
 export function BuilderPage() {
   const study = useStudy((s) => s.study);
-  const concentration = concentrationOf(study.principal);
   const [picker, setPicker] = useState<{ open: boolean; toPrincipal: boolean }>({ open: false, toPrincipal: true });
   const [dragging, setDragging] = useState<Ticker | null>(null);
 
@@ -78,12 +70,6 @@ export function BuilderPage() {
           para ver o Raio-X.
         </p>
       </div>
-      <StudySummary />
-      {concentration.hasAlert && (
-        <Banner tone="caution" icon={<Landmark aria-hidden className="mt-0.5 size-4 shrink-0" />}>
-          {concentrationMessage(concentration)}
-        </Banner>
-      )}
       <DndContext
         sensors={sensors}
         onDragStart={onDragStart}

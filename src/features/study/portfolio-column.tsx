@@ -1,8 +1,7 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { ArrowLeftRight, GripVertical, Inbox, PlusCircle, Scale, X } from 'lucide-react';
+import { ArrowLeftRight, GripVertical, Inbox, PlusCircle, X } from 'lucide-react';
 
 import { type ManualValuationRecord, Portfolio, type PortfolioEntry } from '../../core';
-import { Fmt } from '../../copy';
 import { userValuationOf, useSavedValuations } from '../../app/state/saved-valuations-store';
 import { StudyActions } from '../../app/state/study-store';
 import { IconButton } from '../../ui/button';
@@ -54,11 +53,6 @@ export function PortfolioColumn(props: { portfolio: Portfolio; isPrincipal: bool
             intro="O potencial vem do valuation de cada ativo, recalculado a cada abertura da tela."
             entries={[
               {
-                term: 'Peso',
-                meaning:
-                  'Fatia do aporte destinada ao ativo. Não há rebalanceamento: o peso define para onde vai cada aporte, e a partir daí a posição deriva com o mercado.',
-              },
-              {
                 term: 'Potencial',
                 meaning:
                   'Distância entre a cotação e o preço justo estimado pelo modelo, em percentual, com o preço justo logo abaixo. É a discordância entre o modelo e o mercado — não um retorno previsto, e sem prazo para se realizar.',
@@ -75,11 +69,6 @@ export function PortfolioColumn(props: { portfolio: Portfolio; isPrincipal: bool
               },
             ]}
           />
-          {portfolio.length > 1 && (
-            <IconButton label="Equiponderar" onClick={() => StudyActions.equalize(isPrincipal)}>
-              <Scale aria-hidden className="size-[18px]" />
-            </IconButton>
-          )}
           <IconButton label="Adicionar ativo" tone={isPrincipal ? 'brand' : 'reserve'} onClick={props.onAdd}>
             <PlusCircle aria-hidden className="size-5" />
           </IconButton>
@@ -95,10 +84,9 @@ export function PortfolioColumn(props: { portfolio: Portfolio; isPrincipal: bool
         />
       ) : (
         <div className="mt-3">
-          <div className="hidden grid-cols-[28px_1fr_120px_96px_88px] items-center gap-2 px-1 pb-1.5 sm:grid" aria-hidden>
+          <div className="hidden grid-cols-[28px_1fr_96px_88px] items-center gap-2 px-1 pb-1.5 sm:grid" aria-hidden>
             <span />
             <span className="eyebrow">Ativo</span>
-            <span className="eyebrow">Peso</span>
             <span className="eyebrow text-right">Potencial</span>
             <span />
           </div>
@@ -119,12 +107,13 @@ function AssetRow({ entry, isPrincipal, mine }: { entry: PortfolioEntry; isPrinc
     id: `${isPrincipal ? 'p' : 'r'}:${entry.ticker.value}`,
     data: { ticker: entry.ticker, fromPrincipal: isPrincipal },
   });
-  const weight = entry.weight.value;
   return (
     <li
       ref={setNodeRef}
       className={cn(
-        'grid grid-cols-[28px_1fr_auto] items-center gap-x-2 gap-y-1 py-2 sm:grid-cols-[28px_1fr_120px_96px_88px]',
+        // Uma linha só em qualquer largura: sem a coluna de peso (decisão
+        // 160), o potencial cabe ao lado do ativo também no celular.
+        'grid grid-cols-[28px_minmax(0,1fr)_auto_auto] items-center gap-x-2 py-2 sm:grid-cols-[28px_minmax(0,1fr)_96px_88px]',
         isDragging && 'opacity-30',
       )}
     >
@@ -150,27 +139,10 @@ function AssetRow({ entry, isPrincipal, mine }: { entry: PortfolioEntry; isPrinc
           </span>
         </span>
       </button>
-      {/* No celular, peso e potencial descem para a segunda linha, com rótulo. */}
-      <div className="col-span-3 col-start-2 row-start-2 flex items-center gap-3 sm:col-span-1 sm:col-start-3 sm:row-start-1">
-        <span className="text-caption text-fg-3 sm:hidden">peso</span>
-        <div className="flex flex-1 items-center gap-2">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-sunken" aria-hidden>
-            <div
-              className={cn('h-full rounded-full', isPrincipal ? 'bg-brand' : 'bg-reserve')}
-              style={{ width: `${Math.min(weight, 1) * 100}%` }}
-            />
-          </div>
-          <span className="num w-14 text-right text-body-sm text-fg">{Fmt.weight(weight)}</span>
-        </div>
-        <span className="text-caption text-fg-3 sm:hidden">potencial</span>
-        <span className="sm:hidden">
-          <PotentialCell ticker={entry.ticker} mine={mine} />
-        </span>
-      </div>
-      <div className="hidden justify-end sm:flex">
+      <div className="flex justify-end">
         <PotentialCell ticker={entry.ticker} mine={mine} />
       </div>
-      <div className="col-start-3 row-start-1 flex justify-end sm:col-start-5">
+      <div className="flex justify-end">
         <IconButton
           label={isPrincipal ? `Mover ${entry.ticker.value} para a Reserva` : `Promover ${entry.ticker.value} à Principal`}
           tone={isPrincipal ? 'reserve' : 'brand'}

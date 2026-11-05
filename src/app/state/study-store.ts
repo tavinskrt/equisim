@@ -67,6 +67,18 @@ function saveDraft(study: PortfolioStudy): void {
   );
 }
 
+/**
+ * O estudo com as duas carteiras equiponderadas. A interface não escolhe peso
+ * (decisão 160): incluir e tirar ativo já reequipondera, e um estudo gravado
+ * antes disso com outros pesos não pode levá-los, invisíveis, ao backtest.
+ * Devolve o mesmo estudo quando os pesos já são iguais.
+ */
+export function withEqualWeights(study: PortfolioStudy): PortfolioStudy {
+  const equal = (p: Portfolio) => [...p.entries.values()].every((e) => Math.abs(e.weight.value - 1 / p.length) < 1e-9);
+  if (equal(study.principal) && equal(study.reserve)) return study;
+  return study.copyWith({ principal: study.principal.equalize(), reserve: study.reserve.equalize() });
+}
+
 /** O rascunho guardado, ou `null` quando não há ou está ilegível. */
 export function readDraft(): PortfolioStudy | null {
   if (!hasRuntime()) return null;
@@ -74,7 +86,7 @@ export function readDraft(): PortfolioStudy | null {
   if (raw === null) return null;
   try {
     const d = JSON.parse(raw) as Record<string, unknown>;
-    return new PortfolioStudy({
+    return withEqualWeights(new PortfolioStudy({
       id: typeof d['id'] === 'string' ? d['id'] : null,
       name: typeof d['name'] === 'string' ? d['name'] : 'Novo estudo',
       principal: PortfolioStudyCodec.decodePortfolio(d['principal'], {
@@ -88,7 +100,7 @@ export function readDraft(): PortfolioStudy | null {
         kind: PortfolioKind.reserve,
       }),
       goal: PortfolioStudyCodec.decodeGoal(d['goal']),
-    });
+    }));
   } catch {
     return null;
   }
@@ -120,7 +132,7 @@ function refuse(message: string): void {
 export const StudyActions = {
   /** Substitui o estudo em edição, descartando alterações e erro pendente. */
   load(study: PortfolioStudy): void {
-    setStudy(study, { isSaving: false });
+    setStudy(withEqualWeights(study), { isSaving: false });
   },
 
   /** Renomeia. Nome vazio é aceito. */
@@ -181,16 +193,6 @@ export const StudyActions = {
       fromPrincipal ? study.copyWith({ principal: result.unwrap() }) : study.copyWith({ reserve: result.unwrap() }),
     );
     return true;
-  },
-
-  /** Pesos iguais na carteira indicada. Nunca falha. */
-  equalize(onPrincipal: boolean): void {
-    const { study } = useStudy.getState();
-    setStudy(
-      onPrincipal
-        ? study.copyWith({ principal: study.principal.equalize() })
-        : study.copyWith({ reserve: study.reserve.equalize() }),
-    );
   },
 
   /**

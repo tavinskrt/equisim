@@ -139,7 +139,8 @@ describe('computeTracking', () => {
     expect(asked).toBe(0);
     expect(view.outcome.orders.every((o) => o.origin === 'coorte')).toBe(true);
     expect(view.outcome.newOrders.length).toBe(view.outcome.orders.length);
-    expect(view.curves.map((c) => c.key)).toEqual(['exigido', 'esperado', 'cdi', 'ibov']);
+    // Sem o esperado da carteira desde a decisão 160, mesmo com ele no registro.
+    expect(view.curves.map((c) => c.key)).toEqual(['exigido', 'cdi', 'ibov']);
     // O Ibovespa parado devolve o aportado; o CDI, mais que ele.
     const ibov = view.curves.find((c) => c.key === 'ibov')!;
     expect(ibov.values[ibov.values.length - 1]).toBeCloseTo(view.outcome.contributed[view.outcome.contributed.length - 1]!, 6);

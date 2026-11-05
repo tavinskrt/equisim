@@ -1,7 +1,7 @@
-import { ArrowLeftRight, CalendarX2, CloudOff, OctagonAlert, Ruler, TrendingUp } from 'lucide-react';
+import { ArrowLeftRight, CalendarX2, CloudOff, OctagonAlert, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router';
 
-import { BacktestLimits, type BacktestSettings, type PortfolioComparison, requestedWindow } from '../../app/backtest';
+import { BacktestLimits, type BacktestSettings, type PortfolioComparison } from '../../app/backtest';
 import { CsvExport } from '../../app/csv-export';
 import { services } from '../../app/hooks';
 import { PreferencesActions, usePreferences } from '../../app/state/preferences-store';
@@ -25,21 +25,6 @@ import { RiskReturnChart } from './risk-return-chart';
 import { useComparison, useCorrelation } from './use-comparison';
 import { WealthBridge } from './wealth-bridge';
 
-/**
- * Diz, quando é o caso, que a janela não cobre o prazo da meta. `null` quando
- * não há o que dizer: aviso que aparece sempre deixa de ser aviso. O prazo é
- * arredondado **para cima** — 66 meses não cabem em cinco anos.
- */
-export function horizonNotice(settings: BacktestSettings, goal: FinancialGoal | null): string | null {
-  if (goal === null) return null;
-  const window = settings.windowYears;
-  const term = Math.ceil(goal.months / 12);
-  if (window >= term) return null;
-  const warning = `A janela cobre ${window} dos ${term} anos da meta. Compare a RENTABILIDADE, não o patrimônio: o valor final abaixo acumula só parte do plano de aportes, não o prazo inteiro.`;
-  if (term <= BacktestLimits.maxWindowYears) return warning;
-  return `${warning} A fonte de cotações entrega no máximo ${BacktestLimits.maxWindowYears} anos, então nenhuma posição do controle alcança o prazo da meta.`;
-}
-
 /** Explica, em uma frase, por que a janela pedida não pôde ser usada inteira. */
 export function shortenedWindowMessage(result: PortfolioComparison): string {
   const start = Fmt.date(result.window.start);
@@ -57,7 +42,6 @@ export function BacktestPage() {
   const settings = usePreferences((s) => s.backtest);
   const goal = useStudy((s) => s.study.goal);
   const nothing = useStudy((s) => s.study.principal.isEmpty && s.study.reserve.isEmpty);
-  const notice = horizonNotice(settings, goal);
 
   return (
     <div className="space-y-4">
@@ -66,18 +50,16 @@ export function BacktestPage() {
         <p className="mt-1 text-body-sm text-fg-2">O que as duas carteiras teriam feito no passado, recebendo os aportes do seu plano nas mesmas datas.</p>
       </div>
       <SettingsCard settings={settings} goal={goal} />
-      {/* Ressalva do PARÂMETRO, não do resultado: aparece enquanto a simulação roda, porque decide como o número abaixo deve ser lido. */}
-      {notice !== null && <Banner icon={<Ruler aria-hidden className="mt-0.5 size-4 shrink-0" />}>{notice}</Banner>}
       {goal === null || nothing ? <NothingYet hasGoal={goal !== null} /> : <ComparisonArea />}
     </div>
   );
 }
 
+/** A janela e o prazo da meta, sem texto explicativo ao lado (decisão 160). */
 function SettingsCard({ settings, goal }: { settings: BacktestSettings; goal: FinancialGoal | null }) {
-  const start = requestedWindow(services().clock(), settings.windowYears).start;
   return (
     <Panel title="Parâmetros da simulação" subtitle="Sem rebalanceamento: os pesos derivam com o mercado">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-8">
+      <div className="md:max-w-md">
         <div>
           <Slider
             label="Janela"
@@ -91,11 +73,6 @@ function SettingsCard({ settings, goal }: { settings: BacktestSettings; goal: Fi
           {/* O prazo da meta logo abaixo, no MESMO formato da aba Meta: empilhados, os dois horizontes se comparam sem trocar de aba. */}
           {goal !== null && <KeyValue className="mt-2" label="Prazo da meta" value={Fmt.months(goal.months)} />}
         </div>
-        <p className="text-caption leading-relaxed text-fg-3">
-          Quanto tempo de história a simulação percorre, contado de hoje para trás. Com {settings.windowYears} {settings.windowYears === 1 ? 'ano' : 'anos'}, o plano
-          de aportes começa em {Fmt.date(start)} e vai até hoje. Janelas maiores incluem mais ciclos de mercado; em compensação, exigem que todos os ativos das
-          duas carteiras já negociassem naquela data — quando algum não negociava, a janela é encurtada até o primeiro pregão dele.
-        </p>
       </div>
     </Panel>
   );

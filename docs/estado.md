@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-11-04, a partir de `8bd1adb`.
+Gerado em 2026-11-05, a partir de `ebc948c`.
 
 ## Decisões registradas
 
-**132** aceita · **2** cumprida · **7** substituída
+**133** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -156,6 +156,7 @@ Gerado em 2026-11-04, a partir de `8bd1adb`.
 | 157 | Excluir a conta apaga todos os dados dela no Firestore, e exige a senha antes de apagar qualquer coisa | aceita | voce | 2026-10-29 |
 | 158 | A evolução comparada do Backtest passa ao gráfico de linha da Bklit UI, e o risco × retorno fica no Recharts | aceita | voce | 2026-10-29 |
 | 159 | A Meta acompanha a carteira realizada, que compra a cada aporte o ativo de maior potencial abaixo de um teto de peso, e a compara com o exigido, o esperado, o CDI e o Ibovespa | aceita | voce | 2026-11-04 |
+| 160 | A interface deixa o peso e o retorno esperado da carteira, e enxuga textos do Estudo, da Meta e do Backtest | aceita | voce | 2026-11-05 |
 
 ### Caminhos retirados
 
@@ -889,18 +890,21 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 80 | 26.320 |
-| Apresentacao | 185 | 26.764 |
+| Nucleo de dominio | 80 | 26.347 |
+| Apresentacao | 184 | 26.563 |
 | Camada de dados | 39 | 5.019 |
 | Auditoria | 5 | 679 |
 | Ferramentas de medicao | 128 | 29.840 |
-| Testes do app | 44 | 6.626 |
-| Testes do nucleo | 68 | 32.325 |
+| Testes do app | 44 | 6.663 |
+| Testes do nucleo | 68 | 32.339 |
 | Ferramentas de QA | 21 | 7.574 |
 
 ## Histórico recente
 
 ```
+2026-11-05  ebc948c  A Meta acompanha a carteira realizada (decisão 159)
+2026-11-05  9bcb898  O acompanhamento compra depois da última coorte
+2026-11-04  c9efa75  A Meta acompanha a carteira realizada (decisão 159)
 2026-11-03  8bd1adb  Refaz a entrada congelada e a validação com o motor da decisão 153
 2026-11-03  46b5f9a  Os casos de estudo passam ao motor de 03/11/2026
 2026-11-03  c752c08  Os casos de estudo trocam VALE3 e RENT3 por UNIP6 e RAPT4
@@ -913,7 +917,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-11-02  fa79c80  A entrada congelada passa a ter a curva do Tesouro dela
 2026-10-28  d85bdb4  A evolução comparada do Backtest passa ao gráfico da Bklit (decisão 158)
 2026-10-29  6bac5e3  As grades do Backtest fixam a coluna no celular
-2026-10-29  9425385  Nada do gráfico alarga a página no celular
-2026-10-29  b44e95a  A evolução comparada do Backtest passa ao gráfico da Bklit (decisão 158)
-2026-10-28  20e933e  Excluir a conta apaga todos os dados dela (decisão 157)
 ```

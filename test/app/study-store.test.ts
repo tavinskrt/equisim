@@ -81,7 +81,7 @@ describe('O estudo — edição síncrona', () => {
     expect(state().lastError).toContain('15');
   });
 
-  it('equalizar restaura pesos iguais num estudo salvo desigual', () => {
+  it('um estudo salvo com pesos desiguais abre equiponderado', () => {
     const current = state().study;
     StudyActions.load(
       current.copyWith({
@@ -96,7 +96,8 @@ describe('O estudo — edição síncrona', () => {
         }),
       }),
     );
-    StudyActions.equalize(true);
+    // Sem peso escolhido na interface (decisão 160): o estudo que chega com
+    // outros pesos entra equiponderado.
     for (const w of state().study.principal.weights) expect(w.value).toBeCloseTo(0.5, 9);
   });
 
