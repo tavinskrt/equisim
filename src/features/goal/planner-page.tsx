@@ -17,6 +17,7 @@ import { cn } from '../../ui/cn';
 import { AccumulationChart, type AccumulationRate, monthlyOf } from './accumulation-chart';
 import { feasibilityTitle, feasibilityTone } from './feasibility-tone';
 import { MoneySlider } from './money-slider';
+import { TrackingSection } from './tracking-panel';
 
 const defaults = { initial: 10000, monthly: 1000, target: 500000, months: 120 };
 
@@ -119,6 +120,11 @@ export function PlannerPage() {
               withPremium={skill.status === 'success' && skill.data?.premiumOrdering != null}
             />
           ) : null}
+          <TrackingSection
+            goal={goal}
+            principal={principal}
+            expected={alignment.status === 'success' && alignment.data !== null ? alignment.data.expectedReturn : null}
+          />
         </div>
       </div>
     </div>

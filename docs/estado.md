@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-29, a partir de `9425385`.
+Gerado em 2026-11-04, a partir de `8bd1adb`.
 
 ## Decisões registradas
 
-**131** aceita · **2** cumprida · **7** substituída
+**132** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -155,6 +155,7 @@ Gerado em 2026-10-29, a partir de `9425385`.
 | 156 | A curva de acumulação da Meta é o piloto dos gráficos da Bklit UI, e os outros gráficos continuam no Recharts até a comparação | aceita | voce | 2026-10-28 |
 | 157 | Excluir a conta apaga todos os dados dela no Firestore, e exige a senha antes de apagar qualquer coisa | aceita | voce | 2026-10-29 |
 | 158 | A evolução comparada do Backtest passa ao gráfico de linha da Bklit UI, e o risco × retorno fica no Recharts | aceita | voce | 2026-10-29 |
+| 159 | A Meta acompanha a carteira realizada, que compra a cada aporte o ativo de maior potencial abaixo de um teto de peso, e a compara com o exigido, o esperado, o CDI e o Ibovespa | aceita | voce | 2026-11-04 |
 
 ### Caminhos retirados
 
@@ -888,31 +889,31 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 79 | 24.999 |
-| Apresentacao | 181 | 25.838 |
-| Camada de dados | 38 | 4.728 |
+| Nucleo de dominio | 80 | 26.320 |
+| Apresentacao | 185 | 26.764 |
+| Camada de dados | 39 | 5.019 |
 | Auditoria | 5 | 679 |
-| Ferramentas de medicao | 126 | 29.669 |
-| Testes do app | 43 | 6.392 |
-| Testes do nucleo | 65 | 31.881 |
-| Ferramentas de QA | 21 | 7.565 |
+| Ferramentas de medicao | 128 | 29.840 |
+| Testes do app | 44 | 6.626 |
+| Testes do nucleo | 68 | 32.325 |
+| Ferramentas de QA | 21 | 7.574 |
 
 ## Histórico recente
 
 ```
+2026-11-03  8bd1adb  Refaz a entrada congelada e a validação com o motor da decisão 153
+2026-11-03  46b5f9a  Os casos de estudo passam ao motor de 03/11/2026
+2026-11-03  c752c08  Os casos de estudo trocam VALE3 e RENT3 por UNIP6 e RAPT4
+2026-11-03  aa36267  Os documentos passam aos números da entrada refeita em 03/11/2026
+2026-11-03  6fbb3cf  A paridade lê os pacotes de validação da gravação do gabarito
+2026-11-03  eb4ccf4  Refaz o backtest trimestral com as versões antigas da CVM
+2026-11-03  e536d26  As versões antigas aceitam o XML único com a hora no nome
+2026-11-02  371e6a2  Refaz a entrada congelada de 14/09/2026 com o motor da decisão 153
+2026-11-02  469e3dc  A ingestão da CVM pode dividir a memória por companhia
+2026-11-02  fa79c80  A entrada congelada passa a ter a curva do Tesouro dela
+2026-10-28  d85bdb4  A evolução comparada do Backtest passa ao gráfico da Bklit (decisão 158)
+2026-10-29  6bac5e3  As grades do Backtest fixam a coluna no celular
 2026-10-29  9425385  Nada do gráfico alarga a página no celular
 2026-10-29  b44e95a  A evolução comparada do Backtest passa ao gráfico da Bklit (decisão 158)
 2026-10-28  20e933e  Excluir a conta apaga todos os dados dela (decisão 157)
-2026-10-29  6df65a0  Excluir a conta apaga todos os dados dela (decisão 157)
-2026-10-28  ccab439  Fecha falhas de segurança do proxy, das regras e do Hosting
-2026-10-29  f32ac46  Fecha falhas de segurança do proxy, das regras e do Hosting
-2026-10-28  14f086e  O Raio-X ganha página própria, a interface ganha movimento e a Meta pilota a Bklit UI (decisões 155 e 156)
-2026-10-28  d4496ef  Piloto da Bklit UI na curva de acumulação da Meta (decisão 156)
-2026-10-28  927d6c0  O Raio-X ganha página própria e a interface ganha movimento (decisão 155)
-2026-10-28  b2f8741  Mostra a logo da empresa ao lado de cada ticker (decisão 154)
-2026-10-28  44ab8d5  Merge branch 'main' into claude/project-thread-nfrlmq
-2026-10-28  93a9206  O lucro de partida passa a ser o ano corrente anualizado (decisão 153)
-2026-10-28  5bea0f6  Mostra a logo da empresa ao lado de cada ticker (decisão 154)
-2026-10-26  2dab605  tesouro_baixar: agente de navegador e nova tentativa no 429
-2026-10-25  22edc46  O lucro de partida passa a ser o ano corrente anualizado (decisão 153)
 ```

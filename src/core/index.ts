@@ -53,6 +53,7 @@ export * from './time/point-in-time-view';
 export * from './services/backtest/portfolio-backtest';
 export * from './services/goal/feasibility';
 export * from './services/goal/required-return';
+export * from './services/goal/portfolio-tracking';
 export * from './services/metrics/beta';
 export * from './services/metrics/beta-shrinkage';
 export * from './services/metrics/market-leverage';

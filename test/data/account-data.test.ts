@@ -55,20 +55,23 @@ beforeEach(() => {
 });
 
 describe('deleteAccountData', () => {
-  it('apaga os documentos da conta nas três coleções e o users/{uid}, sem tocar nos de outra conta', async () => {
+  it('apaga os documentos da conta em todas as coleções e o users/{uid}, sem tocar nos de outra conta', async () => {
     seed('valuations', ['ana', 'ana', 'bia']);
     seed('portfolios', ['ana', 'bia']);
     seed('backtests', ['ana']);
+    seed('trackings', ['ana', 'bia']);
+    seed('trackingOrders', ['ana', 'ana', 'ana', 'bia']);
     db.users.add('ana');
     db.users.add('bia');
 
-    expect(await deleteAccountData(firestore, 'ana')).toBe(4);
+    expect(await deleteAccountData(firestore, 'ana')).toBe(8);
 
     for (const name of ACCOUNT_COLLECTIONS) {
       expect((db.docs.get(name) ?? []).every((d) => d.userId === 'bia')).toBe(true);
     }
     expect(db.docs.get('valuations')).toHaveLength(1);
     expect(db.docs.get('portfolios')).toHaveLength(1);
+    expect(db.docs.get('trackingOrders')).toHaveLength(1);
     expect([...db.users]).toEqual(['bia']);
   });
 

@@ -32,7 +32,7 @@ export function ProfilePage() {
       <div className="mx-auto max-w-2xl space-y-4">
         <h1 className="text-title font-semibold text-fg">Meu perfil</h1>
         <Card className="p-5">
-          <p className="text-body text-fg">Você está sem conta: os estudos e os valuations ficam neste navegador.</p>
+          <p className="text-body text-fg">Você está sem conta: os estudos, os valuations e os acompanhamentos da carteira ficam neste navegador.</p>
           <p className="mt-1 text-body-sm text-fg-2">Eles não acompanham você para outro aparelho, e somem se os dados do site forem apagados.</p>
           {hasAuth && (
             <Button className="mt-4" variant="primary" onClick={() => void signOutSession().then(() => navigate('/entrar'))}>
@@ -234,7 +234,7 @@ function DeleteAccount() {
         open={open}
         onOpenChange={openChange}
         title="Excluir a conta?"
-        description="Esta ação é definitiva: a conta deixa de existir, e com ela tudo o que está salvo nela — estudos, valuations confirmados e preferências. Confirme com a sua senha."
+        description="Esta ação é definitiva: a conta deixa de existir, e com ela tudo o que está salvo nela — estudos, valuations confirmados, acompanhamentos da carteira com as compras gravadas e preferências. Confirme com a sua senha."
         confirmLabel={busy ? 'Excluindo…' : 'Excluir tudo'}
         busy={busy}
         confirmDisabled={password === ''}

@@ -13,6 +13,8 @@ import {
   ResolveMarketAnchors,
   type SkillReading,
   type Ticker,
+  UpsideCohorts,
+  UpsideCohortsCodec,
 } from '../core';
 import { CacheDatabase } from '../data/cache/cache-database';
 import type { KeyValueStore } from '../data/cache/key-value-store';
@@ -26,6 +28,7 @@ import { ApiClient } from '../data/network/api-client';
 import type { HttpTransport } from '../data/network/http';
 import type { ManualValuationStore } from '../data/persistence/manual-valuation-store';
 import type { PortfolioStore } from '../data/persistence/portfolio-store';
+import type { TrackingStore } from '../data/persistence/tracking-store';
 import { B3RegistryRepository, OfficialSectorFundamentalsRepository } from '../data/repositories/b3-registry-repository';
 import { type BetaPriorReading, BetaPriorRepository } from '../data/repositories/beta-prior-repository';
 import { CalibratedBandRepository } from '../data/repositories/calibrated-band-repository';
@@ -83,10 +86,12 @@ export interface ServicesOptions {
   readonly retrySleep?: (ms: number) => Promise<void>;
 }
 
-/** Os dois lugares onde o usuário guarda o que é dele. */
+/** Os lugares onde o usuário guarda o que é dele. */
 export interface UserStores {
   readonly portfolios: PortfolioStore;
   readonly valuations: ManualValuationStore;
+  /** Os acompanhamentos da carteira na Meta (decisão 159). */
+  readonly trackings: TrackingStore;
 }
 
 /** Memoriza uma leitura sem argumento: a primeira chamada vale pela sessão. */
@@ -329,6 +334,19 @@ export class Services {
   readonly skillReading = once(async (): Promise<SkillReading | null> => {
     try {
       return await this.skillReadingRepository.reading();
+    } catch {
+      return null;
+    }
+  });
+
+  /**
+   * O preço justo ponto no tempo das coortes trimestrais (decisão 159), de
+   * onde saem as compras com data passada do acompanhamento. `null` sem
+   * pacote: aí o acompanhamento só começa de hoje em diante.
+   */
+  readonly upsideCohorts = once(async (): Promise<UpsideCohorts | null> => {
+    try {
+      return UpsideCohortsCodec.decode(JSON.parse(await this.loadText(AssetPaths.upsideCohorts)));
     } catch {
       return null;
     }
