@@ -11,7 +11,7 @@ resultado (7.6) e acompanhar a carteira realizada contra a meta (7.7).
 | Área | Tela | O que faz |
 |---|---|---|
 | **Estudo** | [builder-page.tsx](../../src/features/study/builder-page.tsx) | monta as carteiras Principal e Reserva e mostra o potencial de cada ativo |
-| **Raio-X** (`/ativo/<ATIVO>`) | [asset-page.tsx](../../src/features/asset/asset-page.tsx); [asset-xray.tsx](../../src/features/asset/asset-xray.tsx) | a avaliação de um ativo (capítulo 6), em dois modos — **Essencial**, a leitura e a régua de preço, e **Completo**, com o modelo, a taxa, a normalização, a sensibilidade e a projeção —, e o botão **Simular minhas premissas**, que abre a conta do motor para o usuário refazê-la (7.5); no computador, um índice lateral leva a cada seção. O endereço antigo, `?ativo=<ATIVO>` sobre qualquer área, redireciona para a página |
+| **Raio-X** (`/ativo/<ATIVO>`) | [asset-page.tsx](../../src/features/asset/asset-page.tsx); [asset-xray.tsx](../../src/features/asset/asset-xray.tsx) | a avaliação de um ativo (capítulo 6): a leitura, a régua de preço, a faixa calibrada, o modelo, a taxa, a normalização, a sensibilidade, os múltiplos de pares, a projeção e as ressalvas, sempre todos (decisão 162) —, e o botão **Simular minhas premissas**, que abre a conta do motor para o usuário refazê-la (7.5); no computador, um índice lateral leva a cada seção. O endereço antigo, `?ativo=<ATIVO>` sobre qualquer área, redireciona para a página |
 | **Meta** | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | a rentabilidade que um plano patrimonial exige, e a carteira frente a ela; a curva de acumulação ([accumulation-chart.tsx](../../src/features/goal/accumulation-chart.tsx)) é o piloto dos gráficos da Bklit UI (decisão 156); o **acompanhamento da carteira** ([tracking-panel.tsx](../../src/features/goal/tracking-panel.tsx)) mostra o que a carteira fez desde a data de início, comprando a cada aporte o maior potencial (7.7; decisão 159) |
 | **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras com uma ação de cada ativo comprada no início da janela (7.4; decisão 161); a evolução comparada ([evolution-chart.tsx](../../src/features/backtest/evolution-chart.tsx)) é desenhada pelo gráfico de linha da Bklit UI, e o risco × retorno segue no Recharts (decisão 158) |
 | **Meus valuations** | [valuations-page.tsx](../../src/features/valuations/valuations-page.tsx) | os valuations que o usuário confirmou, de todos os ativos (7.6) |
@@ -25,7 +25,7 @@ entra em conta nenhuma.
 A interface se move pouco e com motivo (decisão 155): a área entra com um
 esmaecer curto e os cartões do Raio-X entram em cascata, as duas coisas em
 animação CSS, para o conteúdo nunca depender de JavaScript para aparecer; os
-números da leitura contam até o valor e a escolha do Essencial/Completo
+números da leitura contam até o valor e a escolha dos controles segmentados
 desliza, pelo Motion ([motion.tsx](../../src/ui/motion.tsx)). Com a
 preferência de movimento reduzido do sistema, tudo isso para, e nenhum número
 muda com o movimento: a contagem é só visual, e o leitor de tela lê o valor

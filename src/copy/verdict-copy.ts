@@ -2,7 +2,7 @@ import type { ManualValuationRecord, ValuationResult } from '../core';
 import { Fmt, type Trend } from './fmt';
 
 /**
- * O veredito em linguagem simples do modo Essencial.
+ * O veredito em linguagem simples, no alto do Raio-X.
  *
  * **É leitura do número, e não recomendação.** O motor estima um preço justo;
  * o veredito diz, em uma frase, onde o preço de hoje está contra ele e com que

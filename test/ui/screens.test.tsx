@@ -159,15 +159,11 @@ describe('Backtest', () => {
     }
   });
 
-  it('o Essencial mostra cinco métricas; o Completo, todas', () => {
-    const essential = wrap(<SideBySidePortfolios principal={principal} reserve={reserve} essential />);
-    const few = within(essential.container).getAllByRole('row').length;
-    cleanup();
-    const full = wrap(<SideBySidePortfolios principal={principal} reserve={reserve} />);
-    const many = within(full.container).getAllByRole('row').length;
-    // Cinco linhas de métrica mais a do cabeçalho.
-    expect(few).toBe(6);
-    expect(many).toBeGreaterThan(few);
+  it('a tabela lado a lado mostra sempre todas as métricas (decisão 162)', () => {
+    const { container } = wrap(<SideBySidePortfolios principal={principal} reserve={reserve} />);
+    // Dez linhas de métrica mais a do cabeçalho: não há mais recorte do modo Essencial.
+    expect(within(container).getAllByRole('row')).toHaveLength(11);
+    for (const label of ['Volatilidade', 'Sharpe', 'Sortino', 'Calmar']) expect(container.textContent).toContain(label);
   });
 
   it('cada ativo tem uma ação, comprada no primeiro pregão, e o cartão não fala de peso', () => {
