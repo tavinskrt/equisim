@@ -88,6 +88,7 @@ estimador abaixo segue no núcleo.
 | Tarifa da B3 de 0,030% por compra, em inteiros (centavos e partes por milhão) | `TransactionCosts.b3` | decisão 126 |
 | Retorno só de **preço**: a simulação não credita provento | idem | decisões 23 e 89 |
 | Métricas sobre a série TWR: TWR, CAGR, volatilidade amostral anualizada, máximo drawdown, Sharpe contra o CDI observado, Sortino (Sortino e Satchell), Calmar. Sem aporte depois da compra, o XIRR coincide com o retorno da cesta e não é mostrado | [risk-metrics.ts](../../src/core/services/metrics/risk-metrics.ts), [returns.ts](../../src/core/services/metrics/returns.ts) | conferência cruzada em Python; decisão 161 |
+| A evolução comparada mostra o patrimônio **em reais**, eixo a partir do zero; a base 100 sai da tela (é a mesma curva em outra escala) e fica no CSV | [evolution-chart.tsx](../../src/features/backtest/evolution-chart.tsx) | decisão 161 |
 | "O realizado frente à meta" confronta o exigido da Meta com o CAGR da cesta | [goal-confrontation.tsx](../../src/features/backtest/goal-confrontation.tsx) | decisão 161 |
 | Desempenho por ativo: investido, valor final e retorno de cada ação | `AssetPerformance` | decisões 65 e 161 |
 | Exportação em CSV | [csv-export.ts](../../src/app/csv-export.ts) | — |

@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-11-06, a partir de `8a0a745`.
+Gerado em 2026-11-06, a partir de `1c49626`.
 
 ## Decisões registradas
 
@@ -892,17 +892,18 @@ Linhas versionadas, excluindo artefatos gerados.
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
 | Nucleo de dominio | 80 | 26.473 |
-| Apresentacao | 184 | 26.451 |
+| Apresentacao | 184 | 26.448 |
 | Camada de dados | 39 | 5.019 |
 | Auditoria | 5 | 679 |
 | Ferramentas de medicao | 128 | 29.840 |
-| Testes do app | 44 | 6.691 |
+| Testes do app | 44 | 6.693 |
 | Testes do nucleo | 68 | 32.432 |
 | Ferramentas de QA | 21 | 7.574 |
 
 ## Histórico recente
 
 ```
+2026-11-06  1c49626  O Backtest compra uma ação de cada ativo no início da janela (decisão 161)
 2026-11-05  8a0a745  A interface deixa o peso e o retorno esperado da carteira (decisão 160)
 2026-11-05  469893e  A interface deixa o peso e o retorno esperado da carteira (decisão 160)
 2026-11-05  ebc948c  A Meta acompanha a carteira realizada (decisão 159)
@@ -917,5 +918,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-11-03  e536d26  As versões antigas aceitam o XML único com a hora no nome
 2026-11-02  371e6a2  Refaz a entrada congelada de 14/09/2026 com o motor da decisão 153
 2026-11-02  469e3dc  A ingestão da CVM pode dividir a memória por companhia
-2026-11-02  fa79c80  A entrada congelada passa a ter a curva do Tesouro dela
 ```

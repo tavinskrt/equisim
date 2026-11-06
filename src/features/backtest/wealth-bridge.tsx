@@ -92,7 +92,7 @@ export function WealthBridge({ principal, reserve }: { principal: BacktestOutcom
           ]}
         />
       }
-      footer="O investido é o que a cesta custou no primeiro pregão: uma ação de cada ativo, mais a tarifa da B3. As duas cestas custam valores diferentes, então compare as carteiras pela base 100, e não pelo patrimônio."
+      footer="O investido é o que a cesta custou no primeiro pregão: uma ação de cada ativo, mais a tarifa da B3. As duas cestas custam valores diferentes, então compare as carteiras pelo TWR, e não pelo patrimônio."
     />
   );
 }

@@ -61,9 +61,12 @@ compra mais nada.**
      usar o CAGR.
    - O Alocado e o Em caixa, das métricas, da ponte e do CSV: sem sobra, são o
      investido menos os custos e zero.
-   - A vista em reais da evolução comparada: sem aporte, ela é a base 100
-     vezes uma constante. Os reais ficam na ponte "Da compra ao patrimônio" e
-     no CSV.
+   - A vista em base 100 da evolução comparada: sem aporte, ela é o
+     patrimônio em reais dividido por uma constante, e duas vistas da mesma
+     curva confundiam o usuário. A evolução fica só em reais, como pedido em
+     06/11/2026 ("queria ver literalmente em reais [...] pode remover a opção
+     de ver na base 100"). O percentual segue no TWR das métricas, e a série em
+     base 100, no CSV.
    - O peso alvo, o peso atual, a deriva e a barra de peso do desempenho por
      ativo, e os verbetes do glossário que explicavam aportes e deriva.
    - O dia do aporte das preferências do Backtest, `PortfolioComparison.hasBoth`

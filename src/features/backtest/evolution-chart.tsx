@@ -22,7 +22,7 @@ function mergeSeries(principal: BacktestOutcome | null, reserve: BacktestOutcome
   const byKey = new Map<string, Row>();
   const put = (o: BacktestOutcome | null, field: 'principal' | 'reserve') => {
     if (o === null) return;
-    const values = o.base100;
+    const values = o.wealth;
     o.dates.forEach((d, i) => {
       let row = byKey.get(d.key);
       if (row === undefined) {
@@ -97,24 +97,24 @@ export function plotPoints(rows: readonly Row[], keys: readonly SeriesKey[]): { 
 }
 
 /**
- * **Evolução comparada**: o índice TWR em base 100 das duas carteiras.
+ * **Evolução comparada**: o patrimônio das duas carteiras **em reais**, dia a
+ * dia — o valor de mercado da cesta comprada no primeiro pregão.
  *
  * **Uma vista só** (decisão 161). Com uma compra no primeiro pregão e nenhum
- * aporte depois, o patrimônio em reais é a base 100 multiplicada por uma
- * constante — o que a cesta custou ÷ 100 —, e a vista em reais desenhava a
- * mesma curva em outra escala. Os reais estão na ponte da compra ao
- * patrimônio e no CSV.
+ * aporte depois, a base 100 era esta mesma curva em outra escala, e as duas
+ * vistas confundiam mais do que explicavam; ficou a dos reais, a pedido. O
+ * percentual segue no TWR das métricas, e a série em base 100, no CSV.
  *
- * O desenho é o gráfico de linha da Bklit UI (decisão 158). A base 100 ajusta
- * o eixo à faixa dos dados, com a linha de 100 tracejada, porque a diferença
- * entre as carteiras é o que se lê ali.
+ * O desenho é o gráfico de linha da Bklit UI (decisão 158). O eixo parte do
+ * zero: as duas cestas custam valores diferentes, e cortar o eixo exageraria a
+ * distância entre elas.
  */
 export function EvolutionChart(props: { result: PortfolioComparison; onExport: () => void }) {
   const { principal, reserve } = props.result;
   const rows = mergeSeries(principal, reserve);
   const reference = (principal ?? reserve)!;
-  const fmt = (v: number) => Fmt.ratio(v, 0);
-  const fmtExact = (v: number) => Fmt.ratio(v, 2);
+  const fmt = (v: number) => Fmt.compactMoney(v);
+  const fmtExact = (v: number) => Fmt.money(v);
 
   const series = [
     ...(principal !== null ? [{ key: 'principal' as const, label: 'Principal', color: 'var(--brand)' }] : []),
@@ -125,16 +125,15 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
     rows,
     series.map((s) => s.key),
   );
-  for (const p of points) p['base'] = 100;
   const labels = points.map((p) => Fmt.shortDate(p.source.date));
   const footer =
-    'Base 100: as duas carteiras partem de 100 no primeiro dia, e cada ponto diz no que esses 100 se transformaram — 150 é um ganho de 50%, 80 é uma perda de 20%. ' +
-    'É o índice ponderado pelo tempo (TWR): como cada carteira compra uma ação de cada ativo no primeiro pregão e nada mais, ele mede só o que o preço fez com a cesta, qualquer que seja o custo dela. A série diária completa vai no CSV.';
+    'Quanto valeria, a cada dia, a cesta comprada no primeiro pregão: uma ação de cada ativo, a preço de mercado. Sem compra depois, a curva só se move com o preço. ' +
+    'As duas cestas custam valores diferentes, então a altura das curvas não diz qual rendeu mais: o percentual está no TWR, logo abaixo. A série diária completa vai no CSV.';
 
   return (
     <ChartFrame
       title="Evolução comparada"
-      subtitle={`Base 100 · ${reference.effectivePeriod.toString()}`}
+      subtitle={`Patrimônio em reais · ${reference.effectivePeriod.toString()}`}
       legend={legend}
       height={280}
       actions={
@@ -150,11 +149,9 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
           // A Bklit prende o toque para o arrasto; aqui não há arrasto, e a
           // página tem de rolar com o dedo por cima da curva.
           style={{ touchAction: 'pan-y' }}
-          margin={{ top: 8, right: 12, bottom: 28, left: 44 }}
-          yDomainFit
+          margin={{ top: 8, right: 12, bottom: 28, left: 76 }}
         >
           <Grid horizontal />
-          <Line dataKey="base" stroke="var(--border-strong)" strokeWidth={1} curve={curveLinear} dashFromIndex={0} dashArray="3,3" showHighlight={false} />
           {series.map((s) => (
             // Segmento reto entre pregões: a curva natural, padrão da Bklit,
             // passa por valores que a carteira nunca teve entre um dia e outro.
@@ -181,7 +178,7 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
       table={
         <DataTable
           caption="Evolução das carteiras ao fim de cada mês"
-          columns={['Fim do mês', ...series.map((s) => `${s.label} (base 100)`)]}
+          columns={['Fim do mês', ...series.map((s) => `${s.label} (R$)`)]}
           rows={monthEnds(rows).map((r) => [Fmt.date(r.date), ...series.map((s) => (r[s.key] === undefined ? '—' : fmtExact(r[s.key]!)))])}
         />
       }
