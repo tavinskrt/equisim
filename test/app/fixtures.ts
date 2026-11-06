@@ -11,7 +11,6 @@ import {
   Asset,
   type BacktestOutcome,
   CapmInputs,
-  ContributionPlan,
   DateRange,
   DateTime,
   FeasibilityLevel,
@@ -58,7 +57,7 @@ export function seriesOf(symbol: string, start: DateTime, closes: readonly numbe
   return new PriceSeries({ ticker: Ticker.parse(symbol), points });
 }
 
-/** Backtest de uma carteira de um ativo só, sem custo — cem cotas exatas a R$ 10,00. */
+/** Backtest de uma carteira de um ativo só, sem custo — uma ação comprada no primeiro pregão, como na tela (decisão 161). */
 export function outcomeOf(symbol: string, closes: readonly number[]): BacktestOutcome {
   const start = DateTime.local(2024, 1, 1);
   const portfolio = Portfolio.equalWeighted({
@@ -67,10 +66,9 @@ export function outcomeOf(symbol: string, closes: readonly number[]): BacktestOu
     kind: PortfolioKind.principal,
     assets: [assetOf(symbol)],
   }).unwrap();
-  return PortfolioBacktest.run({
+  return PortfolioBacktest.runOneShareEach({
     portfolio,
     prices: new Map([[Ticker.parse(symbol), seriesOf(symbol, start, closes)]]),
-    plan: new ContributionPlan({ initial: new Money(100000), monthly: Money.zero }),
     range: new DateRange(start, DateTime.local(2024, 12, 31)),
     costs: TransactionCosts.none,
   }).unwrap();

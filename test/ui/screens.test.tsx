@@ -152,10 +152,10 @@ describe('Backtest', () => {
   const principal = outcomeOf('ITUB4', curve(10, 14, 250));
   const reserve = outcomeOf('BBAS3', curve(10, 11, 250));
 
-  it('a ponte fecha em centavos: aportado − custos + ganho = final', () => {
+  it('a ponte fecha em centavos: investido − custos + ganho = final', () => {
     for (const o of [principal, reserve]) {
       const b = bridgeOf('x', 'red', o);
-      expect(b.contributed - b.costs + b.marketGain).toBe(b.final);
+      expect(b.invested - b.costs + b.marketGain).toBe(b.final);
     }
   });
 
@@ -170,9 +170,16 @@ describe('Backtest', () => {
     expect(many).toBeGreaterThan(few);
   });
 
-  it('a quantidade por ativo é de ações inteiras, e não de cotas', () => {
+  it('cada ativo tem uma ação, comprada no primeiro pregão, e o cartão não fala de peso', () => {
     const { container } = wrap(<PerAssetCard principal={principal} reserve={reserve} />);
-    expect(container.textContent).toMatch(/\d ações ·/);
+    expect(container.textContent).toContain('1 ação · compra no primeiro pregão');
     expect(container.textContent).not.toContain('cotas');
+    expect(container.textContent).not.toContain('alvo');
+  });
+
+  it('sem aporte, a tabela não traz XIRR, alocado nem caixa (decisão 161)', () => {
+    const { container } = wrap(<SideBySidePortfolios principal={principal} reserve={reserve} />);
+    for (const gone of ['XIRR', 'Alocado', 'Em caixa', 'Aportado']) expect(container.textContent).not.toContain(gone);
+    expect(container.textContent).toContain('Investido');
   });
 });

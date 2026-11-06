@@ -133,8 +133,8 @@ export const Lexicon = {
   expected: 'Esperado da carteira',
   /** Retorno que o histórico entregou — evidência, não projeção. */
   realized: 'Realizado',
-  /** Ressalva de [realized]: nomeia o indicador do painel. */
-  realizedXirr: 'XIRR, ao ano',
+  /** Ressalva de [realized] no Backtest: nomeia o indicador (decisão 161). */
+  realizedCagr: 'CAGR, ao ano',
   /** Distância entre o que se espera (ou se obteve) e o que se exige. */
   margin: 'Folga',
 } as const;

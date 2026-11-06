@@ -24,22 +24,18 @@ interface Row {
 const pct = (v: number, signed = false, tone?: Tone): Cell => ({ text: Fmt.percent(v, { signed }), tone: tone ?? (signed ? trendOf(v) : 'neutral') });
 const ratio = (v: number): Cell => ({ text: Fmt.ratio(v), tone: 'neutral' });
 const money = (v: number): Cell => ({ text: Fmt.money(v), tone: 'neutral' });
-const xirr = (v: number | null): Cell => (v === null ? { text: '—', tone: 'blocked' } : pct(v, true));
 
 /** O modo Essencial fica com o que responde "qual rendeu mais, e quanto custou de susto": os números são os mesmos do Completo. */
-const essentialRows = new Set(['Patrimônio final', 'Aportado', 'TWR', 'XIRR', 'Máx. drawdown']);
+const essentialRows = new Set(['Patrimônio final', 'Investido', 'TWR', 'CAGR', 'Máx. drawdown']);
 
 function rowsOf(portfolios: readonly BacktestOutcome[]): Row[] {
   const each = (f: (o: BacktestOutcome) => Cell) => portfolios.map(f);
   return [
-    { label: 'Patrimônio final', note: 'posições mais caixa', highlight: true, cells: each((o) => money(o.finalValue.reais)) },
-    { label: 'Aportado', note: 'capital do investidor', cells: each((o) => money(o.totalContributed.reais)) },
-    { label: 'Alocado', note: 'do aportado, o que virou ação', cells: each((o) => money(o.totalAllocated.reais)) },
-    { label: 'Custos', note: 'tarifa da B3 nas compras', cells: each((o) => money(o.transactionCosts.reais)) },
-    { label: 'Em caixa', note: 'sobra à espera do próximo aporte', cells: each((o) => money(o.residualCash.reais)) },
-    { label: 'TWR', note: 'da composição', cells: each((o) => pct(o.metrics.timeWeightedReturn, true)) },
-    { label: 'XIRR', note: 'retorno do investidor', cells: each((o) => xirr(o.metrics.moneyWeightedReturn)) },
-    { label: 'CAGR', note: null, cells: each((o) => pct(o.metrics.cagr, true)) },
+    { label: 'Patrimônio final', note: 'as ações a mercado', highlight: true, cells: each((o) => money(o.finalValue.reais)) },
+    { label: 'Investido', note: 'uma ação de cada, com a tarifa', cells: each((o) => money(o.totalContributed.reais)) },
+    { label: 'Custos', note: 'tarifa da B3 na compra', cells: each((o) => money(o.transactionCosts.reais)) },
+    { label: 'TWR', note: 'retorno no período', cells: each((o) => pct(o.metrics.timeWeightedReturn, true)) },
+    { label: 'CAGR', note: 'ao ano', cells: each((o) => pct(o.metrics.cagr, true)) },
     { label: 'Volatilidade', note: 'anualizada', cells: each((o) => pct(o.metrics.volatility)) },
     { label: 'Máx. drawdown', note: null, cells: each((o) => pct(o.metrics.maxDrawdown, false, 'negative')) },
     { label: 'Sharpe', note: 'vs CDI observado', cells: each((o) => ratio(o.metrics.sharpe)) },
@@ -69,11 +65,11 @@ export function SideBySidePortfolios(props: { principal: BacktestOutcome; reserv
     <Card className="p-4 sm:p-5">
       <SectionHeader
         title="Carteiras lado a lado"
-        subtitle="Mesma janela e mesmos aportes — só a composição difere"
+        subtitle="Mesma janela e mesma regra de compra — só a composição difere"
         actions={
           <HintPopover
             title="Indicadores das duas carteiras"
-            intro="Todos se referem à janela simulada. As duas carteiras recebem aportes idênticos nas mesmas datas — só a composição difere, então o que sobra de diferença entre as colunas é a escolha dos ativos."
+            intro="Todos se referem à janela simulada. As duas carteiras compram uma ação de cada ativo no mesmo pregão, o primeiro da janela, e nada mais — só a composição difere, então o que sobra de diferença entre as colunas é a escolha dos ativos."
             entries={metricsGlossary}
             size="md"
           />
@@ -117,14 +113,9 @@ export function SideBySidePortfolios(props: { principal: BacktestOutcome; reserv
   );
 }
 
-/**
- * A legenda de capital sob o patrimônio: aportado, alocado e custos. **O caixa só é
- * nomeado acima de um real**: "R$ 0,40 em caixa" ao lado de seis dígitos
- * transformaria troco em fato econômico.
- */
+/** A legenda de capital sob o patrimônio: o que a cesta custou e quanto disso foi tarifa. */
 export function capitalCaption(o: BacktestOutcome): string {
-  const base = `aportado ${Fmt.money(o.totalContributed.reais)} · alocado ${Fmt.money(o.totalAllocated.reais)} · custos ${Fmt.money(o.transactionCosts.reais)}`;
-  return o.residualCash.cents < 100 ? base : `${base} — ${Fmt.money(o.residualCash.reais)} em caixa`;
+  return `investido ${Fmt.money(o.totalContributed.reais)} · custos ${Fmt.money(o.transactionCosts.reais)}`;
 }
 
 /** Os indicadores de **uma** carteira, quando só ela foi simulada: a comparação lado a lado não tem sentido com uma coluna. */
@@ -144,14 +135,13 @@ export function SinglePortfolioMetrics({ title, outcome, isReserve }: { title: s
         </div>
         <HintPopover
           title={`Indicadores da ${title}`}
-          intro="Todos se referem à janela simulada. As duas carteiras recebem aportes idênticos nas mesmas datas — só a composição difere."
+          intro="Todos se referem à janela simulada. As duas carteiras compram uma ação de cada ativo no mesmo pregão, o primeiro da janela — só a composição difere."
           entries={metricsGlossary}
           size="md"
         />
       </div>
       <MetricRow className="mt-5">
-        <Metric size="sm" label="XIRR" value={m.moneyWeightedReturn === null ? '—' : Fmt.percent(m.moneyWeightedReturn, { signed: true })} hint="retorno do investidor" tone={trendOf(m.moneyWeightedReturn)} />
-        <Metric size="sm" label="CAGR" value={Fmt.percent(m.cagr, { signed: true })} tone={trendOf(m.cagr)} />
+        <Metric size="sm" label="CAGR" value={Fmt.percent(m.cagr, { signed: true })} hint="ao ano" tone={trendOf(m.cagr)} />
         <Metric size="sm" label="Volatilidade" value={Fmt.percent(m.volatility)} hint="anualizada" />
         <Metric size="sm" label="Máx. drawdown" value={Fmt.percent(m.maxDrawdown)} tone="negative" />
         <Metric size="sm" label="Sharpe" value={Fmt.ratio(m.sharpe)} hint="vs CDI observado" />

@@ -8,22 +8,17 @@ import type { HintEntry } from '../../ui/hint';
 export const metricsGlossary: readonly HintEntry[] = [
   {
     term: 'Patrimônio final',
-    meaning:
-      'Quanto a carteira valeria ao fim do período: as posições a preço de mercado mais o caixa que sobrou. Abaixo do valor vêm o aportado e o alocado — a diferença entre o patrimônio e o aportado é o ganho.',
+    meaning: 'Quanto a cesta comprada valeria ao fim do período: uma ação de cada ativo, a preço de mercado. A diferença entre ele e o investido é o ganho.',
   },
   {
-    term: 'Aportado × alocado',
+    term: 'Investido',
     meaning:
-      'O aportado é o dinheiro que o investidor disponibilizou, e é o número que ele já conhece. O alocado é quanto disso virou ação, depois de cada aporte ser dividido pelos pesos da carteira. A diferença é o caixa: a sobra que não completou mais uma ação inteira e espera o aporte seguinte — nada se perde, e ela conta no patrimônio.',
+      'O que a cesta custou no primeiro pregão da janela: uma ação de cada ativo, pelo mercado fracionário, mais a tarifa da B3. É a única compra da simulação — não há aporte depois —, e por isso não sobra caixa. As duas carteiras custam valores diferentes, porque têm ativos e preços diferentes.',
   },
   {
     term: 'TWR — retorno ponderado pelo tempo',
     meaning:
-      'Rentabilidade da composição, neutra ao cronograma de aportes. É por ele que Principal e Reserva se comparam: as duas recebem os mesmos aportes nas mesmas datas, então o que sobra de diferença é a escolha dos ativos.',
-  },
-  {
-    term: 'XIRR — retorno ponderado pelo dinheiro',
-    meaning: 'A rentabilidade que o investidor de fato obteve, porque considera quanto entrou e em que data. É este o número a confrontar com a meta.',
+      'Rentabilidade da cesta no período. É por ele que Principal e Reserva se comparam: é uma taxa, e não depende de quanto cada cesta custou, então o que sobra de diferença é a escolha dos ativos. Sem aporte depois da compra, ele coincide com o retorno do investidor (XIRR), que por isso não aparece.',
   },
   { term: 'CAGR', meaning: 'O TWR convertido em taxa média ao ano. Serve para comparar janelas de durações diferentes na mesma unidade.' },
   {
@@ -39,28 +34,14 @@ export const metricsGlossary: readonly HintEntry[] = [
 /** Glossário das colunas do desempenho por ativo. */
 export const perAssetGlossary: readonly HintEntry[] = [
   {
-    term: 'alvo → atual',
+    term: 'Investido → final',
     meaning:
-      'O peso estipulado quando o ativo entrou e o peso que ele tem ao fim do período. A simulação não rebalanceia: quem sobe passa a pesar mais sozinho.',
-  },
-  {
-    term: 'Deriva (p.p.)',
-    meaning: 'A distância entre os dois pesos, em pontos percentuais. Positiva quando o ativo ganhou espaço na carteira, negativa quando perdeu.',
-  },
-  {
-    term: 'Cotas · destinado',
-    meaning:
-      'Quantas ações a simulação acumulou no ativo e quanto capital ele recebeu dos aportes. A quantidade é INTEIRA: cada aporte compra o que couber em lotes de uma, ao preço do dia, e a sobra fica no caixa do ativo esperando o aporte seguinte.',
+      'O que a ação custou no primeiro pregão da janela, com a tarifa da B3, e quanto ela valia no último. A simulação compra uma ação de cada ativo, pelo mercado fracionário, e não compra mais nada.',
   },
   {
     term: 'Retorno',
     meaning:
-      'Quanto o capital destinado àquele ativo rendeu no período, contando a posição a mercado mais o caixa dela. É retorno de PREÇO: a simulação não distribui provento. Como as duas carteiras rodam na mesma janela e sob o mesmo cronograma de aportes, os retornos são comparáveis entre Principal e Reserva.',
-  },
-  {
-    term: 'Por que ele difere do gráfico do ativo',
-    meaning:
-      'Este número mede o que o SEU dinheiro fez, não o que o preço fez. Com aporte mensal, quem cai e volta rende — o aporte comprou barato no meio —, e quem sobe e volta perde. Dois ativos que começam e terminam no mesmo preço, um em vale e outro em pico, chegam aqui a 56,5 pontos percentuais de distância. As duas leituras são verdadeiras e respondem a perguntas diferentes; esta responde a que importa para a troca entre carteiras, porque é o dinheiro que de fato seguiu este cronograma.',
+      'Quanto o valor da ação mudou no período, sobre o que ela custou. É retorno de PREÇO: a simulação não distribui provento. Como as duas carteiras compram no mesmo pregão, os retornos são comparáveis entre Principal e Reserva — e, sem aporte no meio, este número é o do gráfico do ativo, menos a tarifa da compra.',
   },
 ];
 
@@ -70,4 +51,4 @@ export const perAssetGlossary: readonly HintEntry[] = [
  * aparece, o patrimônio dela se lê como dinheiro que se teria — e é falso.
  */
 export const hypotheticalReserve =
-  'A Reserva é um banco de candidatos; aqui ela é simulada como carteira inteira, sob os mesmos aportes da Principal. É o que torna a comparação possível — e faz do patrimônio dela um valor hipotético.';
+  'A Reserva é um banco de candidatos; aqui ela é simulada como carteira inteira, com uma ação de cada ativo comprada no mesmo pregão da Principal. É o que torna a comparação possível — e faz do patrimônio dela um valor hipotético.';

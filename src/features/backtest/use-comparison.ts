@@ -1,31 +1,27 @@
 import { comparePortfolios, correlationOf, requestedWindow } from '../../app/backtest';
-import { goalKey, portfolioKey, services } from '../../app/hooks';
+import { portfolioKey, services } from '../../app/hooks';
 import { useQuery } from '../../app/query';
 import { usePreferences } from '../../app/state/preferences-store';
 import { useStudy } from '../../app/state/study-store';
 
 /**
- * A comparação Principal × Reserva sob o plano da meta. A chave carrega tudo
- * de que o resultado depende — as duas composições **com os pesos**, o plano e
- * os parâmetros —, então mudar um peso refaz a simulação e voltar ao peso
- * anterior reaproveita a que já rodou.
+ * A comparação Principal × Reserva, uma ação de cada ativo no início da janela
+ * (decisão 161). A chave carrega tudo de que o resultado depende — as duas
+ * composições e a janela —, então mudar um ativo refaz a simulação e voltar à
+ * composição anterior reaproveita a que já rodou. A meta não entra: o plano de
+ * aportes não compra nada aqui.
  */
 export function useComparison() {
   const principal = useStudy((s) => s.study.principal);
   const reserve = useStudy((s) => s.study.reserve);
-  const goal = useStudy((s) => s.study.goal);
   const settings = usePreferences((s) => s.backtest);
   const empty = principal.isEmpty && reserve.isEmpty;
-  const key =
-    empty || goal === null
-      ? null
-      : `backtest:${settings.windowYears}:${settings.contributionDay}:${portfolioKey(principal)}|${portfolioKey(reserve)}:${goalKey(goal)}`;
+  const key = empty ? null : `backtest:${settings.windowYears}:${portfolioKey(principal)}|${portfolioKey(reserve)}`;
   return useQuery(key, () => {
     const s = services();
     return comparePortfolios({
       principal,
       reserve,
-      goal,
       settings,
       prices: s.prices,
       today: s.clock(),

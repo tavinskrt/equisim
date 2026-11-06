@@ -17,6 +17,7 @@ import {
   Sector,
   Ticker,
   TransactionCosts,
+  Weight,
 } from '../../src/core';
 import { day, expectClose } from './helpers';
 
@@ -426,5 +427,97 @@ describe('custo de transação (item C4)', () => {
     expect(b3.feeCents(5000)).toBe(2); // 1,5 centavo
     expect(b3.feeCents(4999)).toBe(1); // 1,4997
     expect(b3.orderCents(0)).toBe(0);
+  });
+});
+
+describe('PortfolioBacktest.runOneShareEach (decisão 161)', () => {
+  const range = new DateRange(start, day(2024, 12, 31));
+
+  it('uma ação de cada no primeiro pregão: o TWR é o da cesta, ponderada pelo preço', () => {
+    // PETR4 a R$ 10 dobra; VALE3 a R$ 30 fica parada. A cesta custou R$ 40 e vale R$ 50.
+    const r = PortfolioBacktest.runOneShareEach({
+      costs: TransactionCosts.none,
+      portfolio: portfolioOf('PETR4', 'VALE3'),
+      prices: pricesOf([
+        ['PETR4', seriesOf('PETR4', start, [10, 15, 20])],
+        ['VALE3', seriesOf('VALE3', start, [30, 30, 30])],
+      ]),
+      range,
+    }).unwrap();
+    expect(r.totalContributed.cents).toBe(4000);
+    expect(r.finalValue.cents).toBe(5000);
+    expect(r.residualCash.cents).toBe(0);
+    // Ponderada pelo preço, 25% e 75%: 0,25 × 100% + 0,75 × 0% = 25%. Equiponderada daria 50%.
+    expectClose(r.metrics.timeWeightedReturn, 0.25, 1e-12);
+    for (const a of r.perAsset.values()) expect(a.shares).toBe(1);
+    expectClose(r.perAsset.get(Ticker.parse('PETR4'))!.totalReturn, 1.0, 1e-12);
+  });
+
+  it('a tarifa entra no investido de cada ativo, e a identidade fecha sem caixa', () => {
+    const r = PortfolioBacktest.runOneShareEach({
+      portfolio: portfolioOf('PETR4', 'VALE3'),
+      prices: pricesOf([
+        ['PETR4', seriesOf('PETR4', start, [50, 51])],
+        ['VALE3', seriesOf('VALE3', start, [99, 98])],
+      ]),
+      range,
+    }).unwrap();
+    // 0,030% de R$ 50,00 é 1,5 centavo → 2; de R$ 99,00 é 2,97 → 3.
+    expect(r.transactionCosts.cents).toBe(5);
+    expect(r.perAsset.get(Ticker.parse('PETR4'))!.invested.cents).toBe(5002);
+    expect(r.perAsset.get(Ticker.parse('VALE3'))!.invested.cents).toBe(9903);
+    expect(r.totalAllocated.plus(r.transactionCosts).cents).toBe(r.totalContributed.cents);
+    expect(sumCents([...r.perAsset.values()].map((a) => a.invested.cents))).toBe(r.totalContributed.cents);
+  });
+
+  it('a compra sai no primeiro pregão do ativo mais novo, e não antes', () => {
+    const late = day(2024, 1, 4);
+    const r = PortfolioBacktest.runOneShareEach({
+      costs: TransactionCosts.none,
+      portfolio: portfolioOf('PETR4', 'VALE3'),
+      prices: pricesOf([
+        ['PETR4', seriesOf('PETR4', start, [10, 11, 12, 13, 14])],
+        ['VALE3', seriesOf('VALE3', late, [20, 21])],
+      ]),
+      range,
+    }).unwrap();
+    // PETR4 é comprada a R$ 13, o fechamento do dia em que a VALE3 estreia.
+    expect(r.dates[0]!.equals(late)).toBe(true);
+    expect(r.totalContributed.cents).toBe(1300 + 2000);
+    expect(r.warnings.length).toBe(1);
+  });
+
+  it('os pesos estipulados não entram: carteira de pesos desiguais compra o mesmo', () => {
+    const prices = pricesOf([
+      ['PETR4', seriesOf('PETR4', start, [10, 12])],
+      ['VALE3', seriesOf('VALE3', start, [30, 27])],
+    ]);
+    const equal = PortfolioBacktest.runOneShareEach({ portfolio: portfolioOf('PETR4', 'VALE3'), prices, range }).unwrap();
+    const p = portfolioOf('PETR4', 'VALE3');
+    const [a, b] = [...p.entries.values()];
+    const skewed = new Portfolio({
+      id: 'q',
+      name: 'Q',
+      kind: PortfolioKind.principal,
+      entries: new Map([
+        [a!.ticker, a!.withWeight(Weight.fraction(0.9))],
+        [b!.ticker, b!.withWeight(Weight.fraction(0.1))],
+      ]),
+    });
+    const r = PortfolioBacktest.runOneShareEach({ portfolio: skewed, prices, range }).unwrap();
+    expect(r.finalValue.cents).toBe(equal.finalValue.cents);
+    expect(r.metrics.timeWeightedReturn).toBe(equal.metrics.timeWeightedReturn);
+  });
+
+  it('carteira vazia e preço não positivo são recusados', () => {
+    const empty = new Portfolio({ id: 'e', name: 'E', kind: PortfolioKind.principal, entries: new Map() });
+    expect(PortfolioBacktest.runOneShareEach({ portfolio: empty, prices: new Map(), range }).isErr).toBe(true);
+    const zero = PortfolioBacktest.runOneShareEach({
+      portfolio: portfolioOf('PETR4'),
+      prices: pricesOf([['PETR4', seriesOf('PETR4', start, [0, 10])]]),
+      range,
+    });
+    expect(zero.failureOrNull).toBeInstanceOf(InsufficientData);
+    expect(zero.failureOrNull!.message).toContain('PETR4');
   });
 });

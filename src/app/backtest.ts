@@ -1,10 +1,8 @@
 import {
   type BacktestOutcome,
   BetaCalculator,
-  ContributionPlan,
   DateRange,
   DateTime,
-  type FinancialGoal,
   type Portfolio,
   PortfolioBacktest,
   type PriceRepository,
@@ -20,8 +18,6 @@ import { FailureCopy } from '../copy';
 export interface BacktestSettings {
   /** Anos de histórico, contados para trás a partir de hoje. */
   readonly windowYears: number;
-  /** Dia do mês do aporte. Limitado a 28 pelo domínio; sem controle na interface. */
-  readonly contributionDay: number;
 }
 
 export const BacktestLimits = {
@@ -34,7 +30,7 @@ export const BacktestLimits = {
   maxWindowYears: 10,
 } as const;
 
-export const defaultBacktestSettings: BacktestSettings = { windowYears: 5, contributionDay: 5 };
+export const defaultBacktestSettings: BacktestSettings = { windowYears: 5 };
 
 /** Trava a janela na faixa declarada. */
 export function clampWindowYears(years: number): number {
@@ -57,11 +53,7 @@ export interface RiskReturnPoint {
   readonly kind: RiskReturnKind;
 }
 
-export function isPortfolioPoint(p: RiskReturnPoint): boolean {
-  return p.kind === 'principal' || p.kind === 'reserve';
-}
-
-/** Resultado comparativo das duas carteiras sob o mesmo plano de aportes. */
+/** Resultado comparativo das duas carteiras, uma ação de cada ativo comprada no início da mesma janela. */
 export class PortfolioComparison {
   /** Resultado da Principal, ou `null` — e aí o motivo está em [principalFailure]. */
   readonly principal: BacktestOutcome | null;
@@ -96,19 +88,17 @@ export class PortfolioComparison {
     this.riskReturn = args.riskReturn ?? [];
   }
 
-  /** `true` quando as duas carteiras foram simuladas. */
-  get hasBoth(): boolean {
-    return this.principal !== null && this.reserve !== null;
-  }
-
   /** `true` quando a janela simulada ficou menor que a pedida. */
   get windowWasShortened(): boolean {
     return this.window.start.isAfter(this.requestedWindow.start);
   }
 
   /**
-   * Diferença de TWR, em pontos percentuais. TWR é a métrica certa aqui:
-   * neutraliza o cronograma de aportes, idêntico nas duas carteiras.
+   * Diferença de TWR, em pontos percentuais. Sem aporte depois da compra, o
+   * TWR é o retorno da cesta comprada no primeiro pregão — e é a métrica certa
+   * aqui porque não depende de quanto cada cesta custou: a Principal e a
+   * Reserva têm ativos e preços diferentes, e portanto investimentos
+   * diferentes.
    */
   get twrGap(): number | null {
     return this.principal !== null && this.reserve !== null
@@ -118,25 +108,25 @@ export class PortfolioComparison {
 }
 
 /**
- * Executa o backtest das duas carteiras com o mesmo plano de aportes.
+ * Executa o backtest das duas carteiras: **uma ação de cada ativo**, comprada
+ * no primeiro pregão da janela pelo mercado fracionário, e nenhuma compra
+ * depois (decisão 161). O plano de aportes da Meta não entra.
  *
  * **As duas carteiras são simuladas na mesma janela**: o início comum é o
  * primeiro pregão em que *todos* os ativos das duas já negociavam. Sem esse
- * alinhamento, os patrimônios aportados divergiam e o TWR comparava períodos
- * diferentes.
+ * alinhamento, as duas compras sairiam em datas diferentes e o TWR compararia
+ * períodos diferentes.
  */
 export async function comparePortfolios(args: {
   principal: Portfolio;
   reserve: Portfolio;
-  goal: FinancialGoal | null;
   settings: BacktestSettings;
   prices: PriceRepository;
   today: DateTime;
   riskFreeRateFor: (window: DateRange) => Promise<number>;
 }): Promise<PortfolioComparison | null> {
-  const { principal, reserve, goal, settings, prices, today } = args;
+  const { principal, reserve, settings, prices, today } = args;
   if (principal.isEmpty && reserve.isEmpty) return null;
-  if (goal === null) return null;
 
   const requested = requestedWindow(today, settings.windowYears);
   // A taxa livre de risco do Sharpe é a da própria janela (decisão 58).
@@ -171,16 +161,10 @@ export async function comparePortfolios(args: {
   }
   const window = new DateRange(start, requested.end);
 
-  const plan = new ContributionPlan({
-    initial: goal.initialContribution,
-    monthly: goal.monthlyContribution,
-    contributionDay: settings.contributionDay,
-  });
-
   const runFor = (portfolio: Portfolio): Result<BacktestOutcome> | null =>
     portfolio.isEmpty
       ? null
-      : PortfolioBacktest.run({ portfolio, prices: priceMap, plan, range: window, riskFreeRate: riskFree });
+      : PortfolioBacktest.runOneShareEach({ portfolio, prices: priceMap, range: window, riskFreeRate: riskFree });
 
   const principalRun = runFor(principal);
   const reserveRun = runFor(reserve);
