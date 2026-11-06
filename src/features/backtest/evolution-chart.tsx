@@ -1,6 +1,5 @@
 import { curveLinear } from '@visx/curve';
 import { Download } from 'lucide-react';
-import { useState } from 'react';
 
 import type { PortfolioComparison } from '../../app/backtest';
 import type { BacktestOutcome, DateTime } from '../../core';
@@ -8,9 +7,7 @@ import { Fmt } from '../../copy';
 import { ChartTooltip, Grid, Line, LineChart, TooltipContent, XAxis, YAxis } from '../../ui/charts/bklit';
 import { ChartFrame, DataTable, type LegendItem } from '../../ui/charts/chart-frame';
 import { IconButton } from '../../ui/button';
-import { Segmented } from '../../ui/segmented';
 
-type Measure = 'base100' | 'wealth';
 type SeriesKey = 'principal' | 'reserve';
 
 export interface Row {
@@ -21,11 +18,11 @@ export interface Row {
 }
 
 /** As duas séries no mesmo eixo de datas: cada curva leva as próprias datas, e nenhuma é desenhada fora de lugar se um pregão faltar a uma delas. */
-function mergeSeries(principal: BacktestOutcome | null, reserve: BacktestOutcome | null, measure: Measure): Row[] {
+function mergeSeries(principal: BacktestOutcome | null, reserve: BacktestOutcome | null): Row[] {
   const byKey = new Map<string, Row>();
   const put = (o: BacktestOutcome | null, field: 'principal' | 'reserve') => {
     if (o === null) return;
-    const values = measure === 'base100' ? o.base100 : o.wealth;
+    const values = o.wealth;
     o.dates.forEach((d, i) => {
       let row = byKey.get(d.key);
       if (row === undefined) {
@@ -100,22 +97,24 @@ export function plotPoints(rows: readonly Row[], keys: readonly SeriesKey[]): { 
 }
 
 /**
- * **Evolução comparada**: o índice TWR em base 100 das duas carteiras — a
- * curva que neutraliza os aportes e por isso compara composições —, ou o
- * patrimônio em reais, que salta no dia de cada aporte. Duas vistas, nunca dois
- * eixos: as grandezas têm escalas diferentes.
+ * **Evolução comparada**: o patrimônio das duas carteiras **em reais**, dia a
+ * dia — o valor de mercado da cesta comprada no primeiro pregão.
  *
- * O desenho é o gráfico de linha da Bklit UI (decisão 158). A base 100 ajusta
- * o eixo à faixa dos dados, com a linha de 100 tracejada, porque a diferença
- * entre as carteiras é o que se lê ali; o patrimônio em reais parte do zero.
+ * **Uma vista só** (decisão 161). Com uma compra no primeiro pregão e nenhum
+ * aporte depois, a base 100 era esta mesma curva em outra escala, e as duas
+ * vistas confundiam mais do que explicavam; ficou a dos reais, a pedido. O
+ * percentual segue no TWR das métricas, e a série em base 100, no CSV.
+ *
+ * O desenho é o gráfico de linha da Bklit UI (decisão 158). O eixo parte do
+ * zero: as duas cestas custam valores diferentes, e cortar o eixo exageraria a
+ * distância entre elas.
  */
 export function EvolutionChart(props: { result: PortfolioComparison; onExport: () => void }) {
   const { principal, reserve } = props.result;
-  const [measure, setMeasure] = useState<Measure>('base100');
-  const rows = mergeSeries(principal, reserve, measure);
+  const rows = mergeSeries(principal, reserve);
   const reference = (principal ?? reserve)!;
-  const fmt = measure === 'base100' ? (v: number) => Fmt.ratio(v, 0) : (v: number) => Fmt.compactMoney(v);
-  const fmtExact = measure === 'base100' ? (v: number) => Fmt.ratio(v, 2) : (v: number) => Fmt.money(v);
+  const fmt = (v: number) => Fmt.compactMoney(v);
+  const fmtExact = (v: number) => Fmt.money(v);
 
   const series = [
     ...(principal !== null ? [{ key: 'principal' as const, label: 'Principal', color: 'var(--brand)' }] : []),
@@ -126,53 +125,33 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
     rows,
     series.map((s) => s.key),
   );
-  if (measure === 'base100') for (const p of points) p['base'] = 100;
   const labels = points.map((p) => Fmt.shortDate(p.source.date));
   const footer =
-    measure === 'base100'
-      ? 'Base 100: as duas carteiras partem de 100 no primeiro dia, e cada ponto diz no que esses 100 se transformaram — 150 é um ganho de 50%, 80 é uma perda de 20%. ' +
-        'É o índice ponderado pelo tempo (TWR): mede só o retorno da composição, e por isso os aportes não fazem a curva saltar. A série diária completa vai no CSV.'
-      : 'Posições a mercado mais o caixa, incluindo os aportes — por isso a curva salta no dia de cada um. Para comparar composições, use a base 100.';
+    'Quanto valeria, a cada dia, a cesta comprada no primeiro pregão: uma ação de cada ativo, a preço de mercado. Sem compra depois, a curva só se move com o preço. ' +
+    'As duas cestas custam valores diferentes, então a altura das curvas não diz qual rendeu mais: o percentual está no TWR, logo abaixo. A série diária completa vai no CSV.';
 
   return (
     <ChartFrame
       title="Evolução comparada"
-      subtitle={`${measure === 'base100' ? 'Base 100' : 'Patrimônio em reais'} · ${reference.effectivePeriod.toString()}`}
+      subtitle={`Patrimônio em reais · ${reference.effectivePeriod.toString()}`}
       legend={legend}
       height={280}
       actions={
-        <>
-          <Segmented
-            size="sm"
-            label="Grandeza"
-            value={measure}
-            onChange={setMeasure}
-            options={[
-              { value: 'base100', label: 'Base 100' },
-              { value: 'wealth', label: 'R$' , ariaLabel: 'Patrimônio em reais' },
-            ]}
-          />
-          <IconButton label="Exportar CSV" tone="brand" onClick={props.onExport}>
-            <Download aria-hidden className="size-[18px]" />
-          </IconButton>
-        </>
+        <IconButton label="Exportar CSV" tone="brand" onClick={props.onExport}>
+          <Download aria-hidden className="size-[18px]" />
+        </IconButton>
       }
       chart={
         <LineChart
-          // Trocar a grandeza remonta o gráfico: a curva entra de novo, em vez
-          // de se transformar de índice em reais, que não são a mesma conta.
-          key={measure}
           data={points}
           aspectRatio=""
           className="bklit-chart h-full"
           // A Bklit prende o toque para o arrasto; aqui não há arrasto, e a
           // página tem de rolar com o dedo por cima da curva.
           style={{ touchAction: 'pan-y' }}
-          margin={{ top: 8, right: 12, bottom: 28, left: measure === 'base100' ? 44 : 76 }}
-          yDomainFit={measure === 'base100'}
+          margin={{ top: 8, right: 12, bottom: 28, left: 76 }}
         >
           <Grid horizontal />
-          {measure === 'base100' && <Line dataKey="base" stroke="var(--border-strong)" strokeWidth={1} curve={curveLinear} dashFromIndex={0} dashArray="3,3" showHighlight={false} />}
           {series.map((s) => (
             // Segmento reto entre pregões: a curva natural, padrão da Bklit,
             // passa por valores que a carteira nunca teve entre um dia e outro.
@@ -199,7 +178,7 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
       table={
         <DataTable
           caption="Evolução das carteiras ao fim de cada mês"
-          columns={['Fim do mês', ...series.map((s) => `${s.label} (${measure === 'base100' ? 'base 100' : 'R$'})`)]}
+          columns={['Fim do mês', ...series.map((s) => `${s.label} (R$)`)]}
           rows={monthEnds(rows).map((r) => [Fmt.date(r.date), ...series.map((s) => (r[s.key] === undefined ? '—' : fmtExact(r[s.key]!)))])}
         />
       }

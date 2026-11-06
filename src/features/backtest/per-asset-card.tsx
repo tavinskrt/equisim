@@ -46,7 +46,7 @@ export function PerAssetCard({ principal, reserve }: { principal: BacktestOutcom
     <Card className="p-4 sm:p-5">
       <SectionHeader
         title="Desempenho por ativo"
-        subtitle={hasBoth ? 'Do melhor ao pior retorno em cada carteira' : 'A deriva de peso é sinal de decisão, não defeito'}
+        subtitle={hasBoth ? 'Do melhor ao pior retorno em cada carteira' : 'Do melhor ao pior retorno'}
         actions={
           <HintPopover
             title="Desempenho por ativo"
@@ -80,8 +80,8 @@ function AssetGroup(props: { label: string; color: string; assets: readonly Asse
         <thead className="sr-only">
           <tr>
             <th scope="col">Ativo</th>
-            <th scope="col">Peso alvo e atual</th>
-            <th scope="col">Retorno e deriva</th>
+            <th scope="col">Compra e valor final</th>
+            <th scope="col">Retorno</th>
           </tr>
         </thead>
         <tbody>
@@ -100,36 +100,19 @@ function AssetGroup(props: { label: string; color: string; assets: readonly Asse
               </th>
               <td className="py-2.5 align-top">
                 <p className="num text-caption text-fg-2">
-                  alvo {Fmt.percent(a.targetWeight.value, { decimals: 1 })} → atual {Fmt.percent(a.currentWeight, { decimals: 1 })}
+                  {Fmt.money(a.invested.reais)} → {Fmt.money(a.finalValue.reais)}
                 </p>
-                <WeightBar target={a.targetWeight.value} current={a.currentWeight} color={props.color} />
                 <p className="num mt-1 truncate text-caption text-fg-3">
-                  {a.shares.toLocaleString('pt-BR')} {a.shares === 1 ? 'ação' : 'ações'} · {Fmt.money(a.invested.reais)} destinados
+                  {a.shares.toLocaleString('pt-BR')} {a.shares === 1 ? 'ação' : 'ações'} · compra no primeiro pregão
                 </p>
               </td>
               <td className="py-2.5 pl-3 text-right align-top whitespace-nowrap">
                 <p className={cn('num font-semibold', toneText[trendOf(a.totalReturn)])}>{pct1(a.totalReturn)}</p>
-                <p className="num text-caption text-fg-3">{Fmt.points(a.drift)}</p>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-/**
- * O peso atual em barra, com o alvo como marca vertical: a deriva é a
- * distância entre o fim da barra e a marca. Na cor da carteira — deriva não é
- * alerta, e as cores de estado ficam reservadas para estado.
- */
-function WeightBar({ target, current, color }: { target: number; current: number; color: string }) {
-  const clamp = (v: number) => Math.min(1, Math.max(0, v)) * 100;
-  return (
-    <div className="relative mt-1.5 h-1.5 rounded-full bg-divider" aria-hidden>
-      <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${clamp(current)}%`, background: color }} />
-      <div className="absolute -inset-y-1 w-0.5 rounded-full bg-fg" style={{ left: `calc(${clamp(target)}% - 1px)` }} />
     </div>
   );
 }

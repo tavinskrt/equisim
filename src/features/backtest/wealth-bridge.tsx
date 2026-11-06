@@ -8,68 +8,62 @@ interface Bridge {
   readonly name: string;
   readonly color: string;
   /** Em centavos, para a identidade fechar sem erro de ponto flutuante. */
-  readonly contributed: number;
+  readonly invested: number;
   readonly costs: number;
-  readonly cash: number;
   readonly marketGain: number;
   readonly final: number;
 }
 
 /**
- * A ponte do aportado ao patrimônio, **em centavos inteiros**:
+ * A ponte da compra ao patrimônio, **em centavos inteiros**:
  *
- *     aportado = alocado + custos + caixa        (identidade do núcleo, item C4)
- *     final    = posições a mercado + caixa
- *  ⇒ final    = aportado − custos + (posições − alocado)
+ *     investido = preço das ações + custos       (uma ação de cada, decisão 161)
+ *     final     = posições a mercado
+ *  ⇒ final     = investido − custos + ganho de mercado
  *
- * O ganho de mercado é `final − caixa − alocado`. O caixa aparece dos dois
- * lados e se cancela: é aportado que ainda não virou ação, e não ganho.
+ * Com uma compra só, que custa exatamente o que as ações e a tarifa custaram,
+ * não sobra caixa, e o ganho de mercado é o que o preço fez com as ações.
  */
 export function bridgeOf(name: string, color: string, o: BacktestOutcome): Bridge {
+  const invested = o.totalContributed.cents;
+  const costs = o.transactionCosts.cents;
   const final = o.finalValue.cents;
-  return {
-    name,
-    color,
-    contributed: o.totalContributed.cents,
-    costs: o.transactionCosts.cents,
-    cash: o.residualCash.cents,
-    marketGain: final - o.residualCash.cents - o.totalAllocated.cents,
-    final,
-  };
+  return { name, color, invested, costs, marketGain: final - (invested - costs), final };
 }
 
 const money = (cents: number) => Fmt.money(cents / 100);
 const signedMoney = (cents: number) => `${cents > 0 ? '+' : cents < 0 ? '−' : ''}${Fmt.money(Math.abs(cents) / 100)}`;
 
 /**
- * **Do aportado ao patrimônio**: quanto entrou, quanto a tarifa levou, quanto o
- * mercado somou ou tirou, e onde a carteira terminou. Barras flutuantes, uma
- * escala para as duas carteiras — comprimentos iguais, valores iguais.
+ * **Da compra ao patrimônio**: quanto a cesta custou, quanto a tarifa levou,
+ * quanto o mercado somou ou tirou, e onde a carteira terminou. Barras
+ * flutuantes, uma escala para as duas carteiras — comprimentos iguais, valores
+ * iguais.
  */
 export function WealthBridge({ principal, reserve }: { principal: BacktestOutcome | null; reserve: BacktestOutcome | null }) {
   const bridges = [
     ...(principal !== null ? [bridgeOf('Principal', 'var(--brand)', principal)] : []),
     ...(reserve !== null ? [bridgeOf('Reserva', 'var(--reserve)', reserve)] : []),
   ];
-  const max = Math.max(1, ...bridges.flatMap((b) => [b.contributed, b.final, b.contributed - b.costs]));
+  const max = Math.max(1, ...bridges.flatMap((b) => [b.invested, b.final, b.invested - b.costs]));
   const pct = (cents: number) => `${(Math.max(0, cents) / max) * 100}%`;
 
   return (
     <ChartFrame
-      title="Do aportado ao patrimônio"
-      subtitle="Aportado − custos ± ganho de mercado = patrimônio final"
+      title="Da compra ao patrimônio"
+      subtitle="Investido − custos ± ganho de mercado = patrimônio final"
       chart={
         <div className="space-y-5">
           {bridges.map((b) => {
-            const afterCosts = b.contributed - b.costs;
+            const afterCosts = b.invested - b.costs;
             const gainLow = Math.min(afterCosts, b.final);
             const gainHigh = Math.max(afterCosts, b.final);
             return (
               <div key={b.name}>
                 <PortfolioBadge name={b.name} color={b.color} />
                 <dl className="mt-2 space-y-1.5">
-                  <BridgeRow label="Aportado" value={money(b.contributed)} from={0} to={b.contributed} pct={pct} fill={b.color} faded />
-                  <BridgeRow label="Custos" value={signedMoney(-b.costs)} from={afterCosts} to={b.contributed} pct={pct} fill="var(--negative)" />
+                  <BridgeRow label="Investido" value={money(b.invested)} from={0} to={b.invested} pct={pct} fill={b.color} faded />
+                  <BridgeRow label="Custos" value={signedMoney(-b.costs)} from={afterCosts} to={b.invested} pct={pct} fill="var(--negative)" />
                   <BridgeRow
                     label={b.marketGain >= 0 ? 'Ganho de mercado' : 'Perda de mercado'}
                     value={signedMoney(b.marketGain)}
@@ -88,18 +82,17 @@ export function WealthBridge({ principal, reserve }: { principal: BacktestOutcom
       }
       table={
         <DataTable
-          caption="Do aportado ao patrimônio, por carteira"
+          caption="Da compra ao patrimônio, por carteira"
           columns={['Parcela', ...bridges.map((b) => b.name)]}
           rows={[
-            ['Aportado', ...bridges.map((b) => money(b.contributed))],
+            ['Investido', ...bridges.map((b) => money(b.invested))],
             ['Custos (tarifa da B3)', ...bridges.map((b) => signedMoney(-b.costs))],
             ['Ganho de mercado', ...bridges.map((b) => signedMoney(b.marketGain))],
             ['Patrimônio final', ...bridges.map((b) => money(b.final))],
-            ['Do qual em caixa', ...bridges.map((b) => money(b.cash))],
           ]}
         />
       }
-      footer={`O caixa — a sobra de cada aporte que não completou mais uma ação inteira — é aportado que ainda não virou ação: está no aportado e no patrimônio, e não muda a conta.${bridges.some((b) => b.cash >= 100) ? ` Hoje: ${bridges.map((b) => `${b.name} ${money(b.cash)}`).join(', ')}.` : ''}`}
+      footer="O investido é o que a cesta custou no primeiro pregão: uma ação de cada ativo, mais a tarifa da B3. As duas cestas custam valores diferentes, então compare as carteiras pelo TWR, e não pelo patrimônio."
     />
   );
 }

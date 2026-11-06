@@ -489,12 +489,210 @@ function allocate(args: {
   }
 }
 
+/** Estado por ativo da simulação: posição inteira, capital destinado, caixa em espera e custos. */
+interface Ledger {
+  readonly shares: Map<Ticker, number>;
+  readonly investedCents: Map<Ticker, number>;
+  readonly cashCents: Map<Ticker, number>;
+  readonly costCents: Map<Ticker, number>;
+}
+
+function emptyLedger(tickers: readonly Ticker[]): Ledger {
+  const ledger: Ledger = { shares: new Map(), investedCents: new Map(), cashCents: new Map(), costCents: new Map() };
+  for (const t of tickers) {
+    ledger.shares.set(t, 0);
+    ledger.investedCents.set(t, 0);
+    ledger.cashCents.set(t, 0);
+    ledger.costCents.set(t, 0);
+  }
+  return ledger;
+}
+
 /**
- * Simula a evolução de uma carteira com pesos estipulados.
+ * O calendário mestre da simulação: a união dos pregões de todos os ativos,
+ * do início efetivo — o primeiro pregão do ativo mais novo, quando ele é
+ * posterior ao pedido — ao fim da janela.
  *
- * **Não há rebalanceamento de espécie alguma.** O aporte inicial e cada aporte
- * mensal são distribuídos segundo os percentuais estipulados; a partir daí
- * cada posição segue sua própria variação e os pesos derivam com o mercado.
+ * Cada ativo tem seus próprios pregões; a união com forward fill evita que um
+ * leilão ou suspensão isolada derrube um dia inteiro da simulação.
+ */
+function calendarOf(
+  tickers: readonly Ticker[],
+  prices: ReadonlyMap<Ticker, PriceSeries>,
+  range: DateRange,
+  warnings: string[],
+): Result<DateTime[]> {
+  const missing = tickers.filter((t) => {
+    const series = prices.get(t);
+    return series === undefined || series.isEmpty;
+  });
+  if (missing.length > 0) {
+    return err(new InsufficientData(`Sem cotações para: ${missing.map((t) => t.value).join(', ')}.`));
+  }
+
+  let latestStart: DateTime | null = null;
+  for (const ticker of tickers) {
+    const firstDate = prices.get(ticker)!.firstDate;
+    if (latestStart === null || firstDate.isAfter(latestStart)) {
+      latestStart = firstDate;
+    }
+  }
+
+  const effectiveStart = latestStart!.isAfter(range.start) ? latestStart! : range.start;
+  if (effectiveStart.isAfter(range.end)) {
+    return err(new InsufficientData('Nenhum ativo possui cotação dentro do período solicitado.'));
+  }
+  if (effectiveStart.isAfter(range.start)) {
+    warnings.push(
+      `Período encurtado para ${new DateRange(effectiveStart, range.end).toString()}: ` +
+        'nem todos os ativos possuem histórico desde o início solicitado.',
+    );
+  }
+
+  // Conjunto de datas com a igualdade do Dart: mesmo instante e mesma
+  // marcação de UTC. A primeira ocorrência é a que fica, como no `Set`.
+  const calendar = new Map<string, DateTime>();
+  for (const ticker of tickers) {
+    for (const point of prices.get(ticker)!.points) {
+      if (!point.date.isBefore(effectiveStart) && !point.date.isAfter(range.end)) {
+        if (!calendar.has(point.date.key)) calendar.set(point.date.key, point.date);
+      }
+    }
+  }
+  const dates = [...calendar.values()].sort((a, b) => a.compareTo(b));
+  if (dates.length < 2) {
+    return err(new InsufficientData('Período com menos de dois pregões: simulação impossível.'));
+  }
+  return ok(dates);
+}
+
+/**
+ * Marcação a mercado do dia, somando o caixa que ainda não virou posição.
+ *
+ * Tudo em **centavos inteiros**, e não em reais: com posição inteira e preço
+ * em centavos, `quantidade × preço` é exato, e a soma sobre os ativos não
+ * acumula erro de representação dia após dia. Só o total do dia vira número de
+ * ponto flutuante, uma vez, na fronteira da série.
+ */
+function markToMarket(tickers: readonly Ticker[], prices: ReadonlyMap<Ticker, PriceSeries>, today: DateTime, ledger: Ledger): number {
+  let positionCents = 0;
+  let cashCentsToday = 0;
+  for (const ticker of tickers) {
+    const price = prices.get(ticker)!.closeAsOf(today);
+    if (price !== null) {
+      positionCents += ledger.shares.get(ticker)! * priceInCents(price);
+    }
+    cashCentsToday += ledger.cashCents.get(ticker)!;
+  }
+  return (positionCents + cashCentsToday) / 100.0;
+}
+
+/** Consolida a trajetória simulada em retorno, risco e desempenho por ativo. */
+function consolidate(args: {
+  portfolio: Portfolio;
+  prices: ReadonlyMap<Ticker, PriceSeries>;
+  dates: readonly DateTime[];
+  path: WealthPathBuilder;
+  cashFlows: CashFlow[];
+  totalContributedCents: number;
+  ledger: Ledger;
+  riskFreeRate: number;
+  warnings: readonly string[];
+}): BacktestOutcome {
+  const { portfolio, prices, dates, path, cashFlows, totalContributedCents, ledger, riskFreeRate, warnings } = args;
+  const { shares, investedCents, cashCents, costCents } = ledger;
+  const wealthPath = path.build();
+  const wealth = wealthPath.values;
+  const finalValue = Money.fromReais(wealth[wealth.length - 1]!);
+  const totalContributed = new Money(totalContributedCents);
+  const lastDate = dates[dates.length - 1]!;
+  if (finalValue.isPositive) {
+    cashFlows.push(new CashFlow({ date: lastDate, amount: finalValue }));
+  }
+
+  const base100 = Returns.timeWeightedIndex(wealthPath);
+  const twr = Returns.timeWeighted(wealthPath);
+
+  const effectiveRange = new DateRange(dates[0]!, lastDate);
+  const years = effectiveRange.years;
+  const cagr = Returns.annualize(twr, years);
+
+  const xirr = Returns.extendedIrr(cashFlows).valueOrNull;
+
+  const risk = RiskMetrics.fromIndex({ twrIndex: base100, cagr, riskFreeRate });
+
+  const perAsset = new Map<Ticker, AssetPerformance>();
+  let residualCashCents = 0;
+  let totalCostCents = 0;
+  for (const c of costCents.values()) totalCostCents = totalCostCents + c;
+  const finalWealthCents = finalValue.cents;
+  for (const entry of portfolio.entries.values()) {
+    const ticker = entry.ticker;
+    const price = prices.get(ticker)!.closeAsOf(lastDate) ?? 0.0;
+    // Mesma aritmética inteira da marcação diária: `Σ finalValue + Σ cash`
+    // reconstitui o patrimônio final ao centavo, sem tolerância.
+    const endValue = new Money(shares.get(ticker)! * priceInCents(price));
+    const invested = new Money(investedCents.get(ticker)!);
+    const cash = new Money(cashCents.get(ticker)!);
+    residualCashCents += cash.cents;
+
+    perAsset.set(
+      ticker,
+      new AssetPerformance({
+        ticker,
+        targetWeight: entry.weight,
+        currentWeight: finalWealthCents > 0 ? endValue.cents / finalWealthCents : 0.0,
+        totalReturn: invested.isPositive ? (endValue.cents + cash.cents - invested.cents) / invested.cents : 0.0,
+        invested,
+        finalValue: endValue,
+        cash,
+        shares: shares.get(ticker)!,
+      }),
+    );
+  }
+
+  const residualCash = new Money(residualCashCents);
+
+  return new BacktestOutcome({
+    effectivePeriod: effectiveRange,
+    dates,
+    wealth,
+    base100,
+    totalContributed,
+    totalAllocated: totalContributed.minus(new Money(totalCostCents)).minus(residualCash),
+    transactionCosts: new Money(totalCostCents),
+    finalValue,
+    residualCash,
+    metrics: new PerformanceMetrics({
+      timeWeightedReturn: twr,
+      moneyWeightedReturn: xirr,
+      cagr,
+      volatility: risk.volatility,
+      maxDrawdown: risk.maxDrawdown,
+      sharpe: risk.sharpe,
+      sortino: risk.sortino,
+      calmar: risk.calmar,
+    }),
+    perAsset,
+    warnings,
+  });
+}
+
+/**
+ * Simula a evolução de uma carteira.
+ *
+ * Duas formas de compra, com o mesmo calendário, a mesma marcação a mercado e
+ * as mesmas métricas:
+ *
+ * - [PortfolioBacktest.run]: o plano de aportes, inicial e mensais, dividido
+ *   pelos pesos estipulados (decisão 9). É a forma das ferramentas de
+ *   validação e da paridade com o núcleo Dart.
+ * - [PortfolioBacktest.runOneShareEach]: **uma ação de cada ativo**, comprada
+ *   no primeiro pregão da janela, e nada mais (decisão 161). É a forma da tela
+ *   de Backtest.
+ *
+ * **Não há rebalanceamento de espécie alguma.** A partir da compra, cada
+ * posição segue sua própria variação e os pesos derivam com o mercado.
  *
  * **Não há proventos.** A simulação responde a uma pergunta só — como a
  * carteira montada teria se comportado no passado —, e a resposta é o preço
@@ -546,65 +744,13 @@ export const PortfolioBacktest = {
     }
 
     const warnings: string[] = [];
-
-    // --- Calendário mestre -------------------------------------------------
-    // Cada ativo tem seus próprios pregões; a união com forward fill evita que
-    // um leilão ou suspensão isolada derrube um dia inteiro da simulação.
     const tickers = portfolio.tickers;
-    const missing = tickers.filter((t) => {
-      const series = prices.get(t);
-      return series === undefined || series.isEmpty;
-    });
-    if (missing.length > 0) {
-      return err(new InsufficientData(`Sem cotações para: ${missing.map((t) => t.value).join(', ')}.`));
-    }
+    const calendar = calendarOf(tickers, prices, range, warnings);
+    if (calendar.isErr) return err(calendar.failureOrNull!);
+    const dates = calendar.unwrap();
 
-    let latestStart: DateTime | null = null;
-    for (const ticker of tickers) {
-      const firstDate = prices.get(ticker)!.firstDate;
-      if (latestStart === null || firstDate.isAfter(latestStart)) {
-        latestStart = firstDate;
-      }
-    }
-
-    const effectiveStart = latestStart!.isAfter(range.start) ? latestStart! : range.start;
-    if (effectiveStart.isAfter(range.end)) {
-      return err(new InsufficientData('Nenhum ativo possui cotação dentro do período solicitado.'));
-    }
-    if (effectiveStart.isAfter(range.start)) {
-      warnings.push(
-        `Período encurtado para ${new DateRange(effectiveStart, range.end).toString()}: ` +
-          'nem todos os ativos possuem histórico desde o início solicitado.',
-      );
-    }
-
-    // Conjunto de datas com a igualdade do Dart: mesmo instante e mesma
-    // marcação de UTC. A primeira ocorrência é a que fica, como no `Set`.
-    const calendar = new Map<string, DateTime>();
-    for (const ticker of tickers) {
-      for (const point of prices.get(ticker)!.points) {
-        if (!point.date.isBefore(effectiveStart) && !point.date.isAfter(range.end)) {
-          if (!calendar.has(point.date.key)) calendar.set(point.date.key, point.date);
-        }
-      }
-    }
-    const dates = [...calendar.values()].sort((a, b) => a.compareTo(b));
-    if (dates.length < 2) {
-      return err(new InsufficientData('Período com menos de dois pregões: simulação impossível.'));
-    }
-
-    // --- Estado ------------------------------------------------------------
-    // Posição inteira, capital destinado e caixa em espera, todos por ativo.
-    const shares = new Map<Ticker, number>();
-    const investedCents = new Map<Ticker, number>();
-    const cashCents = new Map<Ticker, number>();
-    const costCents = new Map<Ticker, number>();
-    for (const t of tickers) {
-      shares.set(t, 0);
-      investedCents.set(t, 0);
-      cashCents.set(t, 0);
-      costCents.set(t, 0);
-    }
+    const ledger = emptyLedger(tickers);
+    const { shares, investedCents, cashCents, costCents } = ledger;
 
     // Acumulador, e não duas listas paralelas: patrimônio e fluxo do dia
     // entram numa chamada só, então não há como desalinhá-los.
@@ -664,104 +810,84 @@ export const PortfolioBacktest = {
       }
 
       // 3) Marcação a mercado, somando o caixa que ainda não virou posição.
-      //
-      // Tudo em **centavos inteiros**, e não em reais: com posição inteira e
-      // preço em centavos, `quantidade × preço` é exato, e a soma sobre os
-      // ativos não acumula erro de representação dia após dia. Só o total do
-      // dia vira número de ponto flutuante, uma vez, na fronteira da série.
-      let positionCents = 0;
-      let cashCentsToday = 0;
-      for (const ticker of tickers) {
-        const price = prices.get(ticker)!.closeAsOf(today);
-        if (price !== null) {
-          positionCents += shares.get(ticker)! * priceInCents(price);
-        }
-        cashCentsToday += cashCents.get(ticker)!;
+      path.add({ value: markToMarket(tickers, prices, today, ledger), externalFlow: flowToday / 100.0 });
+    }
+
+    return ok(consolidate({ portfolio, prices, dates, path, cashFlows, totalContributedCents, ledger, riskFreeRate, warnings }));
+  },
+
+  /**
+   * **Uma ação de cada ativo**, comprada no primeiro pregão da janela, e mais
+   * nada até o fim (decisão 161).
+   *
+   * É a compra do **mercado fracionário** da B3, onde se negocia de uma a 99
+   * ações: lote de uma, e não o lote padrão de cem. Cada ordem paga a tarifa
+   * de [costs]; o aporte é exatamente o que as ações e a tarifa custaram,
+   * então não sobra caixa. Sem aporte depois da compra, o patrimônio só muda
+   * com o preço, e o TWR é o retorno da cesta comprada.
+   *
+   * **Os pesos da carteira não entram.** Com uma ação de cada, cada ativo pesa
+   * o próprio preço sobre a soma dos preços — a ponderação por preço, a de um
+   * índice como o Dow Jones —, e não a fatia estipulada. `AssetPerformance`
+   * guarda o peso estipulado só por contrato; a tela não o mostra.
+   *
+   * Devolve [InvalidInput] para carteira vazia, e [InsufficientData] nos
+   * mesmos casos de [run], ou quando algum ativo não tem preço positivo no
+   * primeiro pregão.
+   *
+   * Complexidade **O(d · a)**, com `d` pregões e `a` ativos.
+   */
+  runOneShareEach(args: {
+    portfolio: Portfolio;
+    prices: ReadonlyMap<Ticker, PriceSeries>;
+    range: DateRange;
+    riskFreeRate?: number;
+    costs?: TransactionCosts;
+  }): Result<BacktestOutcome> {
+    const { portfolio, prices, range } = args;
+    const riskFreeRate = args.riskFreeRate ?? 0.0;
+    const costs = args.costs ?? TransactionCosts.b3;
+    if (portfolio.isEmpty) {
+      return err(new InvalidInput('Carteira vazia.'));
+    }
+
+    const warnings: string[] = [];
+    const tickers = portfolio.tickers;
+    const calendar = calendarOf(tickers, prices, range, warnings);
+    if (calendar.isErr) return err(calendar.failureOrNull!);
+    const dates = calendar.unwrap();
+    const first = dates[0]!;
+
+    // O início efetivo nunca precede o primeiro pregão de ativo algum, então
+    // todos têm fechamento no primeiro dia. Preço não positivo é dado
+    // defeituoso, e a simulação se recusa em vez de comprar de graça.
+    const ledger = emptyLedger(tickers);
+    const invalid: string[] = [];
+    let totalContributedCents = 0;
+    for (const ticker of tickers) {
+      const close = prices.get(ticker)!.closeAsOf(first);
+      const pc = close === null ? 0 : priceInCents(close);
+      if (pc <= 0) {
+        invalid.push(ticker.value);
+        continue;
       }
-
-      path.add({
-        value: (positionCents + cashCentsToday) / 100.0,
-        externalFlow: flowToday / 100.0,
-      });
+      const cost = costs.orderCents(pc);
+      ledger.shares.set(ticker, 1);
+      ledger.investedCents.set(ticker, pc + cost);
+      ledger.costCents.set(ticker, cost);
+      totalContributedCents += pc + cost;
+    }
+    if (invalid.length > 0) {
+      return err(new InsufficientData(`Sem preço positivo no primeiro pregão para: ${invalid.join(', ')}.`));
     }
 
-    // --- Consolidação ------------------------------------------------------
-    const wealthPath = path.build();
-    const wealth = wealthPath.values;
-    const finalValue = Money.fromReais(wealth[wealth.length - 1]!);
-    const totalContributed = new Money(totalContributedCents);
-    const lastDate = dates[dates.length - 1]!;
-    if (finalValue.isPositive) {
-      cashFlows.push(new CashFlow({ date: lastDate, amount: finalValue }));
+    const path = new WealthPathBuilder();
+    for (let i = 0; i < dates.length; i++) {
+      const today = dates[i]!;
+      path.add({ value: markToMarket(tickers, prices, today, ledger), externalFlow: i === 0 ? totalContributedCents / 100.0 : 0 });
     }
+    const cashFlows = [new CashFlow({ date: first, amount: new Money(totalContributedCents).negate() })];
 
-    const base100 = Returns.timeWeightedIndex(wealthPath);
-    const twr = Returns.timeWeighted(wealthPath);
-
-    const effectiveRange = new DateRange(dates[0]!, lastDate);
-    const years = effectiveRange.years;
-    const cagr = Returns.annualize(twr, years);
-
-    const xirr = Returns.extendedIrr(cashFlows).valueOrNull;
-
-    const risk = RiskMetrics.fromIndex({ twrIndex: base100, cagr, riskFreeRate });
-
-    const perAsset = new Map<Ticker, AssetPerformance>();
-    let residualCashCents = 0;
-    let totalCostCents = 0;
-    for (const c of costCents.values()) totalCostCents = totalCostCents + c;
-    const finalWealthCents = finalValue.cents;
-    for (const entry of portfolio.entries.values()) {
-      const ticker = entry.ticker;
-      const price = prices.get(ticker)!.closeAsOf(lastDate) ?? 0.0;
-      // Mesma aritmética inteira da marcação diária: `Σ finalValue + Σ cash`
-      // reconstitui o patrimônio final ao centavo, sem tolerância.
-      const endValue = new Money(shares.get(ticker)! * priceInCents(price));
-      const invested = new Money(investedCents.get(ticker)!);
-      const cash = new Money(cashCents.get(ticker)!);
-      residualCashCents += cash.cents;
-
-      perAsset.set(
-        ticker,
-        new AssetPerformance({
-          ticker,
-          targetWeight: entry.weight,
-          currentWeight: finalWealthCents > 0 ? endValue.cents / finalWealthCents : 0.0,
-          totalReturn: invested.isPositive ? (endValue.cents + cash.cents - invested.cents) / invested.cents : 0.0,
-          invested,
-          finalValue: endValue,
-          cash,
-          shares: shares.get(ticker)!,
-        }),
-      );
-    }
-
-    const residualCash = new Money(residualCashCents);
-
-    return ok(
-      new BacktestOutcome({
-        effectivePeriod: effectiveRange,
-        dates,
-        wealth,
-        base100,
-        totalContributed,
-        totalAllocated: totalContributed.minus(new Money(totalCostCents)).minus(residualCash),
-        transactionCosts: new Money(totalCostCents),
-        finalValue,
-        residualCash,
-        metrics: new PerformanceMetrics({
-          timeWeightedReturn: twr,
-          moneyWeightedReturn: xirr,
-          cagr,
-          volatility: risk.volatility,
-          maxDrawdown: risk.maxDrawdown,
-          sharpe: risk.sharpe,
-          sortino: risk.sortino,
-          calmar: risk.calmar,
-        }),
-        perAsset,
-        warnings,
-      }),
-    );
+    return ok(consolidate({ portfolio, prices, dates, path, cashFlows, totalContributedCents, ledger, riskFreeRate, warnings }));
   },
 };

@@ -13,7 +13,7 @@ resultado (7.6) e acompanhar a carteira realizada contra a meta (7.7).
 | **Estudo** | [builder-page.tsx](../../src/features/study/builder-page.tsx) | monta as carteiras Principal e Reserva e mostra o potencial de cada ativo |
 | **Raio-X** (`/ativo/<ATIVO>`) | [asset-page.tsx](../../src/features/asset/asset-page.tsx); [asset-xray.tsx](../../src/features/asset/asset-xray.tsx) | a avaliação de um ativo (capítulo 6), em dois modos — **Essencial**, a leitura e a régua de preço, e **Completo**, com o modelo, a taxa, a normalização, a sensibilidade e a projeção —, e o botão **Simular minhas premissas**, que abre a conta do motor para o usuário refazê-la (7.5); no computador, um índice lateral leva a cada seção. O endereço antigo, `?ativo=<ATIVO>` sobre qualquer área, redireciona para a página |
 | **Meta** | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | a rentabilidade que um plano patrimonial exige, e a carteira frente a ela; a curva de acumulação ([accumulation-chart.tsx](../../src/features/goal/accumulation-chart.tsx)) é o piloto dos gráficos da Bklit UI (decisão 156); o **acompanhamento da carteira** ([tracking-panel.tsx](../../src/features/goal/tracking-panel.tsx)) mostra o que a carteira fez desde a data de início, comprando a cada aporte o maior potencial (7.7; decisão 159) |
-| **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras sob o mesmo plano de aportes; a evolução comparada ([evolution-chart.tsx](../../src/features/backtest/evolution-chart.tsx)) é desenhada pelo gráfico de linha da Bklit UI, e o risco × retorno segue no Recharts (decisão 158) |
+| **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras com uma ação de cada ativo comprada no início da janela (7.4; decisão 161); a evolução comparada ([evolution-chart.tsx](../../src/features/backtest/evolution-chart.tsx)) é desenhada pelo gráfico de linha da Bklit UI, e o risco × retorno segue no Recharts (decisão 158) |
 | **Meus valuations** | [valuations-page.tsx](../../src/features/valuations/valuations-page.tsx) | os valuations que o usuário confirmou, de todos os ativos (7.6) |
 
 Onde aparece um ticker — Estudo, seletor, busca, Raio-X, Backtest, Meus
@@ -43,7 +43,7 @@ janela própria), com o rastro de cada avaliação
 | Regra | Código | Evidência |
 |---|---|---|
 | **Principal**: a carteira vigente, até 15 ativos, **equiponderada**: incluir e tirar ativo reequipondera, a interface não escolhe peso, e um estudo gravado com outros pesos abre equiponderado | [portfolio.ts, `Portfolio.maxAssets`, `Portfolio.add`, `Portfolio.remove`](../../src/core/entities/portfolio.ts); [study-store.ts, `withEqualWeights`](../../src/app/state/study-store.ts) | decisão 160; [study-store.test.ts](../../test/app/study-store.test.ts) |
-| **Reserva**: candidatos a entrar na Principal; na simulação, vira carteira inteira sob os mesmos aportes, para comparação | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | — |
+| **Reserva**: candidatos a entrar na Principal; na simulação, vira carteira inteira, comprada no mesmo pregão, para comparação | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | — |
 | Coluna "potencial": o upside do preço justo de cada ativo | [hooks.ts, `useValuation`](../../src/app/hooks.ts); [potential-cell.tsx](../../src/features/study/potential-cell.tsx) | — |
 | **Com valuation do usuário que discorda do motor, a coluna é a dele**: o mais recente confirmado para o ativo, com algum campo trocado, dá o preço justo — marcado "seu" — e o potencial contra a cotação de hoje; confirmar os números do motor tal como estão devolve o ativo ao preço do motor. Vale na Principal e na Reserva, em qualquer estudo, porque o valuation é do usuário | [saved-valuations-store.ts, `userValuationOf`](../../src/app/state/saved-valuations-store.ts); [portfolio-column.tsx, `AssetRow`](../../src/features/study/portfolio-column.tsx); [potential-cell.tsx](../../src/features/study/potential-cell.tsx) | decisão 151; [saved-valuations.test.ts](../../test/app/saved-valuations.test.ts) |
 | Setores da Principal: a rosca e a tabela, com o nome do setor quebrando a linha em vez de alargar o cartão | [sector-donut.tsx](../../src/features/study/sector-donut.tsx) | decisão 160 |
@@ -77,19 +77,22 @@ estimador abaixo segue no núcleo.
 
 ---
 
-## 7.4 Simulação: a carteira com aportes no passado
+## 7.4 Simulação: a carteira comprada no passado
 
 | Regra | Código | Evidência |
 |---|---|---|
-| Janela de 1 a 10 anos contados de hoje para trás (padrão 5); encurtada até o primeiro pregão do ativo mais novo | [backtest.ts](../../src/app/backtest.ts) | — |
-| Aporte inicial e mensais (dia 5; dia inexistente cai no primeiro pregão seguinte, ou no último do mês) | [portfolio-backtest.ts, `ContributionPlan`](../../src/core/services/backtest/portfolio-backtest.ts) | lente `nucleo`, 21/09/2026 |
-| **Sem rebalanceamento**: cada aporte é dividido pelos pesos-alvo, e os pesos derivam com o mercado | `PortfolioBacktest` | decisão 9 |
-| Compra **ação inteira**; a sobra fica em caixa por ativo e entra no aporte seguinte | idem | regra do projeto |
+| Janela de 1 a 10 anos contados de hoje para trás (padrão 5); encurtada até o primeiro pregão do ativo mais novo, a mesma para as duas carteiras | [backtest.ts](../../src/app/backtest.ts) | — |
+| **Uma ação de cada ativo**, a quantidade do mercado fracionário, comprada ao fechamento do primeiro pregão da janela; nenhuma compra depois, e o plano da Meta não entra | [portfolio-backtest.ts, `PortfolioBacktest.runOneShareEach`](../../src/core/services/backtest/portfolio-backtest.ts) | decisão 161 |
+| Os pesos do Estudo não entram: cada ativo pesa o próprio preço sobre a soma dos preços (ponderação por preço), e o peso deriva com o mercado, **sem rebalanceamento** | idem | decisões 9 e 161 |
+| Investido = preço das ações + tarifa; não sobra caixa | idem | teste "a tarifa entra no investido de cada ativo" |
 | Tarifa da B3 de 0,030% por compra, em inteiros (centavos e partes por milhão) | `TransactionCosts.b3` | decisão 126 |
 | Retorno só de **preço**: a simulação não credita provento | idem | decisões 23 e 89 |
-| Métricas sobre a série TWR neutralizada de aportes: TWR, XIRR (retorno do investidor), CAGR, volatilidade amostral anualizada, máximo drawdown, Sharpe contra o CDI observado, Sortino (Sortino e Satchell), Calmar | [risk-metrics.ts](../../src/core/services/metrics/risk-metrics.ts), [returns.ts](../../src/core/services/metrics/returns.ts) | conferência cruzada em Python |
-| Desempenho por ativo apurado com o caixa que sobrou dele | `AssetPerformance` | decisão 65 |
+| Métricas sobre a série TWR: TWR, CAGR, volatilidade amostral anualizada, máximo drawdown, Sharpe contra o CDI observado, Sortino (Sortino e Satchell), Calmar. Sem aporte depois da compra, o XIRR coincide com o retorno da cesta e não é mostrado | [risk-metrics.ts](../../src/core/services/metrics/risk-metrics.ts), [returns.ts](../../src/core/services/metrics/returns.ts) | conferência cruzada em Python; decisão 161 |
+| A evolução comparada mostra o patrimônio **em reais**, eixo a partir do zero; a base 100 sai da tela (é a mesma curva em outra escala) e fica no CSV | [evolution-chart.tsx](../../src/features/backtest/evolution-chart.tsx) | decisão 161 |
+| "O realizado frente à meta" confronta o exigido da Meta com o CAGR da cesta | [goal-confrontation.tsx](../../src/features/backtest/goal-confrontation.tsx) | decisão 161 |
+| Desempenho por ativo: investido, valor final e retorno de cada ação | `AssetPerformance` | decisões 65 e 161 |
 | Exportação em CSV | [csv-export.ts](../../src/app/csv-export.ts) | — |
+| O plano de aportes com pesos (`PortfolioBacktest.run`, `ContributionPlan`: aporte inicial e mensais no dia 5, ação inteira, sobra em caixa por ativo) segue no núcleo para as ferramentas de validação e a paridade, sem tela | idem | decisão 9; lente `nucleo`, 21/09/2026 |
 
 ---
 

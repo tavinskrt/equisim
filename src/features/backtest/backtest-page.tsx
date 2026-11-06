@@ -30,13 +30,14 @@ export function shortenedWindowMessage(result: PortfolioComparison): string {
   const start = Fmt.date(result.window.start);
   const requested = Fmt.date(result.requestedWindow.start);
   const culprit = result.limitingTicker === null ? 'nem todos os ativos tinham cotação' : `${result.limitingTicker.value} só tem cotação a partir dessa data`;
-  return `Janela encurtada: a simulação começa em ${start}, e não em ${requested}, porque ${culprit}. As duas carteiras usam a mesma janela — é o que mantém o cronograma de aportes idêntico e torna o TWR comparável. Reduza a janela para descartar o ativo como restrição.`;
+  return `Janela encurtada: a simulação começa em ${start}, e não em ${requested}, porque ${culprit}. As duas carteiras usam a mesma janela — é o que faz as duas compras saírem no mesmo pregão e torna o TWR comparável. Reduza a janela para descartar o ativo como restrição.`;
 }
 
 /**
- * **O Laboratório de backtest**: Principal contra Reserva sob o mesmo plano de
- * aportes, na mesma janela. Sem rebalanceamento, compra de ação inteira, caixa
- * por ativo, tarifa da B3 — e só preço: a simulação não distribui provento.
+ * **O Laboratório de backtest**: Principal contra Reserva na mesma janela, com
+ * **uma ação de cada ativo** comprada no primeiro pregão, pelo mercado
+ * fracionário, e nenhuma compra depois (decisão 161). Sem rebalanceamento,
+ * tarifa da B3 — e só preço: a simulação não distribui provento.
  */
 export function BacktestPage() {
   const settings = usePreferences((s) => s.backtest);
@@ -47,10 +48,10 @@ export function BacktestPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-title font-semibold text-fg">Backtest</h1>
-        <p className="mt-1 text-body-sm text-fg-2">O que as duas carteiras teriam feito no passado, recebendo os aportes do seu plano nas mesmas datas.</p>
+        <p className="mt-1 text-body-sm text-fg-2">O que as duas carteiras teriam rendido no passado, com uma ação de cada ativo comprada no primeiro pregão da janela.</p>
       </div>
       <SettingsCard settings={settings} goal={goal} />
-      {goal === null || nothing ? <NothingYet hasGoal={goal !== null} /> : <ComparisonArea />}
+      {nothing ? <NothingYet /> : <ComparisonArea />}
     </div>
   );
 }
@@ -58,7 +59,7 @@ export function BacktestPage() {
 /** A janela e o prazo da meta, sem texto explicativo ao lado (decisão 160). */
 function SettingsCard({ settings, goal }: { settings: BacktestSettings; goal: FinancialGoal | null }) {
   return (
-    <Panel title="Parâmetros da simulação" subtitle="Sem rebalanceamento: os pesos derivam com o mercado">
+    <Panel title="Parâmetros da simulação" subtitle="Uma ação de cada ativo, no fracionário, comprada no início da janela">
       <div className="md:max-w-md">
         <div>
           <Slider
@@ -78,24 +79,17 @@ function SettingsCard({ settings, goal }: { settings: BacktestSettings; goal: Fi
   );
 }
 
-function NothingYet({ hasGoal }: { hasGoal: boolean }) {
+function NothingYet() {
   return (
     <Card>
       <EmptyState
         icon={<TrendingUp aria-hidden className="size-6" />}
         title="Nada a simular ainda"
-        message="Monte a carteira Principal e defina o plano de aportes na aba Meta."
+        message="Monte a carteira Principal na aba Estudo."
         action={
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button asChild variant="secondary">
-              <Link to="/estudo">Montar a carteira</Link>
-            </Button>
-            {!hasGoal && (
-              <Button asChild variant="secondary">
-                <Link to="/meta">Definir a meta</Link>
-              </Button>
-            )}
-          </div>
+          <Button asChild variant="secondary">
+            <Link to="/estudo">Montar a carteira</Link>
+          </Button>
         }
       />
     </Card>
@@ -139,7 +133,7 @@ function ComparisonArea() {
       </Card>
     );
   }
-  if (comparison.data === null) return <NothingYet hasGoal />;
+  if (comparison.data === null) return <NothingYet />;
   return <ComparisonBody result={comparison.data} />;
 }
 

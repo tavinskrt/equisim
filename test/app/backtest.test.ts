@@ -4,9 +4,7 @@ import {
   type DateRange,
   DateTime,
   err,
-  FinancialGoal,
   InsufficientData,
-  Money,
   ok,
   Portfolio,
   PortfolioKind,
@@ -45,13 +43,6 @@ function pricesOf(series: readonly PriceSeries[], fail = false): PriceRepository
   };
 }
 
-const goal = FinancialGoal.unvalidated({
-  initialContribution: Money.fromReais(10000),
-  monthlyContribution: Money.fromReais(1000),
-  months: 120,
-  targetWealth: Money.fromReais(500000),
-});
-
 const closes = (n: number, start: number, end: number) => curve(start, end, n);
 
 describe('O backtest comparativo', () => {
@@ -61,8 +52,7 @@ describe('O backtest comparativo', () => {
     const result = (await comparePortfolios({
       principal: portfolio(PortfolioKind.principal, ['PETR4', 'VALE3']),
       reserve: portfolio(PortfolioKind.reserve, ['SAPR11']),
-      goal,
-      settings: { windowYears: 2, contributionDay: 5 },
+      settings: { windowYears: 2 },
       prices: pricesOf([
         seriesOf('PETR4', start, closes(380, 30, 40)),
         seriesOf('VALE3', start, closes(380, 60, 70)),
@@ -75,7 +65,8 @@ describe('O backtest comparativo', () => {
     expect(result.limitingTicker!.value).toBe('SAPR11');
     expect(result.window.start.equals(late)).toBe(true);
     expect(result.principal!.effectivePeriod.start.isBefore(late)).toBe(false);
-    expect(result.hasBoth).toBe(true);
+    expect(result.principal).not.toBeNull();
+    expect(result.reserve).not.toBeNull();
     expect(result.twrGap).not.toBeNull();
   });
 
@@ -84,34 +75,64 @@ describe('O backtest comparativo', () => {
     expect(w.start.equals(DateTime.local(2020, 6, 30))).toBe(true);
   });
 
-  it('sem meta, ou sem ativo, não há o que simular', async () => {
+  it('sem ativo não há o que simular; sem meta, sim — o plano de aportes não compra nada aqui', async () => {
+    const start = requestedWindow(today, 1).start;
     const args = {
       principal: portfolio(PortfolioKind.principal, ['PETR4']),
       reserve: portfolio(PortfolioKind.reserve, []),
-      settings: { windowYears: 1, contributionDay: 5 },
-      prices: pricesOf([]),
+      settings: { windowYears: 1 },
+      prices: pricesOf([seriesOf('PETR4', start, closes(250, 30, 40))]),
       today,
       riskFreeRateFor: async () => 0.1,
     };
-    expect(await comparePortfolios({ ...args, goal: null })).toBeNull();
-    expect(
-      await comparePortfolios({ ...args, goal, principal: portfolio(PortfolioKind.principal, []) }),
-    ).toBeNull();
+    expect(await comparePortfolios({ ...args, principal: portfolio(PortfolioKind.principal, []) })).toBeNull();
+    expect((await comparePortfolios(args))!.principal).not.toBeNull();
+  });
+
+  it('compra uma ação de cada ativo no primeiro pregão da janela, e nada depois (decisão 161)', async () => {
+    const start = requestedWindow(today, 1).start;
+    const petr = seriesOf('PETR4', start, closes(250, 30, 40));
+    const vale = seriesOf('VALE3', start, closes(250, 60, 55));
+    const result = (await comparePortfolios({
+      principal: portfolio(PortfolioKind.principal, ['PETR4', 'VALE3']),
+      reserve: portfolio(PortfolioKind.reserve, []),
+      settings: { windowYears: 1 },
+      prices: pricesOf([petr, vale]),
+      today,
+      riskFreeRateFor: async () => 0.1,
+    }))!;
+    const o = result.principal!;
+    const cents = (v: number) => Math.round(v * 100);
+    // Tarifa da B3, 0,030% meio para cima, por ordem.
+    const fee = (pc: number) => Math.floor((pc * 300 + 500000) / 1000000);
+    const p0 = cents(petr.points[0]!.close);
+    const v0 = cents(vale.points[0]!.close);
+    for (const a of o.perAsset.values()) expect(a.shares).toBe(1);
+    expect(o.totalContributed.cents).toBe(p0 + fee(p0) + v0 + fee(v0));
+    expect(o.transactionCosts.cents).toBe(fee(p0) + fee(v0));
+    expect(o.residualCash.cents).toBe(0);
+    // O patrimônio do último pregão é a soma dos dois fechamentos: uma ação de cada, sem compra no meio.
+    const last = (s: typeof petr) => cents(s.points[s.points.length - 1]!.close);
+    expect(o.finalValue.cents).toBe(last(petr) + last(vale));
+    // Sem fluxo depois do primeiro dia, a base 100 é o patrimônio sobre o do primeiro dia.
+    expect(o.base100[o.base100.length - 1]!).toBeCloseTo((100 * o.wealth[o.wealth.length - 1]!) / o.wealth[0]!, 9);
+    // E o XIRR, com um fluxo só na entrada, repete o CAGR — por isso saiu da tela.
+    expect(o.metrics.moneyWeightedReturn!).toBeCloseTo(o.metrics.cagr, 3);
   });
 
   it('a falha das cotações vira texto de tela nas duas carteiras', async () => {
     const result = (await comparePortfolios({
       principal: portfolio(PortfolioKind.principal, ['PETR4']),
       reserve: portfolio(PortfolioKind.reserve, ['ITUB4']),
-      goal,
-      settings: { windowYears: 1, contributionDay: 5 },
+      settings: { windowYears: 1 },
       prices: pricesOf([], true),
       today,
       riskFreeRateFor: async () => 0.1,
     }))!;
     expect(result.principalFailure).toBe('Dados insuficientes · PETR4 — Sem cotações de PETR4 na janela.');
     expect(result.reserveFailure).toBe(result.principalFailure);
-    expect(result.hasBoth).toBe(false);
+    expect(result.principal).toBeNull();
+    expect(result.reserve).toBeNull();
   });
 
   it('a dispersão desenha cada ativo uma vez, exige um mês de pregões e traz as carteiras', async () => {
@@ -119,8 +140,7 @@ describe('O backtest comparativo', () => {
     const result = (await comparePortfolios({
       principal: portfolio(PortfolioKind.principal, ['PETR4', 'VALE3']),
       reserve: portfolio(PortfolioKind.reserve, ['ITUB4']),
-      goal,
-      settings: { windowYears: 1, contributionDay: 5 },
+      settings: { windowYears: 1 },
       prices: pricesOf([
         seriesOf('PETR4', start, closes(250, 30, 40)),
         seriesOf('VALE3', start, closes(250, 60, 55)),
@@ -172,14 +192,16 @@ describe('O CSV', () => {
   it('abre no Excel brasileiro: ponto e vírgula e vírgula decimal', () => {
     const metrics = CsvExport.metrics(result).split('\n');
     expect(metrics[0]).toBe('metrica;principal;reserva');
-    expect(metrics.find((l) => l.startsWith('capital_aportado'))).toBe('capital_aportado;1000,00;1000,00');
+    expect(metrics.find((l) => l.startsWith('capital_investido'))).toBe('capital_investido;10,00;10,00');
+    expect(metrics.some((l) => l.includes('xirr') || l.includes('caixa'))).toBe(false);
   });
 
   it('a quantidade de ações sai inteira', () => {
     const lines = CsvExport.perAsset(result.principal!).split('\n');
     const row = lines[1]!.split(';');
+    expect(lines[0]).toBe('ticker;retorno;acoes;capital_investido;valor_final');
     expect(row[0]).toBe('PETR4');
-    expect(row[5]).toMatch(/^\d+$/);
+    expect(row[2]).toBe('1');
   });
 
   it('o documento traz cabeçalho, as duas carteiras por ativo e a série', () => {

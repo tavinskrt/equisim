@@ -45,7 +45,7 @@ describe('Pontos da evolução no gráfico da Bklit (decisão 158)', () => {
     expect(points.map((p) => p['principal'])).toEqual([100, 101, 99]);
   });
 
-  it('desenha nas duas grandezas, e a tabela segue com o valor exato de cada fim de mês', () => {
+  it('desenha só o patrimônio em reais, e a tabela segue com o valor exato de cada fim de mês', () => {
     const result = comparisonOf({ principal: outcomeOf('ITUB4', curve(10, 14, 250)), reserve: outcomeOf('BBAS3', curve(10, 11, 250)) });
     const { container } = render(
       <MotionProvider>
@@ -55,12 +55,15 @@ describe('Pontos da evolução no gráfico da Bklit (decisão 158)', () => {
       </MotionProvider>,
     );
     expect(container.querySelector('.bklit-chart')).not.toBeNull();
-    fireEvent.click(screen.getByRole('radio', { name: 'Patrimônio em reais' }));
-    expect(container.querySelector('.bklit-chart')).not.toBeNull();
+    // Uma vista só, em reais: com uma compra só, a base 100 era a mesma curva em outra escala (decisão 161).
+    expect(screen.queryByRole('radio', { name: 'Base 100' })).toBeNull();
     expect(container.textContent).toContain('Patrimônio em reais');
     fireEvent.click(screen.getByRole('radio', { name: 'Tabela' }));
-    const rows = within(screen.getByRole('table')).getAllByRole('row');
+    const table = screen.getByRole('table');
+    const rows = within(table).getAllByRole('row');
     expect(rows.length).toBeGreaterThan(2);
+    expect(rows[0]!.textContent).toContain('(R$)');
     expect(rows[1]!.textContent).toContain('R$');
+    expect(table.textContent).not.toContain('base 100');
   });
 });
