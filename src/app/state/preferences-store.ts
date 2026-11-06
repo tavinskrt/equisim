@@ -5,27 +5,15 @@ import { browserPreferences, getRuntime, hasRuntime, type PreferenceStorage } fr
 import { defaultValuationSettings, type ValuationSettings } from '../valuation';
 import { useSession } from './session-store';
 
-/**
- * Profundidade da interface.
- *
- * - `guided` (Essencial): o veredito em linguagem simples e o que decide.
- * - `analyst` (Completo): tudo o que o motor mostra — modelo, taxas,
- *   normalização, múltiplos, sensibilidade, ressalvas, métricas inteiras.
- *
- * Os números são os mesmos nos dois: o modo muda o que aparece, nunca a conta.
- */
-export type DetailMode = 'guided' | 'analyst';
-
 export type ThemeMode = 'dark' | 'light';
 
 export interface PreferencesState {
-  readonly mode: DetailMode;
   readonly theme: ThemeMode;
   readonly valuation: ValuationSettings;
   readonly backtest: BacktestSettings;
 }
 
-const keys = { mode: 'equisim:modo', theme: 'equisim:tema' } as const;
+const keys = { theme: 'equisim:tema' } as const;
 
 /**
  * Onde as preferências moram: as do ambiente montado, ou as do navegador na
@@ -41,13 +29,7 @@ function initialTheme(): ThemeMode {
   return stored === 'light' ? 'light' : 'dark';
 }
 
-function initialMode(): DetailMode {
-  const stored = storage().get(keys.mode);
-  return stored === 'analyst' ? 'analyst' : 'guided';
-}
-
 export const usePreferences = create<PreferencesState>(() => ({
-  mode: 'guided',
   theme: 'dark',
   valuation: defaultValuationSettings,
   backtest: defaultBacktestSettings,
@@ -56,12 +38,7 @@ export const usePreferences = create<PreferencesState>(() => ({
 export const PreferencesActions = {
   /** Lê as preferências guardadas. Chamado na partida, depois do ambiente montado. */
   hydrate(): void {
-    usePreferences.setState({ mode: initialMode(), theme: initialTheme() });
-  },
-
-  setMode(mode: DetailMode): void {
-    usePreferences.setState({ mode });
-    storage().set(keys.mode, mode);
+    usePreferences.setState({ theme: initialTheme() });
   },
 
   /**

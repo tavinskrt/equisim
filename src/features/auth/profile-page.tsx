@@ -155,7 +155,6 @@ function AccountInfo(props: { displayName: string; email: string }) {
 
 function PreferencesCard() {
   const theme = usePreferences((s) => s.theme);
-  const mode = usePreferences((s) => s.mode);
   return (
     <Panel title="Preferências" subtitle="Valem neste navegador; com conta, o tema acompanha você.">
       <div className="space-y-4">
@@ -168,21 +167,6 @@ function PreferencesCard() {
             options={[
               { value: 'dark', label: 'Escuro' },
               { value: 'light', label: 'Claro' },
-            ]}
-          />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-body-sm text-fg-2">Profundidade da interface</p>
-            <p className="text-caption text-fg-3">O Completo mostra o modelo, as taxas e as métricas todas. Os números são os mesmos.</p>
-          </div>
-          <Segmented
-            label="Profundidade da interface"
-            value={mode}
-            onChange={PreferencesActions.setMode}
-            options={[
-              { value: 'guided', label: 'Essencial' },
-              { value: 'analyst', label: 'Completo' },
             ]}
           />
         </div>

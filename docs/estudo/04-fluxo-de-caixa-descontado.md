@@ -168,7 +168,7 @@ medível. O porquê de cada um, com os números, está em
 
 **Onde ver no aplicativo.** No **painel de logs**, o passo "Base do fluxo" abre
 com um quadro **"Por quê"**, em texto corrido, antes das variáveis e da conta. No
-**Raio-X** do ativo (modo Completo) e na tela **Simular minhas premissas**, o
+**Raio-X** do ativo e na tela **Simular minhas premissas**, o
 cartão do lucro de partida traz a pergunta "Por
 que o motor subiu (ou baixou) o lucro de partida?", com o retorno de cada ano
 do ciclo em barras, o típico marcado, o teste que decidiu e a conta.

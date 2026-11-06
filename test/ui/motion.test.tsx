@@ -33,20 +33,20 @@ describe('Movimento (decisão 155)', () => {
     const onChange = vi.fn();
     render(
       <Segmented
-        label="Profundidade"
-        value="guided"
+        label="Tema"
+        value="dark"
         onChange={onChange}
         options={[
-          { value: 'guided', label: 'Essencial' },
-          { value: 'analyst', label: 'Completo' },
+          { value: 'dark', label: 'Escuro' },
+          { value: 'light', label: 'Claro' },
         ]}
       />,
     );
-    const on = screen.getByRole('radio', { name: 'Essencial' });
+    const on = screen.getByRole('radio', { name: 'Escuro' });
     expect(on.getAttribute('data-state')).toBe('on');
     expect(on.className).toContain('data-[state=on]:bg-raised');
-    fireEvent.click(screen.getByRole('radio', { name: 'Completo' }));
-    expect(onChange).toHaveBeenCalledWith('analyst');
+    fireEvent.click(screen.getByRole('radio', { name: 'Claro' }));
+    expect(onChange).toHaveBeenCalledWith('light');
   });
 
   it('o carregamento do motor anuncia um rótulo fixo e reveza as etapas só na tela', () => {

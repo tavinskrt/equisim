@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-11-06, a partir de `1c49626`.
+Gerado em 2026-11-06, a partir de `688d212`.
 
 ## Decisões registradas
 
-**134** aceita · **2** cumprida · **7** substituída
+**135** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -158,6 +158,7 @@ Gerado em 2026-11-06, a partir de `1c49626`.
 | 159 | A Meta acompanha a carteira realizada, que compra a cada aporte o ativo de maior potencial abaixo de um teto de peso, e a compara com o exigido, o esperado, o CDI e o Ibovespa | aceita | voce | 2026-11-04 |
 | 160 | A interface deixa o peso e o retorno esperado da carteira, e enxuga textos do Estudo, da Meta e do Backtest | aceita | voce | 2026-11-05 |
 | 161 | O Backtest compra uma ação de cada ativo, pelo fracionário, no primeiro pregão da janela, e mais nada | aceita | voce | 2026-11-06 |
+| 162 | A interface deixa a alavanca Essencial/Completo e mostra sempre tudo | aceita | voce | 2026-11-06 |
 
 ### Caminhos retirados
 
@@ -892,17 +893,19 @@ Linhas versionadas, excluindo artefatos gerados.
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
 | Nucleo de dominio | 80 | 26.473 |
-| Apresentacao | 184 | 26.448 |
+| Apresentacao | 184 | 26.325 |
 | Camada de dados | 39 | 5.019 |
 | Auditoria | 5 | 679 |
 | Ferramentas de medicao | 128 | 29.840 |
-| Testes do app | 44 | 6.693 |
+| Testes do app | 44 | 6.689 |
 | Testes do nucleo | 68 | 32.432 |
 | Ferramentas de QA | 21 | 7.574 |
 
 ## Histórico recente
 
 ```
+2026-11-05  688d212  O Backtest compra uma ação de cada ativo no início da janela (decisão 161)
+2026-11-06  e6507ee  A evolução do Backtest fica só em reais (decisão 161)
 2026-11-06  1c49626  O Backtest compra uma ação de cada ativo no início da janela (decisão 161)
 2026-11-05  8a0a745  A interface deixa o peso e o retorno esperado da carteira (decisão 160)
 2026-11-05  469893e  A interface deixa o peso e o retorno esperado da carteira (decisão 160)
@@ -916,6 +919,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-11-03  6fbb3cf  A paridade lê os pacotes de validação da gravação do gabarito
 2026-11-03  eb4ccf4  Refaz o backtest trimestral com as versões antigas da CVM
 2026-11-03  e536d26  As versões antigas aceitam o XML único com a hora no nome
-2026-11-02  371e6a2  Refaz a entrada congelada de 14/09/2026 com o motor da decisão 153
-2026-11-02  469e3dc  A ingestão da CVM pode dividir a memória por companhia
 ```

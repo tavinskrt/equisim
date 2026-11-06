@@ -25,9 +25,6 @@ const pct = (v: number, signed = false, tone?: Tone): Cell => ({ text: Fmt.perce
 const ratio = (v: number): Cell => ({ text: Fmt.ratio(v), tone: 'neutral' });
 const money = (v: number): Cell => ({ text: Fmt.money(v), tone: 'neutral' });
 
-/** O modo Essencial fica com o que responde "qual rendeu mais, e quanto custou de susto": os números são os mesmos do Completo. */
-const essentialRows = new Set(['Patrimônio final', 'Investido', 'TWR', 'CAGR', 'Máx. drawdown']);
-
 function rowsOf(portfolios: readonly BacktestOutcome[]): Row[] {
   const each = (f: (o: BacktestOutcome) => Cell) => portfolios.map(f);
   return [
@@ -53,14 +50,13 @@ function rowsOf(portfolios: readonly BacktestOutcome[]): Row[] {
  * cada célula. Abaixo de 400 px ela continua tabela, com a coluna do rótulo
  * quebrando a ressalva em linha própria.
  */
-export function SideBySidePortfolios(props: { principal: BacktestOutcome; reserve: BacktestOutcome; essential?: boolean }) {
+export function SideBySidePortfolios(props: { principal: BacktestOutcome; reserve: BacktestOutcome }) {
   const { principal, reserve } = props;
   const columns = [
     { name: 'Principal', color: PortfolioColors.principal },
     { name: 'Reserva', color: PortfolioColors.reserve },
   ];
-  const all = rowsOf([principal, reserve]);
-  const rows = props.essential === true ? all.filter((r) => essentialRows.has(r.label)) : all;
+  const rows = rowsOf([principal, reserve]);
   return (
     <Card className="p-4 sm:p-5">
       <SectionHeader

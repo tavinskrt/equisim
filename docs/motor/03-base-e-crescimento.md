@@ -78,7 +78,7 @@ que a decidiram — nada é recalculado para explicar:
 | O resultado em uma palavra, pela ordem em que a cascata decide: imposto, reconstruído, sem ciclo, dentro do normal, tendência, travado pela queda, para cima, para baixo | `BaseNormalization.outcome` | variável "resultado da normalização" no rastro |
 | As duas medidas da Guarda 3, sem mudar a regra | `GrowthGuards.cycleDeviation` | — |
 | O porquê em linguagem corrente, com os números | `whyTheBase`, em compute-valuation.ts; `CalculationTrace.explanation` | painel de logs, quadro "Por quê" do passo "Base do fluxo" |
-| O mesmo porquê na tela, com os anos do ciclo em barras | [normalization-panel.tsx](../../src/features/asset/normalization-panel.tsx), [normalization-copy.ts](../../src/copy/normalization-copy.ts) | Raio-X, modo Completo, e Simular minhas premissas, cartão do lucro de partida |
+| O mesmo porquê na tela, com os anos do ciclo em barras | [normalization-panel.tsx](../../src/features/asset/normalization-panel.tsx), [normalization-copy.ts](../../src/copy/normalization-copy.ts) | Raio-X e Simular minhas premissas, cartão do lucro de partida |
 | O porquê de cada ativo do universo | [tool/normalizations.ts](../../tool/normalizations.ts) | [normalizacoes.md](../validacao/normalizacoes.md): 13 para cima, 33 para baixo, 53 dentro do normal, 15 por tendência, 4 travados pela queda, 1 reconstruído, 2 sem ciclo, nos 121 avaliados de 14/09/2026 (motor de 03/11/2026) |
 
 **Nenhum número mudou.** O gabarito de 14/10/2026 saiu igual em preço, cenários e

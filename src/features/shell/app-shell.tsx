@@ -2,14 +2,12 @@ import { ScrollText, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 
-import { PreferencesActions, usePreferences } from '../../app/state/preferences-store';
 import { StudyActions, useStudy } from '../../app/state/study-store';
 import { auditEnabled } from '../../audit/audit-bus';
 import { AuditRoutes } from '../../audit/audit-routes';
 import { IconButton } from '../../ui/button';
 import { cn } from '../../ui/cn';
 import { Logo } from '../../ui/logo';
-import { Segmented } from '../../ui/segmented';
 import { toast } from '../../ui/toast';
 import { AccountMenu } from './account-menu';
 import { CommandPalette } from './command-palette';
@@ -18,12 +16,11 @@ import { navItems } from './nav-items';
 import { useLegacyAssetRedirect } from './use-open-asset';
 
 /**
- * A casca: cabeçalho com as áreas, a busca e o modo; a barra do estudo; e a
+ * A casca: cabeçalho com as áreas e a busca; a barra do estudo; e a
  * área corrente, que entra com um esmaecer curto a cada troca de endereço.
  */
 export function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const mode = usePreferences((s) => s.mode);
   const lastError = useStudy((s) => s.lastError);
   const location = useLocation();
   useLegacyAssetRedirect();
@@ -93,17 +90,6 @@ export function AppShell() {
             <IconButton label="Buscar ativo ou comando" className="sm:hidden" onClick={() => setPaletteOpen(true)}>
               <Search aria-hidden className="size-[18px]" />
             </IconButton>
-            <Segmented
-              label="Profundidade da interface"
-              size="sm"
-              value={mode}
-              onChange={PreferencesActions.setMode}
-              className="ml-1 hidden sm:inline-flex"
-              options={[
-                { value: 'guided', label: 'Essencial' },
-                { value: 'analyst', label: 'Completo' },
-              ]}
-            />
             {auditEnabled() && (
               <IconButton label="Abrir Painel de Logs de Cálculo" onClick={() => AuditRoutes.openInNewWindow()}>
                 <ScrollText aria-hidden className="size-[18px]" />
@@ -117,19 +103,6 @@ export function AppShell() {
 
       {/* `overflow-x-clip`: um elemento mais largo que a tela é cortado aqui, em vez de alargar o documento, o que no Safari do iPhone reduz a página inteira. `clip`, e não `hidden`, para não virar área de rolagem e o índice lateral continuar grudado. */}
       <main id="conteudo" className="mx-auto w-full min-w-0 max-w-[1440px] flex-1 overflow-x-clip px-4 pb-28 pt-4 sm:px-6 md:pb-10">
-        {/* No celular o modo mora aqui: o cabeçalho não tem largura. */}
-        <div className="mb-3 flex justify-end sm:hidden">
-          <Segmented
-            label="Profundidade da interface"
-            size="sm"
-            value={mode}
-            onChange={PreferencesActions.setMode}
-            options={[
-              { value: 'guided', label: 'Essencial' },
-              { value: 'analyst', label: 'Completo' },
-            ]}
-          />
-        </div>
         {/* Só a entrada anima, e em CSS: a saída prenderia a área velha na tela enquanto a nova carrega. */}
         <div key={location.pathname} className="rise-in">
           <Outlet />

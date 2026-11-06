@@ -1,5 +1,5 @@
 import { Command } from 'cmdk';
-import { Moon, ScrollText, Search, SlidersHorizontal, Sun } from 'lucide-react';
+import { Moon, ScrollText, Search, Sun } from 'lucide-react';
 import { Dialog } from 'radix-ui';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -27,7 +27,6 @@ export function CommandPalette(props: { open: boolean; onOpenChange: (open: bool
   const navigate = useNavigate();
   const openAsset = useOpenAsset();
   const theme = usePreferences((s) => s.theme);
-  const mode = usePreferences((s) => s.mode);
   const study = useStudy((s) => s.study);
   const [query, setQuery] = useState('');
 
@@ -105,14 +104,6 @@ export function CommandPalette(props: { open: boolean; onOpenChange: (open: bool
                 >
                   {theme === 'dark' ? <Sun aria-hidden className="size-4 text-fg-3" /> : <Moon aria-hidden className="size-4 text-fg-3" />}
                   {theme === 'dark' ? 'Usar o tema claro' : 'Usar o tema escuro'}
-                </Command.Item>
-                <Command.Item
-                  value="modo completo essencial analista detalhe"
-                  onSelect={() => run(() => PreferencesActions.setMode(mode === 'guided' ? 'analyst' : 'guided'))}
-                  className={itemClass}
-                >
-                  <SlidersHorizontal aria-hidden className="size-4 text-fg-3" />
-                  {mode === 'guided' ? 'Mostrar tudo (modo Completo)' : 'Mostrar o essencial (modo Essencial)'}
                 </Command.Item>
                 {auditEnabled() && (
                   <Command.Item value="painel logs auditoria cálculo" onSelect={() => run(() => AuditRoutes.openInNewWindow())} className={itemClass}>
