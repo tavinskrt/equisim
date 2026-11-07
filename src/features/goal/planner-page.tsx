@@ -24,7 +24,7 @@ const defaults = { initial: 10000, monthly: 1000, target: 500000, months: 120 };
  * depende de avaliação nenhuma: o aviso de meta irreal aparece enquanto se
  * arrasta o controle, antes de escolher qualquer ativo.
  *
- * Sem o retorno esperado da carteira (decisão 160): ele era a média dos Ke
+ * Sem o retorno esperado da carteira: ele era a média dos Ke
  * ponderada pelo peso, e o peso saiu da interface. A carteira se confronta com
  * a meta pelo que de fato fez, no acompanhamento.
  */

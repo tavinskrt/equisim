@@ -27,7 +27,7 @@ import { PremiseFields } from './premise-fields';
 import { CalculationCard, type Confirmation, DisagreementCard, ResultBar, ReverseCard, SummaryCard, YearsCard } from './result-cards';
 
 /**
- * **Simular minhas premissas** (decisão 147): o editor do valuation, com os
+ * **Simular minhas premissas**: o editor do valuation, com os
  * números do motor como ponto de partida, o DCF reverso e a confirmação que
  * guarda o resultado em "Meus valuations" e no painel de logs.
  *

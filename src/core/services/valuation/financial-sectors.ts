@@ -8,7 +8,7 @@ import { CyclicalSectors } from './cyclical-sectors';
  * **A lista é declarada, não inferida**, como a de [CyclicalSectors]. Aceita
  * as duas taxonomias que chegam ao motor:
  *
- * - a **oficial da B3** (item A5, decisão 87): setor `Financeiro` e um dos
+ * - a **oficial da B3**: setor `Financeiro` e um dos
  *   subsetores de [officialSubsectors];
  * - a da **fonte de preços**, que ainda é o recuo quando a B3 não classifica o
  *   emissor: a chave [sourceKey].

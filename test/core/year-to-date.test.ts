@@ -54,7 +54,7 @@ const history = (): CvmPeriodDocument[] => {
   return out;
 };
 
-describe('Ano corrente anualizado (decisão 153)', () => {
+describe('Ano corrente anualizado', () => {
   it('conta os meses do acumulado pelo número de dias', () => {
     expect(YearToDate.months(d(2026, 1, 1), d(2026, 3, 31))).toBe(3);
     expect(YearToDate.months(d(2026, 1, 1), d(2026, 6, 30))).toBe(6);

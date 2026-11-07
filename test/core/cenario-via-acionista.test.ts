@@ -1,5 +1,5 @@
 // O cenário de desconto alcança o período explícito na via do acionista com o
-// custo de capital resolvido (item B36).
+// custo de capital resolvido.
 //
 // O caminho de `Ke` resolvido ano a ano era copiado para o cenário sem o
 // deslocamento, e o `+2 p.p.` do pessimista só chegava à perpetuidade: a AZEV4
@@ -68,7 +68,7 @@ function inputs(): ValuationInputs {
     marketPrice: 12.0,
     capm: new CapmInputs({ riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055 }),
     declaredTerminalRiskFreeRate: 0.1,
-    // Com o beta desalavancado o `Ke` é resolvido ano a ano (decisão 46).
+    // Com o beta desalavancado o `Ke` é resolvido ano a ano.
     unleveredBeta: 0.9,
   });
 }

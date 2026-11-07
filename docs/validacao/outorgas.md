@@ -2,7 +2,7 @@
 
 Medido em 14/09/2026. Ferramentas: `tool/cvm_baixar.py --docs FRE`,
 `tool/fre_outorgas.dart` e `tool/padrao_ligar.dart`.
-[Decisão 88](../decisoes/088-o-prazo-da-concessao-corta-o-excedente.md).
+Decisão 88.
 Retoma o [D8](concessao.md) e as [limitações §2.16](limitacoes.md).
 
 ## 1. A pergunta estava mal posta
@@ -18,7 +18,7 @@ reversão ou por uma renovação que refaz a tarifa ao custo de capital.
 
 ## 2. O que o prazo corta, e o que não corta
 
-O terminal neutro que a [decisão 50](../decisoes/050-concessao-nao-preserva-excedente.md)
+O terminal neutro que a decisão 50
 impõe a toda concessão, `lucro_{N+1}/r`, afirma que o **capital novo** não cria
 valor. Não afirma que o capital **existente** deixa de render acima do custo: o
 lucro do ano N+1 carrega o retorno dele, e dividido por `r` o excedente vale para

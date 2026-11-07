@@ -83,7 +83,7 @@ export const ValuationParameters = {
   // ------------------------------------- Vantagem competitiva residual --
 
   /**
-   * Teto da persistência anual do excedente de retorno (decisão 36). Em 0,90,
+   * Teto da persistência anual do excedente de retorno. Em 0,90,
    * o `λ` máximo em dez anos é 0,35.
    */
   moatMaxPersistence: 0.9,
@@ -112,7 +112,7 @@ export const ValuationParameters = {
 
   /**
    * Teto de passes do veredito contra a taxa que o ponto fixo devolve
-   * (decisão 44). Dez é onde a cauda medida termina.
+   *. Dez é onde a cauda medida termina.
    */
   moatMaxPasses: 10,
 
@@ -442,7 +442,7 @@ export const GrowthGuards = {
       const a = window[i - 1]!;
       const b = window[i]!;
       // O ano corrente anualizado não entra: a base variou por meses, e o
-      // lucro é de um ano (decisão 153).
+      // lucro é de um ano.
       if (b.year - a.year !== 1 || b.partial) continue;
       const delta = b.base - a.base;
       const profit = b.profit ?? 0.0;
@@ -495,7 +495,7 @@ export const GrowthGuards = {
     if (gMedian === null) return null;
 
     // A regressão da base também deixa de fora o ano corrente anualizado, cuja
-    // base é de meses depois da anterior, e não de um ano (decisão 153).
+    // base é de meses depois da anterior, e não de um ano.
     const full = series.points.filter((p) => !p.partial);
     const xs = full.map((p) => p.year);
     const ys = full.map((p) => Math.log(p.base));

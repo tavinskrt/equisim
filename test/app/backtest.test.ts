@@ -89,7 +89,7 @@ describe('O backtest comparativo', () => {
     expect((await comparePortfolios(args))!.principal).not.toBeNull();
   });
 
-  it('compra uma ação de cada ativo no primeiro pregão da janela, e nada depois (decisão 161)', async () => {
+  it('compra uma ação de cada ativo no primeiro pregão da janela, e nada depois', async () => {
     const start = requestedWindow(today, 1).start;
     const petr = seriesOf('PETR4', start, closes(250, 30, 40));
     const vale = seriesOf('VALE3', start, closes(250, 60, 55));

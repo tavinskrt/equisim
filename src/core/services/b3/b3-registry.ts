@@ -5,7 +5,7 @@
  * endpoint que devolve, por emissor, a quantidade de ações por classe e os
  * eventos societários com fator e data-com. É o **registro declarado** que o
  * item A3.1 pedia: o fator do evento vem escrito, e não inferido do preço como
- * em `CorporateEvents` (decisão 75).
+ * em `CorporateEvents`.
  *
  * **Duas convenções de fator, conferidas contra o preço.** Sobre os eventos de
  * 2010 em diante dos 297 emissores do universo, confrontados com a razão de
@@ -70,7 +70,7 @@ export class OfficialShareEvent {
 
 /**
  * Classificação setorial oficial da B3: setor econômico, subsetor e segmento
- * (item A5).
+ *.
  *
  * **Por emissor, e não por papel.** A fonte de preços classifica papel a
  * papel e deixa buracos — SANB11 vinha classificada e SANB4 não, e BRSR6 e

@@ -16,7 +16,7 @@
 //
 //      A mediana, e não o agregado ponderado pelo valor de mercado: ponderar
 //      exigiria a contagem de papéis de cada ativo, que é justamente a grandeza
-//      que a ponte arbitra (decisão 83), e o resultado passaria a depender dela.
+//      que a ponte arbitra, e o resultado passaria a depender dela.
 //      A mediana do potencial é a mesma grandeza que a §0 do plano usa.
 //   3. **O efeito de cada candidato** sobre preço justo, cobertura e ordenação.
 //

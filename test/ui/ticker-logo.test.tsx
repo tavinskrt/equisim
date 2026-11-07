@@ -7,7 +7,7 @@ import { TickerLogo, tickerInitials, tickerLogoUrl } from '../../src/ui/ticker-l
 
 afterEach(cleanup);
 
-describe('TickerLogo (decisão 154)', () => {
+describe('TickerLogo', () => {
   it('pede à brapi a logo no endereço que o perfil devolve em logoUrl', () => {
     // O mesmo endereço de test/fixtures/brapi_profile_petr4.json.
     expect(tickerLogoUrl(Ticker.parse('PETR4'))).toBe('https://icons.brapi.dev/icons/PETR4.svg');

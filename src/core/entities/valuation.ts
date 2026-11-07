@@ -188,7 +188,7 @@ export class ValuationCaveat extends DartEnum implements WireKeyed {
 
   /**
    * A companhia é de controle estatal, e o motor não cobra prêmio por isso
-   * (item B46). **A ressalva informa, e não corrige.**
+   *. **A ressalva informa, e não corrige.**
    */
   static readonly stateControl = new ValuationCaveat('stateControl', 9, 'controleEstatal');
 
@@ -227,14 +227,14 @@ export class ValuationCaveat extends DartEnum implements WireKeyed {
  * aqui já era apurado pela cascata; o que muda é que passa a sair com o
  * resultado, em forma que a máquina lê.
  *
- * **Não existe nota de confiança aqui, e a ausência é medida** (decisão 32): a
+ * **Não existe nota de confiança aqui, e a ausência é medida**: a
  * nota ordinal derivada da contagem de ressalvas ordenava ao contrário do que
  * prometia. O que fica são os **fatos**.
  */
 export class ValuationDiagnostics {
   /**
    * Parcela do preço justo explicada pelo valor terminal, em fração. **É
-   * contra o capital próprio, nas três rotas** (decisão 51). Pode passar de 1.
+   * contra o capital próprio, nas três rotas**. Pode passar de 1.
    */
   readonly terminalShare: number;
 
@@ -270,11 +270,11 @@ export class ValuationDiagnostics {
 
   /**
    * Custo de capital de equilíbrio — a taxa que desconta a perpetuidade. A
-   * taxa decai do CDI corrente até esta ao longo da projeção (decisão 31).
+   * taxa decai do CDI corrente até esta ao longo da projeção.
    */
   readonly terminalDiscountRate: number;
 
-  /** Custo do capital próprio de **equilíbrio resolvido** (decisão 41), ou `null`. */
+  /** Custo do capital próprio de **equilíbrio resolvido**, ou `null`. */
   readonly terminalCostOfEquity: number | null;
 
   /** Crescimento **aplicado** em cada ano explícito. */
@@ -285,23 +285,23 @@ export class ValuationDiagnostics {
 
   /**
    * Custo do capital próprio do ativo pelo CAPM, sobre a taxa livre de risco
-   * **corrente** — o retorno esperado incondicional do papel (decisão 58).
+   * **corrente** — o retorno esperado incondicional do papel.
    */
   readonly costOfEquity: number;
 
   /**
    * Parcela do preço justo que vem do **excedente perpétuo do capital
-   * instalado**, em fração (item B12). Pode ser negativa.
+   * instalado**, em fração. Pode ser negativa.
    */
   readonly terminalExcessShare: number | null;
 
-  /** Retorno que a perpetuidade supõe sobre o capital instalado: `lucro_{N+1} ÷ capital_N` (item B12). */
+  /** Retorno que a perpetuidade supõe sobre o capital instalado: `lucro_{N+1} ÷ capital_N`. */
   readonly impliedTerminalReturn: number | null;
 
-  /** Participação do capital próprio no valor da firma **no ano N** (item B15). */
+  /** Participação do capital próprio no valor da firma **no ano N**. */
   readonly terminalEquityShare: number | null;
 
-  /** Capital das emissões de ações por valor **depois** do balanço usado, em reais (item B28). */
+  /** Capital das emissões de ações por valor **depois** do balanço usado, em reais. */
   readonly postStatementCapital: number | null;
 
   /** A decisão da normalização do lucro de partida, com o que a decidiu. **Explica, e não recalcula.** */
@@ -358,19 +358,19 @@ export class ValuationDiagnostics {
 
   /**
    * Acima disto, o valor terminal domina e a estimativa é rebaixada. **80%**,
-   * o topo da faixa que motivou a projeção de dez anos (decisão 25).
+   * o topo da faixa que motivou a projeção de dez anos.
    */
   static readonly terminalShareLimit = 0.8;
 
   /**
    * Acima disto, um único exercício move demais a avaliação inteira. **2,0x**,
-   * metade da autoridade que a saturação permite (decisão 28).
+   * metade da autoridade que a saturação permite.
    */
   static readonly baseFactorLimit = 2.0;
 
   /**
    * Acima disto em módulo, o excedente perpétuo do capital instalado é
-   * declarado na avaliação (item B12). Ver `docs/validacao/terminal_excedente.md`.
+   * declarado na avaliação. Ver `docs/validacao/terminal_excedente.md`.
    */
   static readonly terminalExcessLimit = 0.2;
 
@@ -421,19 +421,19 @@ export class ValuationResult {
 
   /**
    * Volatilidade anualizada do papel na janela da avaliação, ou `null` — a
-   * escala da faixa calibrada (item C2b), da **mesma série** que a cascata usou.
+   * escala da faixa calibrada, da **mesma série** que a cascata usou.
    */
   readonly priceVolatility: number | null;
 
   /**
-   * A segunda leitura, por múltiplos de pares (item B5, decisão 118). **Não é
+   * A segunda leitura, por múltiplos de pares. **Não é
    * preço, e não entra em [fairValue].**
    */
   readonly triangulation: PeerTriangulation | null;
 
   /**
    * A conta do motor congelada, para o usuário refazê-la com os números dele
-   * (decisão 147). **Não muda [fairValue].**
+   *. **Não muda [fairValue].**
    */
   readonly manual: ManualValuation | null;
 

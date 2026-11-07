@@ -3,7 +3,7 @@
 //
 // **A pergunta.** O motor tira o `g` da mediana das variações anuais da base
 // de capital — o patrimônio na via do acionista, o capital investido na da
-// firma (decisão 25). Pela identidade do lucro limpo, `Δpatrimônio = lucro ×
+// firma. Pela identidade do lucro limpo, `Δpatrimônio = lucro ×
 // retenção` quando não entra nem sai capital, e a variação da base **é** o
 // `ROE × retenção` realizado ano a ano. A proposta do orientador é a versão
 // que olha para a frente: o ROE normalizado vezes a retenção que o payout

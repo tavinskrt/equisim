@@ -26,7 +26,7 @@ const FUNDAMENTAL_COLUMNS = CACHED_FUNDAMENTAL_FIELDS.map(snake);
  *
  * A compatibilidade é o ponto: o `validation_cache.sqlite` e o
  * `data/gabarito/cache.sqlite` que as execuções em Dart deixaram continuam
- * valendo, e a entrada congelada do gabarito (decisão 152) não precisa ser
+ * valendo, e a entrada congelada do gabarito não precisa ser
  * baixada de novo — baixar de novo é justamente o que a descongelaria.
  *
  * Usa o `node:sqlite` embutido no Node 22, sem dependência nova.

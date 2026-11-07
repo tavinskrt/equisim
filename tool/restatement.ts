@@ -11,7 +11,7 @@
 // 16/01/2025; em 04/09/2024 aquele ano ficava sem CVM.
 //
 // **Consertar exige a base bruta** — guardar cada versão com a data dela é
-// trabalho de ingestão, e `data/cvm` não sobrevive ao clone (item C5). **Medir
+// trabalho de ingestão, e `data/cvm` não sobrevive ao clone. **Medir
 // não exige**: o pacote versionado traz a data de recebimento de cada
 // documento, e com ela dá para contar quantos exercícios cada coorte perde por
 // chegarem tarde demais.

@@ -126,7 +126,7 @@ export function usePortfolioValuations(portfolio: Portfolio) {
   });
 }
 
-/** Os sinais transversais (item B1) dos ativos de uma carteira. */
+/** Os sinais transversais dos ativos de uma carteira. */
 export function usePortfolioSignals(portfolio: Portfolio) {
   const tickers = portfolio.tickers;
   const key = `signals:${tickers.map((t) => t.value).join(',')}`;

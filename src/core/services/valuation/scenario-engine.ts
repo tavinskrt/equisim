@@ -76,7 +76,7 @@ export class DiscreteScenarios implements AssumptionSource {
     this.scenarios = scenarios;
   }
 
-  /** Deslocamento padrão do crescimento do primeiro ano: 3 p.p. (decisão 148). */
+  /** Deslocamento padrão do crescimento do primeiro ano: 3 p.p.. */
   static readonly defaultGrowthDelta = 0.03;
 
   /** Deslocamento padrão das duas taxas de desconto: 2 p.p. */

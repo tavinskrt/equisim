@@ -1,6 +1,6 @@
 // Beta desalavancado, e quanto o setor explica.
 //
-// **Por que agora.** O teste A1 ([decisão 39](../docs/decisoes/039-as-duas-vias-sao-modelos-independentes.md))
+// **Por que agora.** O teste A1 (decisão 39)
 // mostrou que as duas vias são modelos independentes, e que uma das duas
 // razões é que `Ke` e `WACC` não estão ligados pela alavancagem: o beta é
 // regressão crua contra o Ibovespa, sem versão desalavancada. Sem essa ligação

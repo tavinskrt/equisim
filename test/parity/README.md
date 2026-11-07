@@ -1,6 +1,6 @@
 # Paridade com o motor Dart original
 
-A reconstrução em TypeScript (decisão 152) trocou a linguagem do motor, e não
+A reconstrução em TypeScript trocou a linguagem do motor, e não
 o método: cada fórmula, limiar, guarda e texto de aviso do núcleo Dart foi
 portado 1:1 para `src/core`. Esta pasta é a prova disso, e continua valendo
 depois que o Dart saiu do repositório.
@@ -64,8 +64,9 @@ avaliações.
 
 O gabarito é a fotografia do motor Dart, e **não se regrava** a partir do
 TypeScript: regravar com o próprio port faria a suíte comparar o port com ele
-mesmo. Uma mudança de método deliberada, registrada em decisão nova, muda o
-gabarito com ela — e a decisão diz quais números mudaram e por quê.
+mesmo. Uma mudança de método deliberada muda o gabarito com ela, e vem com a
+entrada no changelog e o capítulo de `docs/motor/` reescritos, dizendo quais
+números mudaram e por quê.
 
 O harness em Dart (`dart/harness.dart`, `dart/pubspec.yaml` e `dart/run.cjs`)
 saiu da árvore, porque dependia de `packages/equisim_core` e o analisador do

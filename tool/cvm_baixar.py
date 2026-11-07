@@ -38,13 +38,13 @@ RELEVANT = (
     "_composicao_capital_",
     "_valor_mobiliario_",
     # Formulário de Referência: contagem de ações e eventos por data, para as
-    # companhias que já não estão na B3 (item A3.4), e o prazo das outorgas
-    # no quadro de intangíveis (item A6).
+    # companhias que já não estão na B3, e o prazo das outorgas
+    # no quadro de intangíveis.
     "_capital_social_",
     "_ativo_intangivel_",
     # FCA geral: o setor de atividade que a companhia declara, por ano — o
     # recuo da classificação da B3 para as deslistadas que o portal não
-    # responde (item C1b).
+    # responde.
     "_geral_",
 )
 

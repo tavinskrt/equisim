@@ -2,7 +2,7 @@
 //
 // **Por que empacotar.** A mediana é do **universo**, e a cascata avalia um
 // ativo por vez: o núcleo não tem como calculá-la sem deixar de ser puro. É o
-// mesmo arranjo do prior do beta (decisão 40) e do registro da B3 (decisão 82)
+// mesmo arranjo do prior do beta e do registro da B3
 // — um programa varre, grava pacote versionado, e o aplicativo carrega.
 //
 // **Sobre a entrada congelada do gabarito, por padrão**, como os outros
@@ -61,7 +61,7 @@ const company = (ticker: string): string => (ticker.length >= 4 ? ticker.substri
 /**
  * Os múltiplos do grupo, **um por companhia**, sem a companhia [without].
  *
- * **Par é outra companhia** (item B41). A mediana contava cada classe como um
+ * **Par é outra companhia**. A mediana contava cada classe como um
  * par e incluía o próprio ativo: os sete «pares» de saneamento da SAPR11 eram
  * SAPR3, SAPR4 e SAPR11 e mais quatro, a mediana caía na própria Sanepar, e a
  * leitura de P/VP e a de EV/EBITDA devolviam, as duas, o preço da Sanepar na
@@ -106,7 +106,7 @@ export async function main(_args: string[]): Promise<void> {
 
       // **O divisor da ponte, e não a contagem da fonte.** O múltiplo
       // observado tem de sair da mesma contagem que a cascata usa do outro
-      // lado, ou a mediana e a leitura medem pontes diferentes (decisão 83).
+      // lado, ou a mediana e a leitura medem pontes diferentes.
       const divisor = ValuationCascade.quotedShares({
         latest: f,
         marketPrice: inputs.marketPrice,
@@ -134,7 +134,7 @@ export async function main(_args: string[]): Promise<void> {
         priceToEarnings: profit !== null && profit > 0 ? marketValueOf / profit : null,
         priceToBook: pl !== null && pl > 0 ? marketValueOf / pl : null,
         // EBITDA de instituição financeira não descreve geração operacional
-        // (decisão 102): ela não entra nem como par.
+        //: ela não entra nem como par.
         evToEbitda: !financial && ebitda !== null && ebitda > 0 ? (marketValueOf + f.netDebt) / ebitda : null,
       });
     }
@@ -178,7 +178,7 @@ export async function main(_args: string[]): Promise<void> {
     // A ligação de cada ticker ao grupo que vale para ele: subsetor, setor,
     // mercado — na ordem, e **por múltiplo**, porque um subsetor pode ter pares
     // bastantes para P/VP e não para EV/EBITDA. A mediana de cada ticker é a
-    // do grupo **sem a companhia dele** (item B41), e o mínimo de pares vale
+    // do grupo **sem a companhia dele**, e o mínimo de pares vale
     // sobre as outras companhias.
     const byTicker = new Map<string, Record<string, GroupMedian>>();
     for (const p of pairs) {

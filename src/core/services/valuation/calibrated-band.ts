@@ -1,5 +1,5 @@
 /**
- * Faixa calibrada do preço justo (decisão 92): a incerteza medida nas coortes
+ * Faixa calibrada do preço justo: a incerteza medida nas coortes
  * de validação, e não a imaginada pelos cenários.
  */
 

@@ -4,7 +4,7 @@
 > [real_nominal_test.dart](../../packages/equisim_core/test/real_nominal_test.dart).
 > As magnitudes do §2.2 saem dos 97 avaliados da entrada congelada do gabarito,
 > remedidas depois da
-> [decisão 119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md).
+> decisão 119.
 
 ## 0. A pergunta, e por que ela não se responde lendo o código
 
@@ -96,7 +96,7 @@ o capital instalado em moeda constante.
 
 ## 3. O que isto decide
 
-[Decisão 114](../decisoes/114-o-motor-e-nominal-e-a-nao-neutralidade-de-unidade-esta-medida.md):
+Decisão 114:
 **a formulação nominal é a correta, e as três não neutralidades ficam
 declaradas** — a do terminal com o tamanho medido no universo.
 

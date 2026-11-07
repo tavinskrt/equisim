@@ -17,7 +17,7 @@ hoje. Um estado estacionário com o beta e a alavancagem do ano da avaliação �
 premissa não declarada, e ela pesa onde metade do valor mora.
 
 **Metade disso caiu com a
-[decisão 105](../decisoes/105-o-aplicativo-resolve-o-prior-do-beta-e-o-custo-de-capital.md).**
+decisão 105.**
 O aplicativo passou a resolver o caminho de taxas: a alavancagem de equilíbrio é
 a que a projeção alcança no **ano N**, e não a de hoje. Sobra o beta, que
 continua sendo o de hoje — janela de cinco anos, encolhido em direção ao prior
@@ -70,7 +70,7 @@ ano N** — `β_U · fator(D_N/E_N)`. Ele coincide com o beta de hoje só porque
 §1 mostrou que `D_N/E_N` é praticamente `D_0/E_0`: as duas medições se sustentam
 uma na outra.
 
-**E o encolhimento já faz o trabalho.** A [decisão 40](../decisoes/040-beta-encolhido-por-precisao.md)
+**E o encolhimento já faz o trabalho.** A decisão 40
 puxa o beta de cada ativo em direção ao prior transversal por precisão, e o prior
 realavancado fica perto de 1: o beta mediano que chega ao preço é **0,955**, e
 `0,67 × 0,955 + 0,33` dá 0,97. Blume por cima de um beta já encolhido é um ajuste
@@ -92,7 +92,7 @@ setor.
 
 ## 4. O que se decidiu
 
-[Decisão 109](../decisoes/109-a-perpetuidade-declara-de-onde-vem-o-beta-e-a-estrutura-e-nao-os-converge.md):
+Decisão 109:
 **declarar a origem das duas pontas, e não adotar nenhuma das alternativas.**
 
 - `ValuationDiagnostics.terminalEquityShare` passa a carregar a estrutura de

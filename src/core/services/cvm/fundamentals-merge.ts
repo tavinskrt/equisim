@@ -170,7 +170,7 @@ export const FundamentalsMerge = {
   ]) as ReadonlySet<string>,
 
   /**
-   * O que o mercado **empresta** a um ponto de outra data (decisão 78).
+   * O que o mercado **empresta** a um ponto de outra data.
    *
    * - **O que descreve hoje**: valor de mercado, contagem corrente e
    *   EV/EBITDA, que a fonte sobrescreve em toda linha com o snapshot
@@ -222,7 +222,7 @@ export const FundamentalsMerge = {
    * e não ter o EBITDA; o mercado pode ter o valor de mercado e não ter o
    * ativo total. Escolher a fonte inteira descartaria o que a outra sabe.
    *
-   * **Mas só completa com exercício da mesma janela** (decisão 78). Um ponto
+   * **Mas só completa com exercício da mesma janela**. Um ponto
    * de doze meses até junho completado pelo exercício de dezembro anterior
    * levaria a despesa de juros de outra janela para o custo da dívida, e o
    * LPA de outro lucro para o árbitro `lucro ÷ LPA` da contagem. Quando as
@@ -260,9 +260,9 @@ export const FundamentalsMerge = {
       return marketMedians;
     };
 
-    // **A base de patrimônio é o PL da CVM** (decisão 81). A cascata a
+    // **A base de patrimônio é o PL da CVM**. A cascata a
     // reconstitui como `VPA × contagem do exercício`, e a contagem continua
-    // sendo a do mercado — a da CVM não tem escala (decisão 70). O VPA é que
+    // sendo a do mercado — a da CVM não tem escala. O VPA é que
     // passa a ser derivado: `PL ÷ contagem`, e o produto devolve o PL da
     // demonstração exatamente. Medido em 14/09/2026, a base de mercado já era
     // o PL consolidado da CVM em 99,4% dos 4.443 exercícios anuais, a 0,5%;

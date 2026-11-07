@@ -6,8 +6,8 @@
 > paralela.
 >
 > **Remedido duas vezes em 21/09/2026**, depois da
-> [decisão 113](../decisoes/113-o-caixa-rende-a-taxa-livre-de-risco-e-nao-o-custo-de-emprestimo.md)
-> e da [decisão 119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md),
+> decisão 113
+> e da decisão 119,
 > que separaram o caixa da dívida bruta no WACC e na rota derivada. O custo de
 > capital de equilíbrio subiu e cinco ativos deixaram de ser avaliáveis; a
 > leitura não mudou de direção, e os números abaixo são os de hoje.
@@ -30,7 +30,7 @@ do custo dele, mantido para sempre. **O rótulo "não há lucro econômico em
 perpetuidade" é afirmação sobre o retorno médio, e essa afirmação só seria
 verdadeira se `EVA_{N+1}` fosse zero.**
 
-Nas concessões a [decisão 88](../decisoes/088-o-prazo-da-concessao-corta-o-excedente.md)
+Nas concessões a decisão 88
 já corta esse excedente no fim do contrato, pela mesma álgebra: ali
 `VT = capital_N + EVA·anuidade(M)`. Fora delas, `M` é infinito.
 
@@ -96,12 +96,12 @@ imediato.
 
 ## 4. O que se decidiu, e por quê
 
-[Decisão 107](../decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md):
+Decisão 107:
 **o número fica, o rótulo muda, o peso é declarado.**
 
 - **O número fica** porque trocar o terminal por `capital_N` é afirmar reversão
   da rentabilidade à média, e o motor não mediu isso. A
-  [decisão 35](../decisoes/035-dcf-reverso-e-regressao-condicional.md) exige que
+  decisão 35 exige que
   quem proponha trocar o terminal traga um argumento que não seja o viés de
   nível; o argumento do B12 é sobre declaração.
 - **O rótulo muda**: o retorno neutro é `RONIC_∞ = r`, sobre o capital novo.

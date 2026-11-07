@@ -206,7 +206,7 @@ export const CorporateEvents = {
 
   /**
    * Data ex de um evento **declarado** — pela CVM, no Formulário de
-   * Referência —, localizada no preço (item A3.4).
+   * Referência —, localizada no preço.
    *
    * O formulário dá o fator, pela contagem antes e depois, e a **data de
    * aprovação**, que não é a data ex: entre a assembleia e o primeiro pregão
@@ -298,7 +298,7 @@ export const CorporateEvents = {
   },
 
   /**
-   * **Completa o ajuste que a fonte de preços deixou de fazer** (item B29).
+   * **Completa o ajuste que a fonte de preços deixou de fazer**.
    *
    * O `close` da fonte de mercado vem ajustado por desdobramento e
    * grupamento, mas **não por toda bonificação**. Medido em 24/09/2026 sobre o

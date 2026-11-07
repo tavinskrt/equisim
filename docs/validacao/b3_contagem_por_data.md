@@ -5,7 +5,7 @@ Medido em 14/09/2026. Ferramentas: `tool/cvm_baixar.py --docs FRE`,
 `tool/b3_deslistadas_contagem.dart`. Resumo em
 [b3_contagem_por_data.json](b3_contagem_por_data.json); a série por companhia,
 para as coortes da Fase 2, em `data/b3/deslistadas_contagem.json`.
-[Decisão 90](../decisoes/090-a-contagem-por-data-vem-do-formulario-de-referencia.md).
+Decisão 90.
 
 ## 1. O que faltava
 
@@ -104,7 +104,7 @@ dois quadros diferentes da CVM, preenchidos por pessoas diferentes.
 **A composição vem na escala do declarante**: 621 datas divergiam por
 exatamente mil, em quem publica as demonstrações em milhares — a EDP, com
 581.165.268 ações no FRE e 581.165 na composição. É o que a
-[decisão 70](../decisoes/070-a-contagem-de-acoes-da-cvm-nao-tem-escala.md) já registrava ao
+decisão 70 já registrava ao
 usar só a fração em tesouraria, e a conferência conta as mil exatas como a mesma
 contagem. O que sobra são companhias em recuperação, fusões e defasagem em torno
 de aumento de capital.

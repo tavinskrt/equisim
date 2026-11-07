@@ -1,4 +1,4 @@
-// O ajuste que a fonte de preços deixou de fazer (item B29).
+// O ajuste que a fonte de preços deixou de fazer.
 //
 // A fonte ajusta desdobramento e grupamento, e não toda bonificação: a data ex
 // de uma bonificação não ajustada é uma queda que não aconteceu, e ela entrava

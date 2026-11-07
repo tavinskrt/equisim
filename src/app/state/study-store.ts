@@ -69,7 +69,7 @@ function saveDraft(study: PortfolioStudy): void {
 
 /**
  * O estudo com as duas carteiras equiponderadas. A interface não escolhe peso
- * (decisão 160): incluir e tirar ativo já reequipondera, e um estudo gravado
+ *: incluir e tirar ativo já reequipondera, e um estudo gravado
  * antes disso com outros pesos não pode levá-los, invisíveis, ao backtest.
  * Devolve o mesmo estudo quando os pesos já são iguais.
  */

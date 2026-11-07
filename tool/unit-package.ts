@@ -1,7 +1,7 @@
 // B16 — empacota a composição declarada das units para o aplicativo.
 //
 // A razão de unidade era inferida do valor de mercado, e só acerta quando
-// ordinária e preferencial valem o mesmo (item B16,
+// ordinária e preferencial valem o mesmo (
 // `docs/validacao/ponte_por_papel.md` §3). A composição que a companhia declara
 // no quadro de valores mobiliários da FCA é fonte primária e datada; este
 // programa a lê, ano a ano, e grava o pacote que o aplicativo carrega como
@@ -10,7 +10,7 @@
 // **O código de negociação da FCA não serve de chave**, e a medição do A1 já
 // dizia por quê: a coluna é texto livre, vem em branco em 44% das linhas e
 // traz zeros no BTG — a BPAC11 declara a composição sob `000000`. A chave é o
-// **CNPJ**, pela ponte do registro da B3 (decisão 82).
+// **CNPJ**, pela ponte do registro da B3.
 //
 // **A data do pacote é declarada, e não lida do relógio.** Rodar o programa
 // hoje e amanhã sobre a mesma FCA tem de produzir o mesmo arquivo: a

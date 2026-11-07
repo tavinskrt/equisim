@@ -29,7 +29,7 @@ export class CrossSectionalReturn {
    * CDI de recuo.
    *
    * Sai porque a diferença entre as duas é o prêmio de risco inteiro, e o
-   * leitor precisa poder distinguir um número do outro (decisão 58).
+   * leitor precisa poder distinguir um número do outro.
    */
   readonly anchoredOnCostOfEquity: boolean;
 
@@ -122,11 +122,11 @@ export const ExpectedReturn = {
    * está demonstrado**: condicionado ao book-to-market, ele não passa no
    * critério da decisão 96. Por isso o aplicativo não usa mais este estimador:
    * usa [forPortfolioOrdered], com o prêmio da ordenação que a validação
-   * comprovou, ou sem prêmio (decisão 103). Este fica para as ferramentas de
+   * comprovou, ou sem prêmio. Este fica para as ferramentas de
    * validação que medem o potencial sozinho.
    *
    * **A âncora era o CDI, e isso subtraía o prêmio de risco inteiro**
-   * (decisão 58). Sem `Ke` disponível para um ativo, a âncora dele recua para
+   *. Sem `Ke` disponível para um ativo, a âncora dele recua para
    * [spotRiskFree] — o comportamento anterior, e o resultado declara em
    * [CrossSectionalReturn.anchoredOnCostOfEquity].
    *
@@ -232,7 +232,7 @@ export const ExpectedReturn = {
   },
 
   /**
-   * Retorno esperado da carteira com o prêmio da **ordenação medida** (item B1).
+   * Retorno esperado da carteira com o prêmio da **ordenação medida**.
    *
    * `E[R_i] = Ke_i + z_i · prêmio`, com `z_i` o escore de [ordering] contra a
    * seção dos sinais da carteira — ver [TransversalScore]. **Sem ordenação não

@@ -3,11 +3,11 @@
 Medido em 14/09/2026. Ferramentas: `tool/b3_complemento_baixar.py`,
 `tool/proventos_conferir.dart`, `tool/b3_proventos_empacotar.dart`,
 `tool/regressao_condicional.dart` e `tool/padrao_ligar.dart`.
-[Decisão 89](../decisoes/089-proventos-voltam-como-dado-conferido.md).
+Decisão 89.
 
 ## 1. Por que agora
 
-A [decisão 23](../decisoes/023-remocao-de-proventos.md) tirou provento do projeto
+A decisão 23 tirou provento do projeto
 porque a premissa de que o valor da fonte era bruto nunca foi conferida contra
 documento. **O orientador reabriu a decisão em 14/09/2026**, e a conferência
 passou a ser possível com uma fonte independente.

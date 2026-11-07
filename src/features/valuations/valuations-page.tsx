@@ -34,7 +34,7 @@ export function groupByTicker(records: readonly ManualValuationRecord[]): Group[
 }
 
 /**
- * **Meus valuations confirmados** (decisões 150 e 151): tudo o que foi
+ * **Meus valuations confirmados**: tudo o que foi
  * confirmado na edição, por ativo. Cada um guarda as premissas e o resultado do
  * dia em que foi salvo; o mais recente de cada ativo é o "seu" que aparece nas
  * linhas do estudo e na régua de preço.

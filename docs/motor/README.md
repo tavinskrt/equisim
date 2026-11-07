@@ -2,16 +2,13 @@
 
 Esta documentação descreve **o que o código faz**, regra por regra, e mostra
 para cada uma de onde ela vem: o arquivo e a função que a executam, a fórmula,
-a base teórica e a evidência que o próprio projeto produziu (decisão registrada,
-medição, teste). O objetivo é que qualquer número do preço justo possa ser
+a base teórica e a evidência que o próprio projeto produziu (medição, teste,
+contrafactual). O objetivo é que qualquer número do preço justo possa ser
 seguido até a linha que o produziu e até o livro ou artigo que o justifica.
 
-> **Escrita do zero em 28/09/2026, conferindo o código linha a linha**
-> ([decisão 141](../decisoes/141-a-documentacao-do-motor-e-refeita-do-zero-contra-o-codigo.md)).
-> Ao conferir, sete defeitos foram achados e registrados no
-> [plano](../plano-motor-de-referencia.md) (itens B35 a B41); seis foram
-> corrigidos, e o B38 aguarda decisão. O texto abaixo descreve o código **depois**
-> das correções.
+> **Esta documentação descreve o código como ele é hoje**, conferida linha a
+> linha contra ele. Quando uma regra muda, o capítulo que a descreve muda junto;
+> o que mudou, e quando, está no [changelog](../../CHANGELOG.md).
 >
 > Para aprender o assunto do zero, use o [guia de estudo](../estudo/README.md).
 > Esta documentação supõe o vocabulário dele.
@@ -48,9 +45,9 @@ O núcleo (`src/core`) é **TypeScript puro, sem nenhuma dependência de
 execução**, sem rede, sem arquivo, sem relógio: a mesma entrada dá a mesma saída
 hoje e daqui a um ano. Isso é travado por teste
 ([purity.test.ts](../../test/core/purity.test.ts)) e é o que
-torna o gabarito possível. Até 22/10/2026 o núcleo era Dart
-(`packages/equisim_core`); a decisão 152 o portou regra por regra, e a
-[paridade](../../test/parity/README.md) confere que nenhum número mudou.
+torna o gabarito possível. O núcleo é o porte, regra por regra, do núcleo Dart
+original (`packages/equisim_core`), e a [paridade](../../test/parity/README.md)
+confere que nenhum número mudou na passagem.
 
 ## Como ler as tabelas
 
@@ -60,7 +57,7 @@ Cada regra aparece numa linha com as colunas:
 - **Código** — arquivo e função (não número de linha: a função sobrevive a
   edições, a linha não);
 - **Fundamento** — a teoria ou referência (detalhes em [referências](referencias.md));
-- **Evidência** — a decisão que a registrou e, quando houver, a medição.
+- **Evidência** — a medição, o contrafactual ou o teste que sustenta a regra.
 
-As decisões estão em [`docs/decisoes/`](../decisoes/); as medições, em
-[`docs/validacao/`](../validacao/).
+As medições estão em [`docs/validacao/`](../validacao/), cada uma com a data e o
+motor de quando foi feita.

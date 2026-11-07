@@ -141,13 +141,13 @@ export const LeveredCostOfCapital = {
 
   /**
    * Distância relativa a partir da qual duas soluções do ponto fixo são
-   * **respostas diferentes** (item B18). Um décimo de por cento no valor do
+   * **respostas diferentes**. Um décimo de por cento no valor do
    * ano zero.
    */
   startIndependence: 0.001,
 
   /**
-   * Resolve o caminho de taxas, **de dois pontos de partida** (item B18): o
+   * Resolve o caminho de taxas, **de dois pontos de partida**: o
    * caminho sem realavancagem e o custo de capital desalavancado. Quando só
    * uma converge, vale ela; quando as duas divergem, o aviso diz isso.
    */
@@ -179,7 +179,7 @@ export const LeveredCostOfCapital = {
     const a = byInterpolation.valueOrNull;
     const b = byUnlevered.valueOrNull;
     if (a === null && b === null) {
-      // **A recusa é do ponto fixo, e o texto precisa dizer isso** (item B18).
+      // **A recusa é do ponto fixo, e o texto precisa dizer isso**.
       const reason = byInterpolation.failureOrNull?.message ?? '';
       return err(
         new ComputationFailure(
@@ -218,7 +218,7 @@ export const LeveredCostOfCapital = {
   /**
    * Resolve o `Ke` ano a ano **pelo lado do capital próprio**, sem passar pelo
    * valor da firma. **Tudo por papel**, e **a dívida não cresce aqui** (item
-   * B11). Também de duas partidas (item B18).
+   * B11). Também de duas partidas.
    */
   solveEquity(args: LeveredSolveEquityArgs): Result<LeveredRates> {
     const warnings = args.warnings ?? null;
@@ -435,7 +435,7 @@ function attempt(args: {
           ),
         );
       }
-      // **O peso não é confinado em [0, 1]** (decisão 104).
+      // **O peso não é confinado em [0, 1]**.
       const equityWeight = previousEquityValue / vT;
       const interest = netKdAt(riskFreePath[t - 1]!);
       newKe.push(keT);

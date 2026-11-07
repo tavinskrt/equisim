@@ -22,7 +22,7 @@ const STATEMENT_ENDPOINTS = [
   '/v2/stocks/cash-flow',
 ] as const;
 
-/** Campos que descrevem o **hoje**, e não o exercício (decisão 77). */
+/** Campos que descrevem o **hoje**, e não o exercício. */
 const CURRENT_FIELDS = ['sharesOutstanding', 'enterpriseToEbitda', 'marketCap'] as const;
 
 /**
@@ -130,7 +130,7 @@ export class BrapiDatasource {
   /**
    * Os quatro demonstrativos fundidos pelo fim do exercício.
    *
-   * **Falha de um endpoint reprova a busca inteira** (decisão 68). A versão
+   * **Falha de um endpoint reprova a busca inteira**. A versão
    * anterior seguia e devolvia `Ok` desde que **algum** dos quatro
    * respondesse — de modo que uma falha de rede na demonstração de resultado
    * produzia série com balanço preenchido e resultado ausente. Duas coisas
@@ -181,7 +181,7 @@ export class BrapiDatasource {
     // **hoje**, não o exercício; sem eles não há valor por ação nem múltiplo
     // de saída.
     //
-    // **Falha aqui também reprova a busca** (decisão 77), pela mesma razão da
+    // **Falha aqui também reprova a busca**, pela mesma razão da
     // decisão 68 e com consequência pior: sem o corrente, as linhas anuais
     // ficam com o próprio `marketCap` — o inflado pelo fator da unit, descrito
     // logo abaixo — e com a contagem do exercício no lugar da de hoje. Isso
@@ -212,7 +212,7 @@ export class BrapiDatasource {
       // **do ano**, e multiplicá-lo pela contagem corrente mistura duas escalas.
       // O BBAS3 bonificou em 2024 e a contagem dobrou, de 2,865 bi para
       // 5,731 bi; sem `sharesOutstandingAsOf` não há patrimônio líquido nem
-      // capital investido reconstituíveis (decisão 25).
+      // capital investido reconstituíveis.
       const fields: JsonObject = { ...annual };
       if (present(annual, 'sharesOutstanding')) fields['sharesOutstandingAsOf'] = annual['sharesOutstanding'];
       for (const field of CURRENT_FIELDS) {
@@ -220,7 +220,7 @@ export class BrapiDatasource {
       }
       // **Campo de hoje que o snapshot corrente não traz fica ausente** — e
       // não com o valor da linha anual. A resposta vazia é ausência declarada,
-      // e não falha (decisão 77); mas o `marketCap` da linha anual é o do fim
+      // e não falha; mas o `marketCap` da linha anual é o do fim
       // do exercício, e o inflado pela unit nas units, e a contagem é a do
       // exercício, que já está em `sharesOutstandingAsOf`. Nenhum descreve
       // hoje, e ausência não é o valor errado. **Campo a campo**, e não só com

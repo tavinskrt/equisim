@@ -37,7 +37,7 @@ export const GrowthEstimator = {
    * é o crescimento **nominal** — real mais inflação, o valor que a aplicação
    * deriva do IPCA observado.
    *
-   * **O piso é [floorRate], e não zero** (decisão 56). O piso em zero afirmava
+   * **O piso é [floorRate], e não zero**. O piso em zero afirmava
    * que toda empresa em declínio volta a crescer zero em dez anos — e o
    * projeto já tinha declarado onde fica o limite do encolhimento eterno:
    * −5% ao ano, em [floorRate], com a razão escrita lá. O segundo piso tornava

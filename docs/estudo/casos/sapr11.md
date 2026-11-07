@@ -14,8 +14,8 @@
 > **controle estatal**.
 >
 > **Por que mudou tanto.** Até a contagem de 14/09 feita com o motor de outubro,
-> o resultado era R$ 46,05 e +32,6%. Com a decisão 153, o último ponto passou a
-> ser o primeiro semestre de 2026 vezes 2, e esse semestre traz prejuízo. A
+> o resultado era R$ 46,05 e +32,6%. Com o ano corrente anualizado, o último ponto
+> é o primeiro semestre de 2026 vezes 2, e esse semestre traz prejuízo. A
 > seção 3 mostra o caminho.
 
 ---
@@ -35,16 +35,15 @@ SAPR11 é uma **unit**: 1 ação ordinária + 4 preferenciais = 5 ações.
 
 A conferência não fecha porque a fonte já entrega as ações contadas em units
 (302,2 milhões, e não 1,5 bilhão). Quando a medida e a composição declarada
-divergem, vale a declarada (item B16), e a tela diz por quê: a razão medida só
+divergem, vale a declarada, e a tela diz por quê: a razão medida só
 devolve o número de ações da unit quando as espécies valem o mesmo.
 
 As duas contagens da fonte divergem 4,4 vezes, acima da banda de 1,5×. O
-registro oficial da B3 arbitra (decisão 83): 302,2 milhões de units × R$ 34,74
+registro oficial da B3 arbitra: 302,2 milhões de units × R$ 34,74
 dão R$ 10,50 bi, que é o valor de mercado real da Sanepar.
 
-> **Uma correção feita durante esta documentação (item B40):** um aviso nomeava
-> a contagem implícita no valor de mercado como a da ponte por papel, enquanto a
-> conta usava a oficial. O aviso agora nomeia a contagem que a conta usa.
+O aviso de contagens discordantes nomeia a contagem que a conta usa — aqui, a
+oficial —, e não a implícita no valor de mercado.
 
 **Por que importa:** dividir o capital próprio pelas 60,4 milhões das
 demonstrações em vez das 302,2 milhões oficiais daria R$ 138,79 por unit, e um
@@ -151,13 +150,13 @@ firma.
 A vantagem residual é barrada por dois motivos:
 
 1. **concessão**: a tarifa remunera o capital ao custo dele, e um negócio que
-   será relicitado não preserva excedente sobre capital novo (decisão 50);
+   será relicitado não preserva excedente sobre capital novo;
 2. **sem excedente**: o ROIC do ciclo (13,42%) está abaixo do custo de
    equilíbrio (14,5%).
 
 **E o prazo do contrato?** Quando o motor consegue ler o prazo da concessão no
 Formulário de Referência, o terminal passa a ser "capital devolvido + excedente
-até o fim do contrato" (decisão 88). Para a Sanepar, o prazo **não foi lido**:
+até o fim do contrato". Para a Sanepar, o prazo **não foi lido**:
 o terminal fica perpétuo, com retorno neutro, e a tela mostra a ressalva
 **"prazo determinado"** e um aviso explicando o que isso muda.
 
@@ -212,7 +211,7 @@ VP do terminal         = 20.053,0 × 1,072716 ÷ 4,072738 = R$ 5.281,8 mi
 
 O terminal é 63,0% do capital próprio. O capital que já existe rende 11,6% na
 perpetuidade, contra 14,4% de custo: esse déficit vale −R$ 1,50 bi a valor
-presente, e já está dentro do terminal (item B12).
+presente, e já está dentro do terminal.
 
 ---
 
@@ -252,7 +251,7 @@ sentido.
 
 **Divergência de +139,5%** — acima do limite de 50%, e a tela avisa. O preço
 justo **não muda**: a leitura por pares é teste de sanidade, e a divergência
-fica declarada (decisão 118).
+fica declarada.
 
 **Por que tanta diferença.** O setor de utilidade pública, dominado por energia
 elétrica, negocia a múltiplos maiores que a Sanepar (o próprio mercado paga só
@@ -261,11 +260,10 @@ diz que a Sanepar rende 10,9% sobre o capital hoje, abaixo dos 14% a 15% que o
 motor exige — e, com a base presa pela trava, o preço justo fica abaixo do
 mercado e bem abaixo dos pares.
 
-> **Uma correção feita durante esta documentação (item B41):** até 28/09/2026 a
-> mediana dos "pares" de saneamento tinha sete entradas, três delas da própria
-> Sanepar (SAPR3, SAPR4 e SAPR11). A mediana caía na Sanepar, e as leituras de
-> P/VP e EV/EBITDA devolviam, as duas, R$ 38,15 — o preço da própria Sanepar na
-> data do pacote. Agora cada companhia entra uma vez, e a avaliada não entra.
+Na mediana dos pares, cada companhia entra uma vez, e a avaliada não entra. Se
+a Sanepar entrasse, e com as três classes (SAPR3, SAPR4 e SAPR11), a mediana do
+saneamento cairia nela, e as leituras de P/VP e EV/EBITDA devolveriam o preço da
+própria Sanepar.
 
 ---
 
@@ -275,7 +273,7 @@ mercado e bem abaixo dos pares.
   vezes, e só a contagem oficial o evita.
 - **Concessão muda a perpetuidade**, e o prazo lido do contrato muda mais ainda;
   sem ele, a ressalva avisa.
-- **Um semestre pode mudar o preço.** A anualização da decisão 153 levou o
+- **Um semestre pode mudar o preço.** A anualização do ano corrente levou o
   prejuízo do primeiro semestre para o ano inteiro, e a trava de saúde, lendo
   esse prejuízo, impediu a normalização para cima. Com 2025 como último ponto, a
   base era normalizada (fator 1,207) e o preço justo era R$ 46,05. As duas

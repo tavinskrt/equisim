@@ -18,7 +18,7 @@
  * Saida: 0 = liberado, 1 = bloqueado.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 
 const SKIP_FILE = '.qa-skip';
 
@@ -33,7 +33,7 @@ const SKIP_FILE = '.qa-skip';
  * defeito que a lista ENV_TEMPLATES abaixo documenta: um gate que impede
  * trabalho legitimo e um gate que sera arrancado.
  *
- * Na web (decisao 152) a casa dos tokens e `src/styles.css`: o bloco `@theme`
+ * Na versao web a casa dos tokens e `src/styles.css`: o bloco `@theme`
  * do Tailwind v4 e as variaveis `--*` dos dois temas. Enquanto ele existir,
  * todo literal NOVO em codigo de tela e regressao -- porque existe para onde
  * apontar.
@@ -457,188 +457,39 @@ function stagedFiles() {
 }
 
 // ---------------------------------------------------------------------------
-// Integridade do registro de decisoes
+// Historico do projeto: changelog, e nunca arquivo de decisao
 // ---------------------------------------------------------------------------
 
 /**
- * Verificacoes de referencia quebrada em `docs/decisoes/`.
+ * O historico do projeto mora no `CHANGELOG.md`, gerado de
+ * `src/data/changelog.ts`, e a regra vigente mora em `docs/motor/` e
+ * `docs/estudo/`. A pasta `docs/decisoes/`, com um arquivo numerado por pedido,
+ * saiu do repositorio na versao 2.5.0, e nao volta: ela registrava bastidor de
+ * conversa, e nao produto.
  *
- * SO REFERENCIA QUEBRADA BLOQUEIA. Defasagem -- decisao que o codigo deixou de
- * respeitar, promessa nao cumprida, medicao vencida -- NAO entra aqui, e a
- * distincao e deliberada: um gate que trava o push porque um documento
- * envelheceu e um gate arrancado na primeira semana. Defasagem e semantica e
- * cabe a lente `registro` do conselheiro, que aconselha e nao bloqueia.
- *
- * O escopo tambem e estreito de proposito: so decisao citando decisao, dentro
- * de `docs/decisoes/`. Conferir citacao em prosa pelo repositorio inteiro
- * bloquearia o parecer historico, que cita numeros cuja extracao ainda nao
- * aconteceu -- exatamente o falso positivo que o criterio de admissao deste
- * arquivo proibe.
+ * O gate bloqueia so o que e deterministico e barato -- arquivo novo em
+ * `docs/decisoes/`. Se o changelog bate com o package.json e com o markdown
+ * gerado, quem confere e `test/data/changelog.test.ts`, que roda na suite.
  */
-const DECISIONS_DIR = 'docs/decisoes/';
+const RETIRED_DECISIONS_DIR = 'docs/decisoes/';
 
-/** Le a versao EM STAGING do arquivo, nao a do disco. */
-function stagedContent(file) {
-  try {
-    return git(['show', `:${file}`]);
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Extrator de lista do frontmatter, por leitura linha a linha.
- *
- * Foi regex antes, e a regex errava justamente no caso mais comum: a lista que
- * fecha o bloco. O terminador exigia uma linha seguinte que nao existe no fim,
- * entao o ultimo campo passava sem ser conferido -- um gate que so verifica os
- * campos do meio e pior que nenhum, porque da confianca falsa.
- */
-function listOf(block) {
-  const lines = block.split(/\r?\n/);
-  return (key) => {
-    const out = [];
-    let inside = false;
-    for (const line of lines) {
-      if (new RegExp(`^${key}:\\s*$`).test(line)) {
-        inside = true;
-        continue;
-      }
-      if (inside) {
-        const item = /^\s+-\s+(.+?)\s*$/.exec(line);
-        if (item) {
-          out.push(item[1]);
-          continue;
-        }
-        // Qualquer coisa que nao seja item encerra a lista.
-        inside = false;
-      }
-    }
-    return out;
-  };
-}
-
-/** Numeros de decisao que ja tem arquivo, vindos do disco e do staging. */
-// As decisoes 0 a 18 nao tem arquivo: moram na tabela congelada do
-// PLANO_ARQUITETURA.md, de onde o registro por arquivo so comeca em 19. Sem
-// le-las, `substitui: - 14` era acusado de referencia quebrada, e uma decisao
-// nova ficava impedida de derrubar formalmente uma antiga -- que e exatamente o
-// mecanismo que o registro existe para garantir.
-const FROZEN_PLAN = 'PLANO_ARQUITETURA.md';
-
-function frozenPlanDecisions() {
-  const numbers = new Set();
-  if (!existsSync(FROZEN_PLAN)) return numbers;
-  let text;
-  try {
-    text = readFileSync(FROZEN_PLAN, 'utf8');
-  } catch {
-    return numbers;
-  }
-  // Linhas de tabela markdown que abrem com o numero da decisao -- com ou sem
-  // negrito, e com ou sem citacao: a tabela grafa `> | **0** |`, `> | 1 |` e
-  // `| **18** |`. Sem aceitar os dois, as decisoes 0 a 8 e a 18 ficavam de
-  // fora, e a decisao 85 era bloqueada por citar a 18.
-  const decisionLine = /^(?:>\s*)?\|\s*(?:\*\*)?(\d{1,2})(?:\*\*)?\s*\|/gm;
-  for (const m of text.matchAll(decisionLine)) {
-    numbers.add(Number.parseInt(m[1], 10));
-  }
-  return numbers;
-}
-
-function knownDecisions(staged) {
-  const numbers = frozenPlanDecisions();
-  const register = (name) => {
-    const m = /(?:^|\/)(\d{3})-[^/]*\.md$/.exec(name);
-    if (m) numbers.add(Number.parseInt(m[1], 10));
-  };
-  if (existsSync(DECISIONS_DIR)) {
-    for (const f of readdirSync(DECISIONS_DIR)) register(f);
-  }
-  for (const f of staged) register(f);
-  return numbers;
-}
-
-function checkRegistry(staged) {
-  const targets = staged.filter(
-    (f) => f.startsWith(DECISIONS_DIR) && f.endsWith('.md') && !f.endsWith('README.md'),
-  );
-  if (targets.length === 0) return [];
-
-  const known = knownDecisions(staged);
-  const findings = [];
-
-  for (const file of targets) {
-    const text = stagedContent(file);
-    if (text === null) continue;
-    const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
-    if (!fm) {
-      findings.push({
-        id: 'L12',
-        category: 'DECISION_MALFORMED',
-        file,
-        line: 0,
-        title: 'Decisao sem frontmatter',
-        evidence: text.split(/\r?\n/)[0] ?? '(vazio)',
-        explain:
-          'Toda decisao abre com bloco `---` contendo numero, titulo, status,\n' +
-          '  origem, data e afeta. Sem ele a decisao nao e enderecavel, que e a\n' +
-          '  unica coisa que este registro existe para garantir. Ver\n' +
-          '  docs/decisoes/README.md.',
-      });
-      continue;
-    }
-    const block = fm[1];
-    const items = listOf(block);
-
-    // (a) `afeta` apontando para caminho que nao existe.
-    {
-      for (const raw of items('afeta')) {
-        const filePath = raw.replace(/^["']|["']$/g, '');
-        if (!existsSync(filePath)) {
-          findings.push({
-            id: 'L13',
-            category: 'DECISION_BROKEN_PATH',
-            file,
-            line: 0,
-            title: `Decisao governa caminho inexistente: ${filePath}`,
-            evidence: raw,
-            explain:
-              'O campo `afeta` lista os caminhos que a decisao governa, e este\n' +
-              '  nao existe no repositorio. Ou o caminho esta errado, ou a decisao\n' +
-              '  perdeu objeto e precisa ser revogada explicitamente.',
-          });
-        }
-      }
-    }
-
-    // (b) `status: substituida-por-NNN` e `substitui:` apontando para o vazio.
-    const cited = new Set();
-    const sub = /^status:\s*substituida-por-(\d+)/m.exec(block);
-    if (sub) cited.add(Number.parseInt(sub[1], 10));
-    for (const raw of items('substitui')) {
-      const n = /^(\d+)/.exec(raw);
-      if (n) cited.add(Number.parseInt(n[1], 10));
-    }
-    for (const number of cited) {
-      if (!known.has(number)) {
-        findings.push({
-          id: 'L14',
-          category: 'DECISION_DANGLING_REF',
-          file,
-          line: 0,
-          title: `Referencia a decisao inexistente: no ${number}`,
-          evidence: `decisao no ${number}`,
-          explain:
-            `Nao ha docs/decisoes/${String(number).padStart(3, '0')}-*.md. Uma\n` +
-            '  decisao que substitui ou revoga outra precisa que a outra exista --\n' +
-            '  senao a cadeia de substituicao fica sem inicio e ninguem consegue\n' +
-            '  reconstruir por que o rumo mudou.',
-        });
-      }
-    }
-  }
-  return findings;
+function checkHistory(staged) {
+  return staged
+    .filter((f) => f.startsWith(RETIRED_DECISIONS_DIR))
+    .map((file) => ({
+      id: 'L12',
+      category: 'DECISION_FILE',
+      file,
+      line: 0,
+      title: `Arquivo de decisao em commit: ${file}`,
+      evidence: file,
+      explain:
+        'O projeto nao registra mais decisoes numeradas. Uma mudanca de\n' +
+        '  funcionalidade, calculo ou tela entra como item do changelog\n' +
+        '  (src/data/changelog.ts, depois npm run changelog), e a regra vigente\n' +
+        '  e escrita no capitulo correspondente de docs/motor/ ou docs/estudo/.\n' +
+        '  Ver CLAUDE.md, secao 7.',
+    }));
 }
 
 function main() {
@@ -676,7 +527,7 @@ function main() {
     }
   }
 
-  findings.push(...checkRegistry(staged));
+  findings.push(...checkHistory(staged));
 
   // `requiresTokens` e constante durante a execucao: filtrar uma vez, fora do
   // laco por linha, evita reavaliar a condicao milhares de vezes num diff

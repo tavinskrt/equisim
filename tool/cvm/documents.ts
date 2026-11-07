@@ -3,7 +3,7 @@
 //
 // Compartilhado por `cvm-link.ts` e `cvm-package.ts`: a conversão da linha da
 // ingestão para `CvmPeriodDocument` já teve dois defeitos — a contagem absoluta
-// de ações (decisão 70) e o "anual é dezembro" (decisão 72) —, e duas cópias
+// de ações e o "anual é dezembro" —, e duas cópias
 // dela voltariam a divergir.
 import { existsSync, readFileSync } from 'node:fs';
 
@@ -52,10 +52,10 @@ export const oldVersionsFile = 'data/cvm_versoes.json';
  * Documentos por ticker, da base ingerida.
  *
  * - [tickersByCnpj]: tickers a mais para cada CNPJ. A ingestão só liga ticker
- *   à companhia do universo de hoje; as deslistadas (item C1b) chegam com a
+ *   à companhia do universo de hoje; as deslistadas chegam com a
  *   lista vazia, e o ticker delas vem da ponte do COTAHIST.
  * - [withOldVersions]: acrescenta as versões anteriores de cada documento, de
- *   `data/cvm_versoes.json` (item B8), cada uma com a data de recebimento dela.
+ *   `data/cvm_versoes.json`, cada uma com a data de recebimento dela.
  *   Quem lê a lista precisa escolher a vigente — `CvmSeries.build` o faz por
  *   `CvmSeries.inForceAt`. Sem o arquivo, avisa e segue com a última versão,
  *   que é o comportamento anterior ao B8.

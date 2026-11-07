@@ -1,6 +1,6 @@
 /**
  * O cálculo do usuário refaz a conta do motor com os números de quem discorda
- * dele (decisão 147).
+ * dele.
  *
  * A promessa que estes testes travam: **sem nenhuma troca, o resultado é o
  * preço justo do motor** — em cada rota da cascata —, e cada troca muda só a

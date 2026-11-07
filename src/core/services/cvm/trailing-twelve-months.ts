@@ -214,7 +214,7 @@ export const TrailingTwelveMonths = {
    * O ponto que não fecha a soma é **omitido**, e não substituído pela DFP:
    * misturar âncoras na mesma série é exatamente o que ela existe para evitar.
    *
-   * **E a série com buraco não é devolvida** (decisão 73). Se entre dois
+   * **E a série com buraco não é devolvida**. Se entre dois
    * pontos ancorados sobra mais de um ano, a série inteira recua para a âncora
    * de DFP. A razão está medida: em 14/09/2026 a CVM **não publica o ITR de
    * 2025** — o diretório pula de 2024 para 2026 —, e a primeira versão montou

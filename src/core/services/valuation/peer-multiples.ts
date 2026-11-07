@@ -208,17 +208,17 @@ function single(kind: MultipleKind, args: ReadingArgs): MultipleReading {
 
 /**
  * A triangulação por múltiplos de pares. **É segunda leitura, e não é preço**
- * (decisão 103): a divergência é declarada, e não reconciliada.
+ *: a divergência é declarada, e não reconciliada.
  */
 export const PeerValuation = {
   /** Distância a partir da qual a divergência vira ressalva. **Meia ordem de grandeza.** */
   divergenceLimit: 0.5,
 
-  /** Mínimo de pares — outras companhias (item B41) — para a mediana ser usável. */
+  /** Mínimo de pares — outras companhias — para a mediana ser usável. */
   minimumPeers: 5,
 
   /**
-   * As três leituras. [shares] é o **divisor da ponte** (decisão 83);
+   * As três leituras. [shares] é o **divisor da ponte**;
    * [sectorKey] e [industry] desligam `EV/EBITDA` em instituição financeira.
    */
   readings(args: ReadingArgs): MultipleReading[] {

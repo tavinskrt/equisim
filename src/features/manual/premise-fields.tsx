@@ -49,7 +49,7 @@ export function PremiseFields(props: {
   const lane = m.lane;
   const error = (f: ManualField) => errorFor(failure, f);
   const published = m.publishedBase;
-  // O ano corrente anualizado, quando ele fecha a série (decisão 153).
+  // O ano corrente anualizado, quando ele fecha a série.
   const months = m.publishedMonths;
   const lastPeriod =
     months === null

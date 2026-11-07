@@ -27,7 +27,7 @@ const yearLabel = (m: number) => (m % 12 === 0 ? `${m / 12}a` : `${Fmt.ratio(m /
  * aportes sem rendimento. É o valor futuro de uma série uniforme, a mesma
  * conta que o solver da taxa exigida inverte.
  *
- * **O piloto da Bklit UI** (decisão 156): o desenho é o gráfico de linha da
+ * **O piloto da Bklit UI**: o desenho é o gráfico de linha da
  * Bklit, com a moldura, a legenda e a tabela de sempre. O eixo dela é de
  * datas, e o desta curva é de prazo: cada ponto ganha uma data sintética, a
  * um passo fixo por mês, que só posiciona o ponto — o rótulo do eixo e o do

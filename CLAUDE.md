@@ -111,9 +111,8 @@ schema forçado pelo servidor e `temperature: 0`, portanto é o mais reproduzív
 
 **Zero dependências de runtime**, por decisão deliberada, travada pelo teste
 `test/core/purity.test.ts`: todo import de `src/core` é relativo e fica dentro
-dele. O núcleo foi Dart (`packages/equisim_core`) até a
-[decisão 152](docs/decisoes/152-o-equisim-passa-a-typescript-e-o-dart-sai-do-repositorio.md),
-que o portou regra por regra; `test/parity/` confere que nenhum número mudou.
+dele. O núcleo foi Dart (`packages/equisim_core`) até a versão 2.0.0, que o
+portou regra por regra; `test/parity/` confere que nenhum número mudou.
 
 - **Não importe pacote algum** nesse módulo — nem `decimal.js`, nem `big.js`,
   nem utilitário "só dessa vez".
@@ -160,24 +159,22 @@ que são o mesmo relógio — e permite a forma com `??`.
 ## 4. Convenções de domínio
 
 Moeda é BRL: 2 casas, arredondamento half-up. Quantidade de ação é **inteira**
-(o projeto não tem FII desde a decisão 0).
+(o escopo é de ações: o projeto não tem FII).
 
 - Selic/CDI são publicados em % ao ano na **base 252 dias úteis**. Converta
   por composição — `(1+i)^(1/252)-1` —, **nunca** por `i/252`.
 - Taxa real usa Fisher: `(1+nominal)/(1+inflação)-1`. A subtração simples erra
   quase meio ponto percentual com a inflação brasileira.
-- **Provento é dado conferido da validação, e não crédito da simulação.** A
-  [decisão 23](docs/decisoes/023-remocao-de-proventos.md) tirou provento do
-  projeto; a [decisão 89](docs/decisoes/089-proventos-voltam-como-dado-conferido.md)
-  o reabriu, por decisão do orientador, só como **retorno total nas coortes de
-  validação** e no beta, com o histórico da B3; a
-  [decisão 92](docs/decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md)
-  leva esse retorno total medido à **faixa calibrada** da tela de avaliação. A
-  [decisão 142](docs/decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md)
-  usa os proventos da bolsa inteira para medir o **prêmio implícito**, que é o
-  prêmio de mercado do CAPM — provento agregado, nunca o de um ativo. A
-  simulação da carteira, o fluxo de cada ativo na cascata e o retorno esperado
-  continuam de preço. Estender provento a qualquer um deles exige decisão nova.
+- **Provento é dado conferido da validação, e não crédito da simulação.** Os
+  proventos da B3 entram em três lugares, e só neles: o **retorno total nas
+  coortes de validação** e no beta; a **faixa calibrada** da tela de avaliação,
+  que sai desse retorno total medido; e o **prêmio implícito**, que é o prêmio
+  de mercado do CAPM e usa os proventos da bolsa inteira — provento agregado,
+  nunca o de um ativo (ver [docs/motor/](docs/motor/README.md), capítulos 1, 4
+  e 6). A simulação da carteira, o fluxo de cada ativo na cascata e o retorno
+  esperado são de preço. Estender provento a qualquer um deles é mudança de
+  método: só com pedido explícito do usuário, e com a documentação e o
+  changelog atualizados (seção 7).
 - A simulação compra **ação inteira**, e a sobra de cada aporte fica em caixa
   por ativo, acumula e entra no aporte seguinte. Fração de ação em caminho de
   cálculo é defeito.
@@ -215,7 +212,7 @@ correção real; código preexistente no máximo vira `WARN`.
 
 Segundo agente, de papel **oposto** ao do auditor. Aquele caça defeito de
 correção ancorado em arquivo e linha, e **bloqueia**. Este examina relação entre
-coisas — decisão contra código, rótulo contra tela, propósito contra
+coisas — documentação contra código, rótulo contra tela, propósito contra
 implementação — e **nunca bloqueia**: sai com código 0 mesmo em falha de rede,
 cota ou JSON inválido, e nenhum hook o chama.
 
@@ -231,12 +228,12 @@ npm run conselho:dry -- --lente <id>  # monta o payload sem chamar o modelo
 
 | Lente | Pergunta |
 |---|---|
-| `registro` | Onde o registro diverge da realidade do repositório? |
+| `registro` | Onde a documentação e o changelog divergem da realidade do repositório? |
 | `nucleo` | As entidades são coesas? Que regra de negócio vazou para a UI? |
 | `dados` | O que acontece quando a API cai, estoura cota ou devolve série incompleta? |
 | `metodo` | A metodologia de DCF e CAPM é defensável? Que premissa está implícita? |
 | `risco` | Que caminho de cálculo ou de erro não tem teste? |
-| `rumo` | O que foi decidido e não foi entregue? |
+| `rumo` | Que limitação ou pendência declarada continua aberta? |
 | `tela` | O que compete por atenção? O rótulo descreve o que a tela faz? |
 
 Seis são texto puro e rodam pelo `agy`, na cota da assinatura. Só `tela` precisa
@@ -285,51 +282,83 @@ Lista vazia vinda do último degrau é mais provavelmente "não enxerguei" do qu
 
 ---
 
-## 7. O registro de decisões
+## 7. Histórico, versão e documentação
 
-**Decisão mora em arquivo próprio**, em [docs/decisoes/](docs/decisoes/), e não
-se edita depois de aceita — substitui-se por outra, que a cita. O formato está
-no [README de lá](docs/decisoes/README.md).
+O projeto registra o que muda em **dois lugares, e só neles**: o **changelog**,
+que diz o que mudou para quem usa o produto, e a **documentação técnica**, que
+diz como o sistema funciona hoje. Não existe mais registro de decisões
+numeradas: a pasta `docs/decisoes/` saiu do repositório na versão 2.5.0, e o
+gate local bloqueia arquivo novo nela.
+
+**Nunca crie arquivo numerado de decisão, nem documento que cite o pedido do
+usuário** (`origem`, `citacao`, "você pediu"). O que o usuário pediu é contexto
+da conversa, e não produto.
+
+### O que fazer a cada mudança
+
+Sempre que uma alteração impactar funcionalidade, cálculo, interface ou
+experiência do usuário:
+
+1. **Atualize a documentação técnica** correspondente — o capítulo de
+   [docs/motor/](docs/motor/README.md) que descreve a regra, o
+   [docs/estudo/](docs/estudo/README.md) se o guia a explica, o
+   [README.md](README.md) se a mudança aparece nele. Escreva o estado atual,
+   **sem mencionar que houve mudança** ("antes era X", "passou a", "desde a
+   versão"): quem lê a documentação quer saber como é, e o como era mora no
+   changelog.
+2. **Acrescente a entrada no changelog**, em
+   [src/data/changelog.ts](src/data/changelog.ts) — a fonte única, que a tela
+   de novidades do aplicativo lê —, e regenere o markdown com
+   `npm run changelog`. Nunca edite o [CHANGELOG.md](CHANGELOG.md) à mão.
+3. **Atualize a versão** quando a mudança for publicada: o `version` do
+   `package.json` e a versão nova no alto de `changelog`, com a data
+   `AAAA-MM-DD`. Trabalho que ainda não fecha uma versão vai para `unreleased`,
+   que aparece como "Não publicado".
+4. Rode `npm run estado` para regenerar o [docs/estado.md](docs/estado.md).
+
+`test/data/changelog.test.ts` reprova quando a versão do `package.json`, a do
+aplicativo e a mais recente do changelog divergem, quando o `CHANGELOG.md` não é
+o que `npm run changelog` gera, ou quando um item cita arquivo, código ou
+registro interno.
+
+### Como escrever o changelog
+
+O formato é o [Keep a Changelog 1.1.0](https://keepachangelog.com/pt-BR/1.1.0/),
+e a numeração, o [Versionamento Semântico 2.0.0](https://semver.org/lang/pt-BR/).
+
+- **Quatro categorias**, nesta ordem: `added` (Adicionado), `changed`
+  (Alterado), `removed` (Removido) e `fixed` (Corrigido).
+- **Tom profissional, voltado a quem usa o produto ou analisa a avaliação.**
+  Diga o que mudou na tela, no cálculo ou na simulação, e o efeito para o
+  usuário. Nada de caminho de arquivo, nome de componente, tipo ou variável
+  interna (`DetailMode`, `SideBySidePortfolios`), nem menção ao pedido.
+- Cada item é uma frase completa, terminada em ponto.
+
+| Mudança | Versão |
+|---|---|
+| A plataforma ou o método de avaliação é reconstruído de ponta a ponta, ou o que o usuário gravou deixa de ser lido como antes | **MAJOR** |
+| Funcionalidade que entra, muda ou sai, ou regra de cálculo que muda, mantendo legível o que o usuário gravou | **MINOR** |
+| Só correção de defeito, sem funcionalidade nova | **PATCH** |
+
+A política completa está em `versioningPolicy`, no mesmo arquivo, e aparece no
+alto do `CHANGELOG.md`.
+
+### Onde mora cada coisa
 
 | Onde | O quê |
 |---|---|
-| `docs/decisoes/` | Decisões 19+. Imutáveis, com `origem`, `data` e `afeta` |
-| `docs/apontamentos/` | O que orientador e devs apontam fora do git |
+| `src/data/changelog.ts` | Histórico de versões, fonte única. A tela Changelog e o `CHANGELOG.md` saem dele |
+| `CHANGELOG.md` | **Gerado** por `npm run changelog`. Nunca edite à mão |
 | `docs/estado.md` | **Gerado** por `npm run estado`. Nunca edite à mão |
-| `docs/motor/` | O que o código faz, regra por regra, com código, fórmula, teoria e evidência (decisão 141). Mudou uma regra, mude o capítulo |
+| `docs/motor/` | O que o código faz, regra por regra, com código, fórmula, teoria e evidência. Mudou uma regra, mude o capítulo |
 | `docs/estudo/` | Guia para quem não sabe finanças: capítulos e casos com os números de `tool/study-cases.ts`. Mudou o motor, refaça os dados e releia os casos |
-| `docs/eap/` | Pacotes da reconstrução da UI, cumprida (decisão 22) — especificação histórica |
-| `PLANO_ARQUITETURA.md` | **Congelado.** Plano de transição já cumprido; decisões 0–18 estão nele |
-
-O gate local bloqueia **referência quebrada** — `afeta` apontando para caminho
-inexistente, `substitui` citando decisão que não existe. **Defasagem nunca
-bloqueia**: um gate que trava o push porque um documento envelheceu é um gate
-arrancado na primeira semana. Defasagem é assunto da lente `registro`.
+| `docs/validacao/` | Relatórios de medição, **datados**: o número vale para a data e o motor de quando foi medido |
 
 ### Postura: como tratar o que já existe
 
 A **preservação** é o padrão: divergência é dívida a inventariar, e só regressão
-vira tarefa. A **reconstrução** é declarada por uma decisão com
-`postura: reconstrucao` e `status: aceita` — dentro do `afeta` dela, tudo é
-acionável.
-
-A fronteira não é configuração, é o próprio registro:
-[scripts/qa/advisor/postura.ts](scripts/qa/advisor/postura.ts) lê
-`docs/decisoes/` a cada execução. Cumprida a EAP, a decisão vira
-`status: cumprida` e a superfície volta à preservação.
-
-**Não há reconstrução aberta.** As duas que existiram estão fechadas: a
-[decisão 22](docs/decisoes/022-reconstrucao-da-ui.md), sobre as telas de
-operação, e a [decisão 25](docs/decisoes/025-reconstrucao-do-motor-de-avaliacao.md),
-sobre o motor de avaliação — esta marcada como `cumprida` em 07/09/2026 pela
-[decisão 29](docs/decisoes/029-saude-operacional-na-porta-2a.md), que confere as
-quatro condições de encerramento uma a uma.
-
-**Tudo está sob preservação**, portanto: divergência é dívida a inventariar, e
-mudança de método — na cascata de avaliação inclusive — exige decisão nova que a
-declare. Foi o que fizeram as decisões
-[31](docs/decisoes/031-escala-do-preco-tributo-e-invariancia-das-guardas.md) e
-[32](docs/decisoes/032-validacao-preditiva-e-diagnosticos-do-resultado.md).
-
-Confira antes de agir, em vez de confiar nesta frase: quem responde é
-`docs/decisoes/`, e este parágrafo é cópia que envelhece.
+vira tarefa. Mudança de método — na cascata de avaliação inclusive — só acontece
+quando o usuário a pede explicitamente, e vem com a medição que a sustenta, o
+capítulo de `docs/motor/` reescrito e a entrada no changelog. Se a mudança move
+um número da paridade (`test/parity/`), diga isso ao usuário antes de regravar
+qualquer gabarito.

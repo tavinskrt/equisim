@@ -25,7 +25,7 @@
 O item B5 mediu que o potencial do DCF e o dos múltiplos de pares têm
 correlação de postos de **0,470**, com o mesmo sinal em 63 de 93. **Sinal
 distinto, e não cópia** — o que o torna candidato a ordenação pela regra que a
-[decisão 103](../decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)
+decisão 103
 fixou **antes de medir**: o prêmio do retorno esperado sai da **primeira
 ordenação que passar** no critério da decisão 96.
 
@@ -119,5 +119,5 @@ decisão 103 continua devolvendo prêmio nenhum
   existia naquela data. Comparar os dois números seria comparar instrumentos.
 - **O múltiplo é do exercício publicado**, e não normalizado. Numa companhia
   cíclica no fundo do ciclo, o `P/L` fica alto e a leitura parece cara — é a
-  mesma limitação que a [decisão 118](../decisoes/118-a-triangulacao-por-multiplos-e-segunda-leitura-declarada-e-nao-entra-no-preco.md)
+  mesma limitação que a decisão 118
   já declarou.

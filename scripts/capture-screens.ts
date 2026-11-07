@@ -229,7 +229,7 @@ async function installMarket(context: BrowserContext): Promise<void> {
     if (url.hostname === 'icons.brapi.dev') {
       // Logo sintética: a raiz do ticker num quadrado de cor pela semente.
       // TAEE11 responde 404 de propósito, para a captura mostrar também as
-      // iniciais que ocupam o lugar da logo que não vem (decisão 154).
+      // iniciais que ocupam o lugar da logo que não vem.
       const symbol = /\/icons\/([A-Z0-9]+)\.svg$/.exec(url.pathname)?.[1] ?? '';
       if (!UNIVERSE.includes(symbol) || symbol === 'TAEE11') return route.fulfill({ status: 404, body: '' });
       return route.fulfill({ status: 200, contentType: 'image/svg+xml', body: syntheticLogo(symbol) });
@@ -281,7 +281,7 @@ async function step(errors: string[], label: string, fn: () => Promise<void>): P
 async function captureAll(browser: Browser, base: string, theme: ThemeName, width: number, errors: string[]): Promise<number> {
   const dir = join(OUT, theme);
   mkdirSync(dir, { recursive: true });
-  // Movimento reduzido (decisão 155): a foto pega o estado final, e não um
+  // Movimento reduzido: a foto pega o estado final, e não um
   // quadro no meio da cascata ou da contagem dos números.
   const context = await browser.newContext({
     viewport: { width, height: heightFor(width) },
@@ -356,7 +356,7 @@ async function captureAll(browser: Browser, base: string, theme: ThemeName, widt
   await step(errors, `${tag} raio-x`, async () => {
     await page.getByRole('button', { name: 'Adicionar ativo' }).first().click();
     await page.locator('#picker-search').fill('VALE3');
-    // Abre a página do ativo (decisão 155); o Voltar devolve ao Estudo.
+    // Abre a página do ativo; o Voltar devolve ao Estudo.
     await page.getByRole('button', { name: 'Abrir o Raio-X de VALE3' }).click();
     await page.waitForURL(/\/ativo\/VALE3$/);
     await page.waitForTimeout(5000);
@@ -383,7 +383,7 @@ async function captureAll(browser: Browser, base: string, theme: ThemeName, widt
     await shot(page, 5, 'meta');
   });
   await step(errors, `${tag} acompanhamento`, async () => {
-    // O acompanhamento da carteira (decisão 159), começado no passado: as
+    // O acompanhamento da carteira, começado no passado: as
     // compras saem das coortes ponto no tempo, contra o mercado sintético.
     await page.getByLabel('Início da carteira').fill('2021-04-01');
     await page.getByRole('button', { name: 'Iniciar acompanhamento' }).click();

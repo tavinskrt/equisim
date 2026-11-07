@@ -1,4 +1,4 @@
-// O capital emitido depois do balanço entra no patrimônio da ponte (item B28).
+// O capital emitido depois do balanço entra no patrimônio da ponte.
 //
 // O patrimônio vem do último balanço publicado, e o divisor é a contagem que
 // forma a cotação de hoje. Uma emissão entre as duas datas estava na contagem e

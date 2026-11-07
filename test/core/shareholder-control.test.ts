@@ -1,4 +1,4 @@
-// O controle acionário, do Formulário Cadastral da CVM (item B46).
+// O controle acionário, do Formulário Cadastral da CVM.
 //
 // O histórico sai das linhas do FCA de todos os anos, com a data da mudança
 // tirada da coluna que a companhia declara quando ela é plausível; e a

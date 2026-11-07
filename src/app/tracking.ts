@@ -36,7 +36,7 @@ export interface TrackingCurve {
 
 /**
  * O que é uma coorte, para quem lê o acompanhamento: a frase vai junto de
- * todo aviso que fala de coorte (decisão 160).
+ * todo aviso que fala de coorte.
  */
 export const cohortMeaning =
   'Coorte é a fotografia trimestral do preço justo: no último dia de cada trimestre, de 2018 a 2025, o motor avaliou cada ativo só ' +
@@ -87,7 +87,7 @@ export function liveReading(v: ValuationResult): FairValueReading {
 }
 
 /**
- * **Monta o acompanhamento** de [stored] até [today] (decisão 159): cotações,
+ * **Monta o acompanhamento** de [stored] até [today]: cotações,
  * proventos, coortes e — só se houver aporte ao vivo vencido — as avaliações
  * de hoje, e então os benchmarks com os mesmos aportes.
  *

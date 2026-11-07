@@ -15,7 +15,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe('Movimento (decisão 155)', () => {
+describe('Movimento', () => {
   it('a contagem é só visual: o leitor de tela lê o valor final, uma vez', () => {
     const { container } = render(
       <MotionProvider>
@@ -68,7 +68,7 @@ describe('Movimento (decisão 155)', () => {
   });
 });
 
-describe('Página do ativo (decisão 155)', () => {
+describe('Página do ativo', () => {
   it('o endereço do ativo é /ativo/<TICKER>', () => {
     expect(assetPath(Ticker.parse('PETR4'))).toBe('/ativo/PETR4');
   });

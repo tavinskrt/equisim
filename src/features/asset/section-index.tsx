@@ -10,7 +10,7 @@ export interface IndexedSection {
 }
 
 /**
- * **O índice da página do ativo** (decisão 155, a ideia do Scroll Index da
+ * **O índice da página do ativo** (a ideia do Scroll Index da
  * Kokonut UI): as seções do Raio-X numa coluna fixa, com a que está à vista
  * marcada por uma barra que desliza até ela.
  *

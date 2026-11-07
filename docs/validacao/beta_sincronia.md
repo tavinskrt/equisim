@@ -55,7 +55,7 @@ contrário do que a teoria prevê, e a razão está na liquidez.
 | metade que mais negocia | **250** | 0,985 |
 
 **As duas metades negociam todos os pregões do ano.** O corte de liquidez da
-[decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md) removeu 162
+decisão 25 removeu 162
 ativos do universo por liquidez insuficiente, e com eles foi embora a condição
 que produz o viés.
 
@@ -73,7 +73,7 @@ real. Aqui ele não chega.
 | semanal | 0,1073 |
 
 **Dimson custa 74% mais erro-padrão; o semanal, 119%.** Como o encolhimento da
-[decisão 40](../decisoes/040-beta-encolhido-por-precisao.md) pondera por
+decisão 40 pondera por
 `1/SE²`, adotar qualquer um dos dois transferiria peso do ativo para o prior
 setorial — trocaria precisão por viés numa direção em que **não há viés a
 trocar**.

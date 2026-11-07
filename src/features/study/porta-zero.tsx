@@ -6,7 +6,7 @@ import { Card } from '../../ui/card';
  * **A Porta 0**, explicada antes da escolha: o motor só avalia o que a
  * calibragem dele cobre. Os parâmetros das guardas foram calibrados sobre
  * ativos líquidos, e extrapolá-los em silêncio inflaria o preço justo
- * justamente onde o beta sai viesado para baixo (decisão 25).
+ * justamente onde o beta sai viesado para baixo.
  */
 export function PortaZeroExplainer({ className }: { className?: string }) {
   return (

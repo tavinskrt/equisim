@@ -30,7 +30,7 @@ export interface TrackingsState {
 }
 
 /**
- * Os acompanhamentos da carteira (decisão 159). A falha de leitura é
+ * Os acompanhamentos da carteira. A falha de leitura é
  * **propagada**, e não convertida em lista vazia: "nenhum acompanhamento" e
  * "não consegui ler" são situações diferentes.
  */

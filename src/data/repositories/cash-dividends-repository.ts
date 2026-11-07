@@ -2,7 +2,7 @@ import { type CashDividend, CashDividendsCodec, type Ticker } from '../../core';
 import { memoizedPackage, type PackageLoader } from './package-loader';
 
 /**
- * Proventos da B3 empacotados com o aplicativo (item A4, decisão 89).
+ * Proventos da B3 empacotados com o aplicativo.
  *
  * Dão ao beta o **retorno total** do ativo. Gerado por
  * `tool/b3-dividends-package.ts`. **Sem pacote, o repositório é

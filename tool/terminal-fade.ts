@@ -1,6 +1,6 @@
 // O degrau da vantagem competitiva, medido antes de ser trocado.
 //
-// **Por que este utilitário existe.** A [decisão 35](../docs/decisoes/035-dcf-reverso-e-regressao-condicional.md)
+// **Por que este utilitário existe.** A decisão 35
 // tirou do decaimento contínuo de `RONIC` o argumento que ele tinha: o terminal
 // **não** é a causa do viés de nível, e trocá-lo não conserta o nível. A mesma
 // decisão diz que quem propuser a troca depois dela precisa de outro argumento.
@@ -12,7 +12,7 @@
 // saem com preços justos que diferem em dezenas de por cento — e a diferença
 // não vem da economia delas, vem de onde o limiar caiu.
 //
-// É defeito da mesma família do que a [decisão 34](../docs/decisoes/034-fronteira-das-vias-medida-na-taxa-estrutural.md)
+// É defeito da mesma família do que a decisão 34
 // corrigiu na fronteira das vias: preço justo descontínuo numa grandeza
 // contínua.
 //

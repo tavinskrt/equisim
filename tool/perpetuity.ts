@@ -3,7 +3,7 @@
 // **O apontamento, e o que dele sobrou.** A lente `metodo` disse em 15/09/2026
 // que a taxa de equilíbrio troca só a taxa livre de risco: mesmo beta, e — na
 // via da firma — o WACC com o peso e a dívida **de hoje**. Metade disso caiu
-// com a [decisão 105](../docs/decisoes/105-o-aplicativo-resolve-o-prior-do-beta-e-o-custo-de-capital.md):
+// com a decisão 105:
 // o aplicativo passou a resolver o caminho de taxas, e a alavancagem de
 // equilíbrio virou a que a própria projeção alcança no ano N. **O beta não**:
 // ele é o de hoje, estimado na janela de cinco anos, e vai à perpetuidade sem

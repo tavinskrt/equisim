@@ -13,7 +13,7 @@
 
 ## 0. Por que uma grandeza própria
 
-A §0 do [plano](../plano-motor-de-referencia.md) mediu que o potencial do DCF
+A §0 do plano mediu que o potencial do DCF
 ordena menos que o book-to-market e, condicionado a ele, não acrescenta. Isso é
 uma acusação, e acusação não se acompanha. **O resíduo do potencial depois de
 pagar o que o P/B já dá de graça é uma grandeza**, e medi-la a cada rodada
@@ -38,7 +38,7 @@ Em cada coorte, o potencial em posto padronizado é regredido contra o do fator 
 ou dos fatores —, e o **resíduo** tem a correlação de ordem medida contra o
 retorno realizado. A média entre coortes recebe o mesmo tratamento inferencial de
 todo o resto: `t` corrigido pela sobreposição contra o crítico simulado dela, e
-Newey-West ao lado ([decisão 96](../decisoes/096-o-t-da-habilidade-e-corrigido-pela-sobreposicao-contra-o-critico-dela.md)).
+Newey-West ao lado (decisão 96).
 
 ## 2. A leitura de hoje
 
@@ -90,7 +90,7 @@ outro instrumento sobre outro motor. **É a partir de 16/09 que a série começa
 ## 4. O que a métrica decide, e o que não decide
 
 **Não decide o prêmio do retorno esperado.** Isso é o B1, e a
-[decisão 103](../decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)
+decisão 103
 já o resolveu pela regra fixada antes de medir: o prêmio sai da primeira
 ordenação que passar no critério, e nenhuma passa.
 

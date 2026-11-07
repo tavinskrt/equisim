@@ -49,7 +49,7 @@ export type LensId = (typeof LENS_IDS)[number];
  * o backlog generico que este agente precisa nao produzir.
  */
 export interface Observation {
-  /** Do que se fala: arquivo, modulo, tela, ou "decisao no 9". */
+  /** Do que se fala: arquivo, modulo, tela, ou "versao 2.4.0 do changelog". */
   subject: string;
   /**
    * Trecho LITERAL do material que sustenta a observacao.
@@ -123,7 +123,7 @@ const observationSchema: Schema = {
       type: Type.STRING,
       description:
         'Do que se fala: caminho de arquivo, modulo, nome de tela, ou ' +
-        'identificador de decisao (ex.: "decisao no 9").',
+        'versao do changelog (ex.: "versao 2.4.0").',
     },
     evidence: {
       type: Type.STRING,

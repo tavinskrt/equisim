@@ -89,7 +89,7 @@ export class AuditBus {
     return event.endpoint.startsWith('/core/');
   }
 
-  /** O evento é um valuation que o usuário confirmou na edição (decisão 150)? */
+  /** O evento é um valuation que o usuário confirmou na edição? */
   static isConfirmedValuation(event: AuditEvent): boolean {
     return event.endpoint.startsWith(ManualValuationRecord.endpointPrefix);
   }

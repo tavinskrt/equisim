@@ -79,7 +79,7 @@ import { Regression } from './validation/regression';
 
 const output = 'docs/validacao/premio_implicito.json';
 
-/** O pacote que o aplicativo e o backtest leem (decisão 142). */
+/** O pacote que o aplicativo e o backtest leem. */
 const packageFile = 'public/assets/mercado/premio_implicito.json';
 const reference = CapmInputs.defaultMarketPremium;
 
@@ -137,7 +137,7 @@ interface Company {
   cnpj: string;
   /** Raiz de quatro letras de hoje: é por ela que os proventos são lidos. */
   root: string;
-  /** A contagem conferida contra o preço, de `checkCount` (item B43). */
+  /** A contagem conferida contra o preço, de `checkCount`. */
   accepted: AcceptedCount[];
   /** A data da primeira contagem do formulário, conferida ou não. */
   firstRaw: DateTime | null;
@@ -498,7 +498,7 @@ export async function main(args: string[]): Promise<void> {
 
     // -------------------------------------------------------------------
     // O pacote: a série trimestral que o aplicativo e o backtest leem
-    // (decisão 142). A média que o motor usa sai do núcleo, sobre `r − Rf`.
+    //. A média que o motor usa sai do núcleo, sobre `r − Rf`.
     // -------------------------------------------------------------------
     const pkg = new ImpliedPremiumPackage({
       generatedAt: DateTime.utc(today.year, today.month, today.day),
@@ -527,7 +527,7 @@ export async function main(args: string[]): Promise<void> {
       row['premioSomado5'] = five.length >= 20 * minCoverage ? five.reduce((x, y) => x + y) / five.length : null;
     }
     if (datesOnly.length === 0) {
-      // **O passado não muda em silêncio** (item B48). Um trimestre já gravado
+      // **O passado não muda em silêncio**. Um trimestre já gravado
       // é fato histórico; se a série medida agora o devolve diferente, a causa
       // é dado que mudou por baixo — em 02/10/2026, as âncoras de 2011 e 2012
       // dependiam de a rede devolver o IBC-Br anterior à entrada congelada, e

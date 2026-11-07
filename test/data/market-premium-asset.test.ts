@@ -14,7 +14,7 @@ import { expectClose } from '../core/helpers';
 import { isServed, readPublicJson } from './public-assets';
 
 /**
- * A série do prêmio implícito versionada é o que o build leva (decisão 142).
+ * A série do prêmio implícito versionada é o que o build leva.
  *
  * **Sem ela o prêmio é outro**: os 5,5% parametrizados, quatro pontos acima da
  * média de dez anos que o preço da bolsa embute. No aplicativo isso vira

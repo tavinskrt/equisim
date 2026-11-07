@@ -9,6 +9,7 @@ import { IconButton } from '../../ui/button';
 import { cn } from '../../ui/cn';
 import { Logo } from '../../ui/logo';
 import { toast } from '../../ui/toast';
+import { ChangelogSheet } from '../changelog/changelog-sheet';
 import { AccountMenu } from './account-menu';
 import { CommandPalette } from './command-palette';
 import { ContextBar } from './context-bar';
@@ -16,8 +17,9 @@ import { navItems } from './nav-items';
 import { useLegacyAssetRedirect } from './use-open-asset';
 
 /**
- * A casca: cabeçalho com as áreas e a busca; a barra do estudo; e a
- * área corrente, que entra com um esmaecer curto a cada troca de endereço.
+ * A casca: cabeçalho com as áreas e a busca; a barra do estudo; a área
+ * corrente, que entra com um esmaecer curto a cada troca de endereço; e as
+ * camadas que qualquer área abre — a busca e o histórico de versões.
  */
 export function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -130,6 +132,7 @@ export function AppShell() {
       </nav>
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <ChangelogSheet />
     </div>
   );
 }

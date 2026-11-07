@@ -1,4 +1,4 @@
-// Sela as previsões das coortes novas (item C7, decisões 129 e 133).
+// Sela as previsões das coortes novas.
 //
 // Lê `data/c7/coortes.json` — do backtest em modo `--c7` — e grava, em
 // `docs/validacao/c7/`, um arquivo de previsões por coorte que ainda não tem
@@ -14,7 +14,7 @@
 //
 // Com o motor igual ao pré-registrado, este programa sela a série
 // pré-registrada; com motor novo, sela a série «motor da data», e a
-// pré-registrada sai do commit dela pelo terceiro passo (decisão 138).
+// pré-registrada sai do commit dela pelo terceiro passo.
 //
 // **Selar logo depois da coorte** é o que dá valor ao selo: o commit do
 // arquivo selado é a prova de que a previsão existia antes do desfecho.

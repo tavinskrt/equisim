@@ -1,4 +1,4 @@
-// O protocolo da réplica fora da amostra (item C7, decisões 129 e 133).
+// O protocolo da réplica fora da amostra.
 //
 // **O que ele garante.** A única via pela qual o R3 poderia vir a passar é dado
 // que nenhuma decisão do motor viu, lido pelo instrumento que já existe, nas
@@ -24,7 +24,7 @@
 // precisa ser produzida por ele, num `git worktree` do commit que o índice
 // registra.
 //
-// **Duas árvores de núcleo** (decisão 152): o motor pré-registrado é o núcleo
+// **Duas árvores de núcleo**: o motor pré-registrado é o núcleo
 // em Dart, `packages/equisim_core/lib/**/*.dart`, que o git guarda; o motor de
 // hoje é o porte em TypeScript, `src/core/**/*.ts`. A impressão é a mesma conta
 // sobre cada árvore, e a busca do commit de uma impressão procura nas duas.
@@ -403,7 +403,7 @@ export function situation(args: { folder: string; today: DateTime; dataEnd: Date
     byEngine.set(s['motor'] as string, list);
   }
   const engines: Json = {};
-  // As séries de motores posteriores ao pré-registrado (decisão 133).
+  // As séries de motores posteriores ao pré-registrado.
   for (const [engine, cohorts] of byEngine) if (engine !== preRegistered?.fingerprint) engines[engine] = cohorts.sort(compareStr);
   const out: Json = {
     motorPreRegistrado: preRegistered?.toJson() ?? null,

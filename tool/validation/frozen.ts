@@ -110,7 +110,7 @@ export function frozenCurve(): YieldCurve {
   return curve;
 }
 
-/** O pacote do prêmio implícito (decisão 142). */
+/** O pacote do prêmio implícito. */
 const premiumPackageFile = 'public/assets/mercado/premio_implicito.json';
 const answerKeyFile = 'docs/validacao/gabarito_cascata.json';
 
@@ -168,7 +168,7 @@ export class CvmFundamentals implements FundamentalsRepository {
         market: base.unwrap(),
         published: (s) => view.isPublished(s),
         anchored: this.options.anchored ?? false,
-        // A mesma série do aplicativo: o ano corrente anualizado (decisão 153).
+        // A mesma série do aplicativo: o ano corrente anualizado.
         yearToDate: CvmSeries.yearToDateByDefault,
       }).series,
     ]);
@@ -203,7 +203,7 @@ export class Frozen {
     readonly anchors: MarketAnchors,
     readonly curve: YieldCurve | null,
     readonly universe: Ticker[],
-    /** O prior do pacote — o que o aplicativo lê (decisão 105). */
+    /** O prior do pacote — o que o aplicativo lê. */
     readonly prior: BetaPrior | null,
     readonly registry: Map<string, B3Issuer>,
     readonly terms: Map<string, ConcessionTerm>,
@@ -211,9 +211,9 @@ export class Frozen {
     readonly units: Map<string, UnitComposition[]>,
     /** Emissões e eventos de ações do pacote do aplicativo (itens B28 e B29). */
     readonly capital: Map<string, CapitalEvents>,
-    /** O controle acionário de cada emissor, pela raiz do código (item B46). */
+    /** O controle acionário de cada emissor, pela raiz do código. */
     readonly control: Map<string, ShareholderControlPeriod[]>,
-    /** O prêmio de mercado da montagem do aplicativo, e de onde ele veio (decisão 142). */
+    /** O prêmio de mercado da montagem do aplicativo, e de onde ele veio. */
     readonly premium: PremiumChoice,
   ) {}
 
@@ -260,11 +260,11 @@ export class Frozen {
     const units = existsSync('public/assets/cvm/units.json')
       ? UnitCompositionCodec.decodePackage(readJson('public/assets/cvm/units.json'))
       : new Map<string, UnitComposition[]>();
-    // O controle acionário (item B46), como o aplicativo o lê.
+    // O controle acionário, como o aplicativo o lê.
     const control = existsSync('public/assets/cvm/controle.json')
       ? (ShareholderControlHistory.decode(readJson('public/assets/cvm/controle.json'))?.byIssuer ?? new Map<string, ShareholderControlPeriod[]>())
       : new Map<string, ShareholderControlPeriod[]>();
-    // O prêmio de mercado do aplicativo (decisão 142): a média de dez anos da
+    // O prêmio de mercado do aplicativo: a média de dez anos da
     // série do pacote, na data congelada. Sem pacote, o recuo do aplicativo —
     // os 5,5% parametrizados —, dito no terminal.
     const premiumPackage = existsSync(premiumPackageFile) ? ImpliedPremiumCodec.decode(readJson(premiumPackageFile)) : null;
@@ -302,13 +302,13 @@ export class Frozen {
   /**
    * A entrada da montagem **do aplicativo**, a mesma do gabarito.
    *
-   * [years] existe para a varredura do horizonte (item B6) e **nada mais**: o
+   * [years] existe para a varredura do horizonte e **nada mais**: o
    * padrão de 10 é o do gabarito, e passar outro valor produz uma montagem que
    * não é a dele — quem varre precisa dizer isso ao imprimir número.
    *
    * [premium] existe para a varredura do prêmio de risco de mercado (itens B3
    * e B42), e tem a mesma ressalva: ausente, é o do aplicativo — a média de
-   * dez anos do prêmio implícito, do pacote (decisão 142) —, que é o do
+   * dez anos do prêmio implícito, do pacote —, que é o do
    * gabarito; informado, entra como parametrizado.
    *
    * [rate] troca a fonte da taxa livre de risco, para a medição da Selic

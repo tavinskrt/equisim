@@ -1,6 +1,6 @@
 {
   "name": "equisim",
-  "version": "2.0.0",
+  "version": "2.5.0",
   "private": true,
   "type": "module",
   "description": "Equisim: avaliação de ações da B3 por DCF/CAPM, meta patrimonial e simulação histórica de carteiras. Aplicação web em TypeScript (React + Vite), com o motor financeiro em src/core.",
@@ -28,6 +28,7 @@
     "conselho": "tsx scripts/advisor.ts",
     "conselho:dry": "tsx scripts/advisor.ts --dry-run",
     "estado": "node scripts/gerar-estado.mjs",
+    "changelog": "tsx scripts/gerar-changelog.ts",
     "ui:capturar": "tsx scripts/capture-screens.ts"
   },
   "scriptsComments": {
@@ -48,6 +49,7 @@
     "conselho": "CONSELHEIRO -- o segundo agente. Le o projeto por lente e propoe; nao bloqueia nada e sai SEMPRE com codigo 0. Exige --lente. Ex.: npm run conselho -- --lente registro. Sem argumento, lista as lentes.",
     "conselho:dry": "Monta o payload de uma lente e imprime, sem chamar o modelo. Ex.: npm run conselho:dry -- --lente nucleo",
     "estado": "Regenera docs/estado.md a partir do repositorio. O arquivo e DERIVADO: nao edite a mao -- se um numero sair errado, o conserto e em scripts/gerar-estado.mjs.",
+    "changelog": "Regenera o CHANGELOG.md a partir de src/data/changelog.ts, a fonte unica do historico de versoes (a mesma que a tela de novidades le). Nao edite o CHANGELOG.md a mao.",
     "ui:capturar": "Gera as capturas de tela em docs/telas/ (telas x larguras x temas) com o Chromium do Playwright, para a lente `tela`. NAO e teste de regressao visual: nada aqui reprova."
   },
   "dependencies": {

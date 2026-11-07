@@ -110,7 +110,7 @@ export class PortfolioComparison {
 /**
  * Executa o backtest das duas carteiras: **uma ação de cada ativo**, comprada
  * no primeiro pregão da janela pelo mercado fracionário, e nenhuma compra
- * depois (decisão 161). O plano de aportes da Meta não entra.
+ * depois. O plano de aportes da Meta não entra.
  *
  * **As duas carteiras são simuladas na mesma janela**: o início comum é o
  * primeiro pregão em que *todos* os ativos das duas já negociavam. Sem esse
@@ -129,7 +129,7 @@ export async function comparePortfolios(args: {
   if (principal.isEmpty && reserve.isEmpty) return null;
 
   const requested = requestedWindow(today, settings.windowYears);
-  // A taxa livre de risco do Sharpe é a da própria janela (decisão 58).
+  // A taxa livre de risco do Sharpe é a da própria janela.
   const riskFree = await args.riskFreeRateFor(requested);
 
   const tickers = [...new Set([...principal.tickers, ...reserve.tickers])];

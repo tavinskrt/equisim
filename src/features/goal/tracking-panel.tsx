@@ -31,7 +31,7 @@ import { Slider } from '../../ui/slider';
 import { TrackingChart } from './tracking-chart';
 
 /**
- * **O acompanhamento da carteira** (decisão 159): a Meta deixa de ser só uma
+ * **O acompanhamento da carteira**: a Meta deixa de ser só uma
  * projeção e passa a confrontar o plano com o que a carteira de fato fez,
  * comprando a cada aporte o ativo de maior potencial do dia.
  */

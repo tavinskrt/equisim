@@ -18,12 +18,12 @@ orquestração em [compute-valuation.ts, `output1`, `baseFlow`, `output2`](../..
 | Regra | Código | Fundamento / evidência |
 |---|---|---|
 | Via da firma: base = capital investido, lucro = NOPAT na alíquota estrutural. Via do acionista: base = patrimônio, lucro = lucro líquido | `CapitalSeries.build` | McKinsey: ROIC e crescimento do capital investido; Damodaran: ROE para financeiras |
-| Alíquota estrutural = mediana das alíquotas efetivas (≥ 5 exercícios), limitada a [0; 34%]; sem isso, o NOPAT publicado (34%) | `CapitalSeries.structuralTaxRate` | JCP, incentivo e presunção são regime, e regime é o que se projeta (decisão 37); mediana porque um ano atípico não arrasta |
+| Alíquota estrutural = mediana das alíquotas efetivas (≥ 5 exercícios), limitada a [0; 34%]; sem isso, o NOPAT publicado (34%) | `CapitalSeries.structuralTaxRate` | JCP, incentivo e presunção são regime, e regime é o que se projeta ([fluxo_explicito.md](../validacao/fluxo_explicito.md)); mediana porque um ano atípico não arrasta |
 | Limpeza: descarta ponto com base fora de [1/8; 8]× a mediana de até dois vizinhos de cada lado | `cleanByNeighbour` | falha de escala da fonte; a referência local evita julgar o bom contra o ruim |
 | Retorno do ano = lucro do ano ÷ base de **abertura** (ano anterior); prejuízo entra com sinal | `CapitalSeries` | o lucro é gerado pelo capital que existia no começo do ano |
 | Retorno do ciclo = mediana dos retornos dos 8 exercícios anteriores ao corrente (≥ 4) | `cycleReturn`, `cycleWindow = 8` | um ciclo de commodity ou de crédito cabe em oito anos; mediana resiste a extremos |
 | Série com menos de 4 pontos: a via não se aplica | `isTooShort` | — |
-| **Ano corrente anualizado** como último ponto, quando há ITR depois da última DFP: fluxo do acumulado × 12 ÷ meses, base na data do ITR. Entra no retorno (é ele o "atual" da Saída 1); fica **fora** da variação anual da base, da retenção, do capital externo, da regressão da base e da contagem da Porta 0 | `YearToDate.latest`, `CapitalPoint.partial` | decisão 153: o lucro mais atual publicado; a base dele está a meses da anterior, e não a um ano. Sem correção de sazonalidade |
+| **Ano corrente anualizado** como último ponto, quando há ITR depois da última DFP: fluxo do acumulado × 12 ÷ meses, base na data do ITR. Entra no retorno (é ele o "atual" da Saída 1); fica **fora** da variação anual da base, da retenção, do capital externo, da regressão da base e da contagem da Porta 0 | `YearToDate.latest`, `CapitalPoint.partial` | o lucro mais atual publicado; a base dele está a meses da anterior, e não a um ano. Sem correção de sazonalidade |
 
 ---
 
@@ -31,9 +31,9 @@ orquestração em [compute-valuation.ts, `output1`, `baseFlow`, `output2`](../..
 
 | Guarda | Regra | Parâmetros | Evidência |
 |---|---|---|---|
-| **1 — tendência** | regressão do retorno contra o ano na série completa (≥ 6), `t` com erro de Newey-West, crítico de Student a α = 10%; a tendência **domina** se é significante e se a deriva em 8 anos (`|inclinação| × 8`) é pelo menos igual à correção (`|atual − ciclo|`) | `alpha = 0,10`, `minTrendDominance = 1,0`, `trendDriftWindow = 8` | decisões 25, 27 e 28 |
-| **2 — capital externo (Φ)** | soma, na janela de 8 anos, de `max(0, Δbase − lucro)` ÷ base inicial: capital que não veio de lucro retido | `maxExternalCapital = 1,0` (declara, **não** bloqueia) | decisão 28 |
-| **3 — desvio do ciclo** | destoa se `|atual − ciclo|` > 1,5 MAD escalado, **ou** se atual ÷ ciclo sai de [0,75; 1,33] | `robustZ = 1,5` | decisões 25 e 27 |
+| **1 — tendência** | regressão do retorno contra o ano na série completa (≥ 6), `t` com erro de Newey-West, crítico de Student a α = 10%; a tendência **domina** se é significante e se a deriva em 8 anos (`|inclinação| × 8`) é pelo menos igual à correção (`|atual − ciclo|`) | `alpha = 0,10`, `minTrendDominance = 1,0`, `trendDriftWindow = 8` | [normalizacao_fluxo_base.md](../validacao/normalizacao_fluxo_base.md) |
+| **2 — capital externo (Φ)** | soma, na janela de 8 anos, de `max(0, Δbase − lucro)` ÷ base inicial: capital que não veio de lucro retido | `maxExternalCapital = 1,0` (declara, **não** bloqueia) | [normalizacao_fluxo_base.md](../validacao/normalizacao_fluxo_base.md) |
+| **3 — desvio do ciclo** | destoa se `|atual − ciclo|` > 1,5 MAD escalado, **ou** se atual ÷ ciclo sai de [0,75; 1,33] | `robustZ = 1,5` | [normalizacao_fluxo_base.md](../validacao/normalizacao_fluxo_base.md) |
 
 **Normaliza** se a guarda 3 disser que destoa, a tendência não dominar (ou o
 setor tiver precedência do ciclo) e o retorno atual for positivo:
@@ -43,7 +43,7 @@ fator = clamp(retorno do ciclo ÷ retorno atual, 0,33, 3,00)
 base  = lucro do exercício × fator
 ```
 
-Com o ano corrente anualizado no fim da série (decisão 153), o "exercício" é
+Com o ano corrente anualizado no fim da série, o "exercício" é
 ele: `lucro anualizado ÷ patrimônio do fim da última DFP` é o retorno atual, e
 `lucro anualizado × fator` é a base. No BBAS3 em 25/10/2026: 1S26 × 2 =
 R$ 12.725,9 mi, retorno de 6,6% contra o típico de 16,1%, queda de 61,6% sobre
@@ -51,11 +51,11 @@ R$ 12.725,9 mi, retorno de 6,6% contra o típico de 16,1%, queda de 61,6% sobre
 
 | Regra especial | Código | Evidência |
 |---|---|---|
-| **Precedência do ciclo** em commodity e cíclico pesado (setor "materiais básicos" ou subsetor de petróleo, refino, mineração, siderurgia, papel e celulose, petroquímicos): normaliza mesmo com tendência significante | [cyclical-sectors.ts](../../src/core/services/valuation/cyclical-sectors.ts), `CyclicalSectors.hasCyclePrecedence` | decisão 28: a perna de alta do ciclo tem forma de tendência |
-| **Trava de saúde**: se o pior entre lucro líquido e EBITDA caiu mais de 50% em três anos, o fator não passa de 1,00 (não normaliza para cima) | `recentOperationalDecline`, `maxOperationalDecline = 0,50`, `operationalHealthWindow = 3` | decisões 28 e 29 (caso QUAL3: +477% vinha da base normalizada) |
-| **Commodity é isenta da trava** (só na base) | `output1` | decisão 30 |
-| A vantagem competitiva residual **não** tem trava de saúde | `GrowthGuards.residualMoat` | decisão 36 tirou os cortes de nível; texto corrigido em 28/09/2026 (item B39) |
-| **Base reconstruída**: retorno atual ≤ 0, ciclo > 0, sem trava e fluxo positivo em ≥ 60% da janela → base = retorno do ciclo × capital de hoje | `baseFlow` | decisão 53: o vale do ciclo não descarta a empresa; vira ressalva |
+| **Precedência do ciclo** em commodity e cíclico pesado (setor "materiais básicos" ou subsetor de petróleo, refino, mineração, siderurgia, papel e celulose, petroquímicos): normaliza mesmo com tendência significante | [cyclical-sectors.ts](../../src/core/services/valuation/cyclical-sectors.ts), `CyclicalSectors.hasCyclePrecedence` | a perna de alta do ciclo tem forma de tendência ([normalizacao_fluxo_base.md](../validacao/normalizacao_fluxo_base.md)) |
+| **Trava de saúde**: se o pior entre lucro líquido e EBITDA caiu mais de 50% em três anos, o fator não passa de 1,00 (não normaliza para cima) | `recentOperationalDecline`, `maxOperationalDecline = 0,50`, `operationalHealthWindow = 3` | caso QUAL3: +477% vinha da base normalizada para cima de uma empresa em queda |
+| **Commodity é isenta da trava** (só na base) | `output1` | em commodity a base converge ao ciclo nos dois sentidos; fora do recorte, a trava impede inflar o fluxo de quem quebrou o modelo de negócio |
+| A vantagem competitiva residual **não** tem trava de saúde | `GrowthGuards.residualMoat` | o tamanho do excedente já entra de forma contínua pelo decaimento medido ([fade_terminal.md](../validacao/fade_terminal.md)) |
+| **Base reconstruída**: retorno atual ≤ 0, ciclo > 0, sem trava e fluxo positivo em ≥ 60% da janela → base = retorno do ciclo × capital de hoje | `baseFlow` | o vale do ciclo não descarta a empresa; vira ressalva ([base_negativa.md](../validacao/base_negativa.md)) |
 | Base ≤ 0 depois de tudo: a via não se aplica | `baseFlow` | — |
 
 A base da via do acionista é por papel: lucro líquido ÷ papéis da ponte × fator
@@ -68,9 +68,8 @@ converge para o ciclo ao longo da projeção", o que o código não faz.
 
 ### 3.2.1 Por que normalizou, e para que lado
 
-A pergunta do orientador, em 14/10/2026, foi o porquê de cada normalização e a
-direção dela. A Saída 1 guarda a decisão inteira num registro, com os valores
-que a decidiram — nada é recalculado para explicar:
+A Saída 1 guarda o porquê de cada normalização, e a direção dela, num registro,
+com os valores que a decidiram — nada é recalculado para explicar:
 
 | O que | Código | Onde aparece |
 |---|---|---|
@@ -91,12 +90,12 @@ o rastro do passo da base.
 
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
-| `g` = **mediana** das variações anuais da base (≥ 4 variações consecutivas) | `GrowthGuards.dispersion` | `g = b × ROIC` (McKinsey): a base de capital é o que o reinvestimento acumula | decisão 25 |
+| `g` = **mediana** das variações anuais da base (≥ 4 variações consecutivas) | `GrowthGuards.dispersion` | `g = b × ROIC` (McKinsey): a base de capital é o que o reinvestimento acumula | [crescimento_log_linear.md](../validacao/crescimento_log_linear.md) |
 | Conferência: crescimento de uma regressão de `ln(base)` contra o ano, `e^b − 1`, erro pelo método delta `(1 + g) × erro(b)` | idem | Wooldridge; método delta | [crescimento_log_linear.md](../validacao/crescimento_log_linear.md) |
-| **Não identificado** se o erro passa de 3 p.p., **ou** se `|mediana − regressão| ÷ erro` passa do crítico de Student **e** a diferença passa de `max(2 p.p.; 25% × |mediana|)` | `maxGrowthStdError = 0,03`, `dispersionFloor = 0,02`, `dispersionRelative = 0,25` | a série não diz um crescimento só | decisão 27 |
+| **Não identificado** se o erro passa de 3 p.p., **ou** se `|mediana − regressão| ÷ erro` passa do crítico de Student **e** a diferença passa de `max(2 p.p.; 25% × |mediana|)` | `maxGrowthStdError = 0,03`, `dispersionFloor = 0,02`, `dispersionRelative = 0,25` | a série não diz um crescimento só | [crescimento_log_linear.md](../validacao/crescimento_log_linear.md) |
 | Não identificado, mas a inflação é **financiável** (retenção exigida `inflação ÷ ROIC do ciclo` < 1 e ≤ retenção mediana observada) → `g` = inflação, com ressalva | `anchorIsFundable` | crescer com a inflação é o mínimo de uma empresa em continuidade | — |
 | Nem isso → `g` = 0, com ressalva e aviso | `output2` | direção conservadora, declarada | — |
-| Crescimento de cada ano limitado ao que o retorno financia: `g_t ≤ 0,95 × ROIC_t` | [dcf.ts, `sustainable`](../../src/core/services/valuation/dcf.ts) | reter 100% para sempre não é plano | decisão 47 |
+| Crescimento de cada ano limitado ao que o retorno financia: `g_t ≤ 0,95 × ROIC_t` | [dcf.ts, `sustainable`](../../src/core/services/valuation/dcf.ts) | reter 100% para sempre não é plano | [fluxo_explicito.md](../validacao/fluxo_explicito.md) |
 
 ---
 
@@ -104,7 +103,7 @@ o rastro do passo da base.
 
 | Regra | Código | Evidência |
 |---|---|---|
-| `g∞ = min(g, teto nominal)`, limitado a **[−5%; teto]** | [growth-estimator.ts, `GrowthEstimator.perpetual`](../../src/core/services/valuation/growth-estimator.ts) | decisão 56 (piso de −5%); o rastro dizia [0; teto] até 28/09/2026 |
+| `g∞ = min(g, teto nominal)`, limitado a **[−5%; teto]** | [growth-estimator.ts, `GrowthEstimator.perpetual`](../../src/core/services/valuation/growth-estimator.ts) | o piso é o da banda de sanidade; onde a economia encolhe mais que o piso, o teto vence |
 | Teto = crescimento nominal da economia, `(1 + real) × (1 + inflação) − 1` | `MarketAnchors` | nominal porque a taxa de desconto é nominal |
 | O crescimento de cada ano decai em linha reta de `g` a `g∞` ao longo dos dez anos | `DcfAssumptions.growthAt` | vantagem se desgasta com a concorrência, não acaba numa data (substituiu a queda em degrau) |
 
@@ -117,5 +116,5 @@ o rastro do passo da base.
 - O crescimento vem só da história; aquisições aparecem como capital externo
   declarado, e não são modeladas. A alternativa que olha para a frente —
   `ROE normalizado × (1 − payout)`, com o PIB do setor para as de pouco capital e
-  as altas pagadoras — foi medida em 01/10/2026, sem ligar nada (item B45,
-  [crescimento_fundamental.md](../validacao/crescimento_fundamental.md)).
+  as altas pagadoras — foi medida em 01/10/2026, sem ligar nada
+  ([crescimento_fundamental.md](../validacao/crescimento_fundamental.md)).

@@ -64,7 +64,7 @@ function git(args: string[], cwd: string): string {
  * `.gitignore` nao exclui**.
  *
  * So os versionados, como era, deixava a lente cega para o que a rodada acabou
- * de escrever: em 24/09/2026 as decisoes 131 a 134, os testes novos e o
+ * de escrever: em 24/09/2026 os documentos novos, os testes novos e o
  * `tool/c7/` nao chegaram a lente nenhuma, porque ainda nao tinham commit -- e
  * o conselheiro roda justamente antes do commit. O `.gitignore` continua
  * barrando `data/`, `.env*` e o resto que nao e do projeto.
@@ -73,8 +73,8 @@ function listFiles(root: string, filePaths: string[]): string[] {
   const existing = filePaths.filter((c) => existsSync(join(root, c)));
   if (existing.length === 0) return [];
   // O indice ainda lista o arquivo apagado e nao commitado; a lente o leria
-  // como presente (28/09/2026: `docs/refinamento-do-valuation.md`, retirado
-  // pela decisao 141, voltou como "nao foi apagado"). So o que existe no disco.
+  // como presente (28/09/2026: `docs/refinamento-do-valuation.md`, ja
+  // apagado, voltou como "nao foi apagado"). So o que existe no disco.
   return git(['ls-files', '--cached', '--others', '--exclude-standard', '--', ...existing], root)
     .split('\n')
     .map((l) => l.trim())
@@ -165,7 +165,7 @@ function materialBlocks(root: string, material: Material): Block[] {
             'TODOS os arquivos versionados' +
             (exclude.length > 0
               ? `, exceto ${exclude.join(' ')},\n` +
-                'que nao carregam decisao deste projeto.\n'
+                'que nao carregam material deste projeto.\n'
               : '.\n') +
             'Esta lista e COMPLETA no escopo declarado: se um caminho nao esta\n' +
             'aqui, ele nao esta no repositorio. O conteudo dos arquivos nao foi\n' +

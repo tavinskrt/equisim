@@ -1,6 +1,6 @@
 /**
  * O cálculo do usuário: a conta do motor refeita com os números de quem
- * discorda dele (decisão 147).
+ * discorda dele.
  */
 
 import { ComputationFailure, InvalidInput, QuantityUnit, type Failure } from '../../failures/failure';
@@ -110,7 +110,7 @@ export interface ManualPremisesArgs {
 }
 
 /**
- * As premissas de um cálculo do usuário (decisão 147). Taxas em fração ao
+ * As premissas de um cálculo do usuário. Taxas em fração ao
  * ano. **O lucro de partida é em reais nas duas vias.**
  */
 export class ManualPremises {
@@ -250,7 +250,7 @@ export class ManualTerminal extends DartEnum {
   /** Gordon com a parcela fixa: `lucro_{N+1}·(1 − b) ÷ (taxa − g)`. */
   static readonly fixedFraction = new ManualTerminal('fixedFraction', 2);
 
-  /** Concessão: o capital volta no fim do contrato (decisão 88). */
+  /** Concessão: o capital volta no fim do contrato. */
   static readonly contract = new ManualTerminal('contract', 3);
 
   static readonly values: readonly ManualTerminal[] = [
@@ -512,7 +512,7 @@ function smallest(values: readonly number[]): number {
 
 /**
  * **A conta do motor congelada**, para o usuário refazê-la com os números
- * dele (decisão 147). Sem nenhuma troca, o resultado é o preço justo do
+ * dele. Sem nenhuma troca, o resultado é o preço justo do
  * motor; cada troca muda só a premissa trocada. **O que ele não faz é
  * revalidar.**
  */
@@ -532,12 +532,12 @@ export class ManualValuation {
   readonly publishedYear: number | null;
   /**
    * Meses do acumulado quando o lucro publicado é o ano corrente anualizado
-   * (decisão 153), ou `null` no exercício completo.
+   *, ou `null` no exercício completo.
    */
   readonly publishedMonths: number | null;
   /** Fator de normalização que o motor aplicou ao último exercício. */
   readonly baseFactor: number;
-  /** `true` quando o fluxo-base foi reconstruído do ciclo (decisão 53). */
+  /** `true` quando o fluxo-base foi reconstruído do ciclo. */
   readonly rebuiltBase: boolean;
   /** Premissas finais do motor. */
   readonly engineAssumptions: DcfAssumptions;
@@ -549,7 +549,7 @@ export class ManualValuation {
   readonly engineEquityRate: number | null;
   readonly engineTerminalEquityRate: number | null;
   readonly engineEquityRatePath: readonly number[] | null;
-  /** Capital das emissões depois do balanço, em reais (item B28). */
+  /** Capital das emissões depois do balanço, em reais. */
   readonly postStatementCapital: number;
 
   constructor(args: {

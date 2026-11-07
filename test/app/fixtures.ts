@@ -57,7 +57,7 @@ export function seriesOf(symbol: string, start: DateTime, closes: readonly numbe
   return new PriceSeries({ ticker: Ticker.parse(symbol), points });
 }
 
-/** Backtest de uma carteira de um ativo só, sem custo — uma ação comprada no primeiro pregão, como na tela (decisão 161). */
+/** Backtest de uma carteira de um ativo só, sem custo — uma ação comprada no primeiro pregão, como na tela. */
 export function outcomeOf(symbol: string, closes: readonly number[]): BacktestOutcome {
   const start = DateTime.local(2024, 1, 1);
   const portfolio = Portfolio.equalWeighted({
@@ -99,7 +99,7 @@ export function curve(start: number, end: number, n = 120): number[] {
 }
 
 /**
- * Uma avaliação **de verdade**, saída da cascata (decisão 147): a edição do
+ * Uma avaliação **de verdade**, saída da cascata: a edição do
  * valuation precisa da conta congelada, que só existe no resultado da cascata.
  *
  * - [firm]: via da firma (operacional) ou do acionista (operacional negativo).

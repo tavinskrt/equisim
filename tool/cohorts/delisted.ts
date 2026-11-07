@@ -1,4 +1,4 @@
-// As companhias deslistadas, prontas para entrar nas coortes (item C1b).
+// As companhias deslistadas, prontas para entrar nas coortes.
 //
 // Tudo o que o A3.4 deixou em `data/b3/deslistadas_contagem.json` — contagem de
 // ações por data, eventos localizados no preço, eventos não localizados e
@@ -75,7 +75,7 @@ export class DelistedSecurity {
   readonly classification: B3Classification | null;
   /** `b3`, `cvm` ou `nenhuma`. */
   readonly sectorOrigin: 'b3' | 'cvm' | 'nenhuma';
-  /** Divisão do capital entre ordinárias e preferenciais (item C3). */
+  /** Divisão do capital entre ordinárias e preferenciais. */
   readonly classes: CapitalClasses;
 
   constructor(args: {
@@ -192,7 +192,7 @@ export class Delisted {
     readonly cvmSector: CvmSector | null,
     /**
      * Entradas da contagem descartadas pela conferência contra o salto do preço
-     * (item B43), somadas nas companhias.
+     *, somadas nas companhias.
      */
     readonly discardedCounts: number,
   ) {}
@@ -214,7 +214,7 @@ export class Delisted {
 
   /**
    * Valor de mercado da companhia de [security] em [date], com os papéis dela e a
-   * contagem da data (item C3). `null` sem contagem ou sem papel de espécie
+   * contagem da data. `null` sem contagem ou sem papel de espécie
    * negociando.
    */
   marketValueOf(security: DelistedSecurity, date: DateTime): MarketValue | null {
@@ -233,7 +233,7 @@ export class Delisted {
    *
    * - [listedClassification]: CNPJ da listada → classificação da B3, para
    *   medir o setor da CVM.
-   * - [until]: a data de corte da conferência da contagem (item B43) — a âncora
+   * - [until]: a data de corte da conferência da contagem — a âncora
    *   é a contagem mais recente até ela.
    */
   static read(listedClassification: Map<string, B3Classification>, until: DateTime): Delisted | null {
@@ -268,7 +268,7 @@ export class Delisted {
       const registry = a34[cnpj];
       if (registry === undefined) continue;
       // A contagem do formulário conferida contra o salto do preço dos papéis
-      // da companhia (item B43, decisão 143): a correção que repete a contagem
+      // da companhia: a correção que repete a contagem
       // de antes de um grupamento sai.
       const checked = checkCount(
         (registry['contagem'] as JsonMap[]).map((p) => ({
@@ -376,7 +376,7 @@ export class Delisted {
  * data. É a mesma reconstrução que a coorte faz com as listadas, cuja fonte
  * repete o valor de mercado de hoje em todo exercício.
  *
- * **O valor de mercado é o da companhia, espécie a espécie** (item C3), e não
+ * **O valor de mercado é o da companhia, espécie a espécie**, e não
  * `contagem × preço do papel`, que dava razão de unidade 1 por construção. Sem
  * ele, recua para o produto.
  */
@@ -390,7 +390,7 @@ export class DelistedFundamentals implements FundamentalsRepository {
     readonly options: {
       /** Valor de mercado da companhia na data, de [Delisted.marketValueOf]. */
       marketValueOf?: number | null;
-      /** Série de doze meses ancorada no trimestre (item C1c), ou a de DFPs. */
+      /** Série de doze meses ancorada no trimestre, ou a de DFPs. */
       anchored?: boolean;
     } = {},
   ) {}
@@ -420,7 +420,7 @@ export class DelistedFundamentals implements FundamentalsRepository {
         market,
         published,
         anchored: this.options.anchored ?? false,
-        // A mesma série do aplicativo: o ano corrente anualizado (decisão 153).
+        // A mesma série do aplicativo: o ano corrente anualizado.
         yearToDate: CvmSeries.yearToDateByDefault,
       }).series,
     ]);

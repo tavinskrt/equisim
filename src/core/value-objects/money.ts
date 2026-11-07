@@ -38,7 +38,7 @@ export class Money {
    * **É a fronteira do `double` para o dinheiro.** Até 22/09/2026 ela fazia
    * `(reais * 100).round()`, e o produto em ponto flutuante perdia o meio:
    * `1.005 * 100` resulta em `100.49999999999999`, e R$ 1,005 virava R$ 1,00
-   * (item B21, decisão 125). Agora o arredondamento é feito sobre a **menor
+   *. Agora o arredondamento é feito sobre a **menor
    * representação decimal** do `double`: `1.005` dá 101 centavos, `2.675` dá
    * 268, `-1.005` dá −101; `0.1 + 0.2` dá 30.
    *

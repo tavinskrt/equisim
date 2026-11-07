@@ -5,7 +5,7 @@ import { Fmt } from './fmt';
  * O texto que explica a normalização do lucro de partida.
  *
  * **O núcleo diz o que decidiu, e com que números**; a frase é montada aqui,
- * com a formatação brasileira (decisões 122 e 125). Pedido do orientador em
+ * com a formatação brasileira. Pedido do orientador em
  * 14/10/2026: entender o porquê das normalizações e a direção de cada uma.
  */
 export const NormalizationCopy = {
@@ -67,7 +67,7 @@ export const NormalizationCopy = {
 
   /**
    * O ano do último ponto, dizendo quando ele é o ano corrente anualizado
-   * (decisão 153): `2026 (6 meses anualizados)`.
+   *: `2026 (6 meses anualizados)`.
    */
   period(n: BaseNormalization): string {
     const year = String(n.latestYear ?? '');
@@ -189,7 +189,7 @@ export const NormalizationCopy = {
     if (n.cyclicalPrecedence && n.trendDominates && ['upward', 'downward'].includes(n.outcome.name)) {
       out.push(
         'O retorno tem tendência, mas a empresa é de commodity ou de setor cíclico pesado: ali a ' +
-          'alta do ciclo tem cara de tendência, e o ciclo tem precedência (decisão 28).',
+          'alta do ciclo tem cara de tendência, e o ciclo tem precedência.',
       );
     }
     if (n.healthExempt && n.factor > 1) {
@@ -197,7 +197,7 @@ export const NormalizationCopy = {
         `O lucro ou o EBITDA caiu ${pct(n.operationalDecline)} em ` +
           `${ValuationParameters.operationalHealthWindow} anos, mas em commodity a queda entre pico ` +
           'e vale é do preço do insumo, e não mudança de patamar: a trava que impede subir não se ' +
-          'aplica (decisão 30).',
+          'aplica.',
       );
     }
     return out;

@@ -91,7 +91,7 @@ describe('RateSeries', () => {
   });
 
   it('não há como desalinhar data e taxa', () => {
-    // O construtor por listas paralelas deixou de existir (decisão 59): a
+    // O construtor por listas paralelas deixou de existir: a
     // série guarda um ponto por período, e o repositório de cache — que
     // iterava `rates` indexando `dates` — passou a iterar pontos.
     const s = seriesOf(3, 0.001);

@@ -34,7 +34,7 @@ from pathlib import Path
 ROOT = "https://bvmf.bmfbovespa.com.br/InstDados/SerHist"
 HEADER = "data;ticker;isin;especificacao;nome;fechamento;fatorCotacao;distribuicao;volume\n"
 # Máxima e mínima do pregão, para a estimativa de spread de Corwin e Schultz
-# (item C4). Arquivo à parte, e não colunas a mais em `avista_*.csv`: os
+#. Arquivo à parte, e não colunas a mais em `avista_*.csv`: os
 # leitores de lá são posicionais, e baixar de novo por cima misturaria uma
 # revisão eventual da fonte à medição que estiver em curso.
 EXTREMES_HEADER = "data;ticker;isin;maxima;minima;fechamento;fatorCotacao\n"

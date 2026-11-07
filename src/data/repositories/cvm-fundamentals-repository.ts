@@ -30,7 +30,7 @@ function unreadable(reason: string): CvmPackage {
 }
 
 /**
- * Fundamentos do aplicativo com a demonstração da CVM mesclada (item A1.9).
+ * Fundamentos do aplicativo com a demonstração da CVM mesclada.
  *
  * **Decora** o repositório de mercado em vez de substituí-lo: preço, valor de
  * mercado e a contagem corrente continuam vindo de lá, e a CVM entra campo a
@@ -38,7 +38,7 @@ function unreadable(reason: string): CvmPackage {
  * cópia dela.
  *
  * **De onde vêm os documentos.** De um pacote versionado com o aplicativo,
- * gerado por `tool/cvm-package.ts` a partir da base ingerida (decisão 80).
+ * gerado por `tool/cvm-package.ts` a partir da base ingerida.
  * A CVM não é API de tempo real — publica arquivos anuais de centenas de
  * megabytes —, e levar a ingestão ao navegador seria baixar 750 MB para ler
  * 375 tickers.
@@ -46,7 +46,7 @@ function unreadable(reason: string): CvmPackage {
  * **Sem pacote, a avaliação segue — e diz que seguiu sem ele.** Pacote
  * ausente, corrompido ou de versão desconhecida não derruba a avaliação: ela
  * volta a ter só a fonte de mercado. Mas isso deixou de ser silencioso
- * (item A1.10): [coverageNote] devolve a ressalva que a tela mostra.
+ *: [coverageNote] devolve a ressalva que a tela mostra.
  */
 export class CvmFundamentalsRepository implements FundamentalsRepository {
   /** Repositório de mercado decorado. */
@@ -62,11 +62,11 @@ export class CvmFundamentalsRepository implements FundamentalsRepository {
   readonly today: () => DateTime;
 
   /**
-   * Usa a série ancorada no trimestre (decisão 73).
+   * Usa a série ancorada no trimestre.
    *
    * **Desligada por padrão**, e a razão está medida: a série ancorada move a
    * ordenação de metade do universo (correlação de postos de 0,683 contra a
-   * anual, decisão 78), e se isso é informação ou ruído só a coorte
+   * anual), e se isso é informação ou ruído só a coorte
    * trimestral dirá.
    */
   readonly anchored: boolean;
@@ -182,7 +182,7 @@ export class CvmFundamentalsRepository implements FundamentalsRepository {
       market: base.unwrap(),
       published: (s) => view.isPublished(s),
       anchored: this.anchored,
-      // O ano corrente anualizado fecha a série anual (decisão 153).
+      // O ano corrente anualizado fecha a série anual.
       yearToDate: CvmSeries.yearToDateByDefault,
     });
     return ok([...assembled.series]);

@@ -225,7 +225,7 @@ describe('O contrato encurta a projeção só quando acaba dentro dela', () => {
 
 describe('O rastro do terminal da concessão', () => {
   // Lente `metodo`, 21/09/2026. Com prazo, o terminal é
-  // `capital_N + EVA·anuidade(M)` (decisão 88), e o rastro imprimia a
+  // `capital_N + EVA·anuidade(M)`, e o rastro imprimia a
   // perpetuidade de Gordon — a mesma forma de defeito que a ponte `EV − D`
   // tinha antes da decisão 102: rastro que descreve outra conta é pior que
   // nenhum.

@@ -1,6 +1,6 @@
 // B14 — o beta do papel pouco negociado, e o que ele faz com o nível.
 //
-// **A pergunta.** A [decisão 95](../docs/decisoes/095-a-recusa-por-liquidez-fica-pelo-nivel-e-nao-pela-ordenacao.md)
+// **A pergunta.** A decisão 95
 // deixou a recusa por liquidez de pé por **uma** razão: soltos do corte, os
 // recusados ordenam o retorno, mas o preço justo deles sai 27 p.p. acima do das
 // avaliadas. A explicação proposta foi o beta: papel com pouco negócio responde
@@ -223,7 +223,7 @@ export async function main(_args: string[]): Promise<void> {
       const dim5 = dimson(pair.asset, pair.market, 5);
 
       // **O contrafactual tem de ser justo.** O beta de produção já é
-      // encolhido em direção ao prior setorial (decisão 40), e Dimson tem
+      // encolhido em direção ao prior setorial, e Dimson tem
       // erro-padrão muito maior: comparar o encolhido com um Dimson cru
       // premiaria o ruído. Aqui o mesmo encolhimento é aplicado aos dois, com
       // o erro-padrão de cada um — que é o que a produção faria se adotasse a
@@ -388,7 +388,7 @@ function printReport(l: readonly Row[], divergent: string[] | null): void {
     );
   }
 
-  // O que chega ao preço é o beta **encolhido** (decisão 40), e o erro-padrão
+  // O que chega ao preço é o beta **encolhido**, e o erro-padrão
   // maior de Dimson desloca peso para o prior setorial. Sem esta linha, a
   // comparação premiaria o estimador mais ruidoso.
   outln('\n-- beta em nível, encolhido (é o que chega ao preço) --');

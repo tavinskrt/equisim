@@ -67,7 +67,7 @@ import type { WireKeyed } from '../audit/wire-keyed';
 
 /**
  * Como o deslocamento do cenário de desconto vira deslocamento do `Ke` na
- * rota derivada (item B20, decisão 121).
+ * rota derivada.
  *
  * O cenário perturba `DcfAssumptions.discountRate`. Na via do acionista esse
  * campo **é** o `Ke`, e o deslocamento é um a um por construção. Na via da
@@ -129,7 +129,7 @@ export class QuotedSharesSource extends DartEnum {
   /** Única disponível: o valor de mercado não pôde ser usado. */
   static readonly onlyAvailable = new QuotedSharesSource('onlyAvailable', 2);
 
-  /** Registro oficial da B3, líquida da fração em tesouraria (decisão 83). */
+  /** Registro oficial da B3, líquida da fração em tesouraria. */
   static readonly official = new QuotedSharesSource('official', 3);
 
   static readonly values: readonly QuotedSharesSource[] = [
@@ -247,19 +247,19 @@ export class ValuationInputs {
   /** Margem de segurança aplicada ao preço justo, em fração. */
   readonly marginOfSafety: number;
 
-  /** Anos de projeção explícita. **Dez, por medição** (decisão 115). */
+  /** Anos de projeção explícita. **Dez, por medição**. */
   readonly projectionYears: number;
 
-  /** Como o cenário de desconto vira deslocamento do `Ke` na rota derivada (item B20, decisão 121). */
+  /** Como o cenário de desconto vira deslocamento do `Ke` na rota derivada. */
   readonly scenarioTranslation: ScenarioTranslation;
 
   /** Valor a somar ao peso do capital próprio pelo minoritário — **imposição de diagnóstico do item B23**. */
   readonly minorityEquityValue: number | null;
 
-  /** Medianas de múltiplos dos pares, para a segunda leitura (item B5). `null` desliga a triangulação. */
+  /** Medianas de múltiplos dos pares, para a segunda leitura. `null` desliga a triangulação. */
   readonly peerMultiples: PeerMultipleSet | null;
 
-  /** Chave do setor, em minúsculas (decisão 87). Entra na Porta 1. */
+  /** Chave do setor, em minúsculas. Entra na Porta 1. */
   readonly sectorKey: string | null;
 
   /** Subsetor como publicado — com acento e pontuação. */
@@ -271,7 +271,7 @@ export class ValuationInputs {
   /** `true` quando o ativo consta da lista externa de recuperação judicial. */
   readonly isDistressed: boolean;
 
-  /** `true` quando a companhia é de controle estatal na data (item B46). **Não muda o preço justo.** */
+  /** `true` quando a companhia é de controle estatal na data. **Não muda o preço justo.** */
   readonly stateControlled: boolean;
 
   /** Inflação anual observada, em fração — a âncora *top-down* da Saída 2. */
@@ -280,16 +280,16 @@ export class ValuationInputs {
   /** Taxa livre de risco **estrutural** — o destino do decaimento **quando não há curva**. */
   readonly declaredTerminalRiskFreeRate: number | null;
 
-  /** Curva de juros observada, quando disponível (item A2, decisão 74). */
+  /** Curva de juros observada, quando disponível. */
   readonly riskFreeCurve: YieldCurve | null;
 
-  /** Contagem oficial de ações do registro da B3 (item A3.3, decisão 83). */
+  /** Contagem oficial de ações do registro da B3. */
   readonly officialShares: OfficialShareCount | null;
 
   /** Retorno terminal imposto de fora — **existe para o DCF reverso**. */
   readonly terminalReturnOverride: number | null;
 
-  /** Beta **desalavancado** do ativo, de `ShrunkBeta.unlevered` (decisão 41). */
+  /** Beta **desalavancado** do ativo, de `ShrunkBeta.unlevered`. */
   readonly unleveredBeta: number | null;
 
   /** Crescimento explícito imposto de fora — **existe para o teste A1**. */
@@ -307,16 +307,16 @@ export class ValuationInputs {
   /** Convenção de chegada do caixa imposta de fora. */
   readonly cashTimingOverride: CashTiming | null;
 
-  /** Proventos reinvestidos no retorno que estimou o beta (decisão 89). */
+  /** Proventos reinvestidos no retorno que estimou o beta. */
   readonly dividendsInBeta: number;
 
-  /** Fim do contrato de concessão (item A6, decisão 88). **Só age sobre concessão.** */
+  /** Fim do contrato de concessão. **Só age sobre concessão.** */
   readonly concessionEnd: DateTime | null;
 
-  /** Taxa livre de risco **da data**, que arbitra o custo da dívida observado (item B10). */
+  /** Taxa livre de risco **da data**, que arbitra o custo da dívida observado. */
   readonly creditReferenceRiskFree: number | null;
 
-  /** Extensão, em anos, da série que estimou o beta (item B17). */
+  /** Extensão, em anos, da série que estimou o beta. */
   readonly betaWindowYears: number | null;
 
   /** Peso do beta do ativo no beta de **equilíbrio** — imposição de diagnóstico do item B15. */
@@ -325,7 +325,7 @@ export class ValuationInputs {
   /** `D/E` imposto na perpetuidade — imposição de diagnóstico do item B15. */
   readonly terminalLeverageOverride: number | null;
 
-  /** Ações reunidas na unit, **como a companhia declara** (item B16). */
+  /** Ações reunidas na unit, **como a companhia declara**. */
   readonly declaredSharesPerUnit: number | null;
 
   /** Teto **nominal** do crescimento na perpetuidade, em fração. */
@@ -334,7 +334,7 @@ export class ValuationInputs {
   /** Ressalvas que a camada de dados conhece e a cascata não enxerga (item D4). */
   readonly contextNotes: readonly string[];
 
-  /** Emissões de ações por valor conhecidas na data (item B28). */
+  /** Emissões de ações por valor conhecidas na data. */
   readonly shareIssues: readonly ShareIssue[];
 
   /** Agrupa os insumos. Não busca nada — quem busca é `PrepareValuationInputs`. */
@@ -387,7 +387,7 @@ export class ValuationInputs {
   }
 
   /**
-   * **A única cópia de [ValuationInputs]** (item B27). Campo mencionado em
+   * **A única cópia de [ValuationInputs]**. Campo mencionado em
    * [changes] é trocado — inclusive por `null`, que tira a série de preços,
    * por exemplo —, e o não mencionado é mantido. **Ao acrescentar um campo,
    * acrescente aqui e no teste «a cópia preserva todo campo».**
@@ -440,7 +440,7 @@ export class ValuationInputs {
     return this.copy({ projectionYears: n });
   }
 
-  /** Os mesmos insumos com outra série de exercícios — a ancorada no trimestre do backtest (item C1c). */
+  /** Os mesmos insumos com outra série de exercícios — a ancorada no trimestre do backtest. */
   withFundamentals(series: readonly FundamentalsSnapshot[]): ValuationInputs {
     return this.copy({ fundamentals: series });
   }
@@ -667,11 +667,11 @@ interface Lane {
   /** Contagem de papéis da ponte. */
   readonly divisor: QuotedShares;
   readonly audit: AuditTransaction | null;
-  /** Capital das emissões por valor depois do balanço usado e até a data (item B28). Zero sem emissão. */
+  /** Capital das emissões por valor depois do balanço usado e até a data. Zero sem emissão. */
   readonly subsequentCapital: number;
 }
 
-/** A realavancagem recusou a estrutura de capital (decisão 45). */
+/** A realavancagem recusou a estrutura de capital. */
 interface RefusedStructure {
   readonly kind: 'refused';
   /** Frase da recusa, com o ativo e a via. */
@@ -686,7 +686,7 @@ interface DiscountedLane {
   readonly assumptions: LaneAssumptions;
   /** Fluxo-base descontado. */
   readonly base: number;
-  /** `true` quando o fluxo-base foi reconstruído do ciclo (decisão 53). */
+  /** `true` quando o fluxo-base foi reconstruído do ciclo. */
   readonly rebuiltBase: boolean;
   readonly cost: Cost;
   /** O desconto sob as premissas finais. */
@@ -697,7 +697,7 @@ interface DiscountedLane {
 
 type Discounting = RefusedStructure | DiscountedLane;
 
-/** A reconstrução do fluxo-base pelo ciclo (decisão 53). */
+/** A reconstrução do fluxo-base pelo ciclo. */
 interface Reconstruction {
   readonly total: number;
   readonly fraction: number;
@@ -739,7 +739,7 @@ interface LaneAssumptions {
   readonly baseReturn: number;
   /** Premissas do DCF com a taxa interpolada. */
   readonly assumptions: DcfAssumptions;
-  /** `Ke` do CAPM na taxa corrente e na de equilíbrio (decisão 102). */
+  /** `Ke` do CAPM na taxa corrente e na de equilíbrio. */
   readonly currentKe: number;
   readonly keTerminal: number;
   /** Custo da dívida aplicado no WACC, ou `null` quando o WACC degenerou para o `Ke`. */
@@ -754,17 +754,17 @@ interface Cost {
   readonly assumptions: DcfAssumptions;
   /** Caminho de taxas resolvido, ou `null` quando vale a interpolação. */
   readonly rates: LeveredRates | null;
-  /** Motivo da recusa **econômica** da estrutura de capital, ou `null` (decisão 45). */
+  /** Motivo da recusa **econômica** da estrutura de capital, ou `null`. */
   readonly rejectedStructure: string | null;
   /** Veredito final da vantagem competitiva. */
   readonly verdict: MoatVerdict;
   /** Retorno terminal que o veredito final concede, ou `null`. */
   readonly verifiedMoat: number | null;
-  /** O caminho da taxa livre de risco contra o qual [rates] foram resolvidas (item B24). */
+  /** O caminho da taxa livre de risco contra o qual [rates] foram resolvidas. */
   readonly rfPath: readonly number[] | null;
 }
 
-/** A rota derivada da firma, e o `Ke` do centro que a desconta (decisão 147). */
+/** A rota derivada da firma, e o `Ke` do centro que a desconta. */
 interface FirmRoute {
   readonly route: FirmDiscountRoute;
   readonly ke: number;
@@ -782,19 +782,19 @@ interface CurrentCost {
 
 // ---------------------------------------------------------------- constantes --
 
-/** Fração do patrimônio consolidado a partir da qual o minoritário vira ressalva (item B23, decisão 120). */
+/** Fração do patrimônio consolidado a partir da qual o minoritário vira ressalva. */
 const MINORITY_WEIGHT_MATERIALITY = 0.01;
 
 /** Janela, em anos, que o beta pede — e contra a qual a efetiva é medida. */
 const BETA_WINDOW_YEARS = 5;
 
-/** Fração da janela do beta abaixo da qual a avaliação declara a janela curta (item B17). */
+/** Fração da janela do beta abaixo da qual a avaliação declara a janela curta. */
 const MINIMUM_BETA_WINDOW_SHARE = 0.8;
 
 /** Teto de ações por unit. As units da B3 vão até 5 (1 ON + 4 PN). */
 const MAX_SHARES_PER_UNIT = 10;
 
-/** Folga **relativa** entre a razão medida e o inteiro mais próximo (decisão 61). */
+/** Folga **relativa** entre a razão medida e o inteiro mais próximo. */
 const UNIT_RATIO_TOLERANCE = 0.05;
 
 /** Idade máxima, em dias, em que o registro oficial arbitra sozinho. */
@@ -883,7 +883,7 @@ function evaluateInner(
   },
 ): Result<ValuationResult> {
   // **Concessão que acaba dentro da projeção termina a projeção no contrato**
-  // (item A6, decisão 88). Antes de tudo, porque o horizonte governa a curva,
+  //. Antes de tudo, porque o horizonte governa a curva,
   // o decaimento do crescimento, a convergência do retorno e o ponto fixo.
   const contractYearsCount = contractYears(receivedInputs);
   const inputs =
@@ -899,7 +899,7 @@ function evaluateInner(
   const view = new PointInTimeView(inputs.asOf);
   const disclosed = view.published(inputs.fundamentals);
 
-  // **Exercício sem demonstração de resultado não é exercício de zero** (decisão 52).
+  // **Exercício sem demonstração de resultado não é exercício de zero**.
   const published = disclosed.filter((s) => s.hasIncomeStatement);
   const emptyCount = disclosed.length - published.length;
 
@@ -961,7 +961,7 @@ function evaluateInner(
     );
   }
 
-  // **A composição declarada decide, e a medida confere** (item B16).
+  // **A composição declarada decide, e a medida confere**.
   const measured = quotedUnitRatio({
     sharesOutstanding: latest.sharesOutstanding,
     marketCap: latest.marketCap,
@@ -976,7 +976,7 @@ function evaluateInner(
   });
   auditCapm(audit, inputs.capm, inputs.dividendsInBeta, { withCurve: inputs.riskFreeCurve !== null });
 
-  // **A janela do beta, quando ela é curta** (item B17, decisão 111).
+  // **A janela do beta, quando ela é curta**.
   const betaWindow = inputs.betaWindowYears;
   if (betaWindow !== null && betaWindow > 0 && betaWindow < BETA_WINDOW_YEARS * MINIMUM_BETA_WINDOW_SHARE) {
     warnings.push(
@@ -1074,7 +1074,7 @@ function evaluateInner(
         'falso de desconto. O preço justo é, nesta medida, conservador.',
     );
   } else if (latest.sharesDisagree) {
-    // **A ponte por papel é a que o divisor adotou** (item B40).
+    // **A ponte por papel é a que o divisor adotou**.
     warnings.push(
       'As duas contagens de ações publicadas pela fonte discordam: ' +
         `${str(r(latest.sharesOutstanding ?? 0, 0))} correntes contra ` +
@@ -1133,7 +1133,7 @@ function evaluateInner(
 /**
  * Quantas ações compõem a **unit** negociada, ou 1 para a ação comum. A
  * razão é **medida, não tabelada** (`ações × preço ÷ valor de mercado`), com
- * tolerância **relativa** ao inteiro mais próximo (decisão 61). Sempre em
+ * tolerância **relativa** ao inteiro mais próximo. Sempre em
  * `[1, MAX_SHARES_PER_UNIT]`; `1.0` para qualquer entrada ausente, não
  * positiva, não finita, fora da faixa ou longe de um inteiro.
  */
@@ -1243,7 +1243,7 @@ function quotedShares(args: {
 /**
  * A contagem oficial na unidade negociada e líquida de tesouraria, ou `null`
  * sem registro utilizável **na data**. **Nunca olha para a frente.** A
- * tesouraria sai pela fração, e só por ela (decisão 70).
+ * tesouraria sai pela fração, e só por ela.
  */
 function officialInUnit(
   latest: FundamentalsSnapshot,
@@ -1403,7 +1403,7 @@ function route(
 /**
  * Aplica a Porta 2 e desconta, na via informada. **É o condutor, e os
  * estágios são funções** (item D1). **Nenhuma avaliação muda de via no meio
- * da conta** (decisão 102). Devolve `null` quando a via não se aplica; a
+ * da conta**. Devolve `null` quando a via não se aplica; a
  * recusa com motivo vai para [refusals].
  */
 function evaluateLane(
@@ -1419,7 +1419,7 @@ function evaluateLane(
   audit: AuditTransaction | null,
   refusals: string[] | null,
 ): ValuationResult | null {
-  // **O capital que entrou depois do balanço** (item B28).
+  // **O capital que entrou depois do balanço**.
   const capital = subsequentCapital(inputs, latest);
   const withShares = divisor.count > 0;
   if (capital.value > 0 && withShares) {
@@ -1463,7 +1463,7 @@ function evaluateLane(
   if (discounted === null) return null;
 
   if (discounted.kind === 'refused') {
-    // **Recusar** é a conta dizendo que a estrutura não fecha (decisão 45), e
+    // **Recusar** é a conta dizendo que a estrutura não fecha, e
     // desde a decisão 102 o ativo não muda de via por isso.
     refusals?.push(
       `${discounted.reason} A avaliação não muda de via: a do acionista é outro modelo, ` +
@@ -1569,7 +1569,7 @@ function discountLane(laneContext: Lane, warnings: readonly string[]): Discounti
 /**
  * **O desconto do fluxo da via**, sob as premissas [a]. Na via da firma, o
  * capital próprio vem sempre do fluxo do acionista derivado do da firma, e
- * nunca da subtração `EV − D` (decisão 102).
+ * nunca da subtração `EV − D`.
  */
 function discountFlow(
   laneContext: Lane,
@@ -1601,7 +1601,7 @@ function discountFromBalanceSheet(
         : a.copyWith({ discountRatePath: path.map((rate) => rate + deviation) });
     return DcfCalculator.shareholder({ baseProfit: base, assumptions: shifted });
   }
-  // **O centro é a premissa que produziu o preço justo** (item B11), e o
+  // **O centro é a premissa que produziu o preço justo**, e o
   // deslocamento vira deslocamento do `Ke` pelo fator da tradução (B20).
   const center = cost.assumptions;
   const factor = scenarioFactor(laneContext, cost);
@@ -1619,7 +1619,7 @@ function discountFromBalanceSheet(
 }
 
 /**
- * **A conta da via congelada, para o cálculo do usuário** (decisão 147). As
+ * **A conta da via congelada, para o cálculo do usuário**. As
  * taxas saem do **desconto que produziu o preço justo**.
  */
 function freeze(laneContext: Lane, d: DiscountedLane): ManualValuation | null {
@@ -1660,7 +1660,7 @@ function freeze(laneContext: Lane, d: DiscountedLane): ManualValuation | null {
 /**
  * **A rota derivada da firma, e o `Ke` do centro que a desconta** (decisão
  * 147). O custo da dívida é **sempre o sintético que o WACC aplica** (item
- * B11), e o caixa rende a taxa livre de risco (decisão 119).
+ * B11), e o caixa rende a taxa livre de risco.
  */
 function firmRoute(laneContext: Lane, cost: Cost, assumptions: LaneAssumptions): FirmRoute {
   const rates = cost.rates;
@@ -1685,7 +1685,7 @@ function firmRoute(laneContext: Lane, cost: Cost, assumptions: LaneAssumptions):
     });
   if (rates === null) {
     // Sem caminho resolvido, e com curva, o `Ke`, o juro e o rendimento do
-    // caixa de cada ano seguem o forward daquele ano (item B37).
+    // caixa de cada ano seguem o forward daquele ano.
     const fw = laneContext.inputs.riskFreeCurve?.annualForwards(laneContext.inputs.projectionYears) ?? null;
     return {
       route: makeRoute(fw),
@@ -1695,7 +1695,7 @@ function firmRoute(laneContext: Lane, cost: Cost, assumptions: LaneAssumptions):
     };
   }
   // **Com o caminho de taxas resolvido, o juro e o rendimento seguem a
-  // curva** (item B24, decisão 127).
+  // curva**.
   return {
     route: makeRoute(cost.rfPath),
     ke: rates.costOfEquity[0]!,
@@ -1707,7 +1707,7 @@ function firmRoute(laneContext: Lane, cost: Cost, assumptions: LaneAssumptions):
 /**
  * **A conclusão da via**: o rastro do desconto e da ponte, os cenários e os
  * diagnósticos. Devolve `null` com preço justo não positivo. Usa **as
- * premissas finais, e não as interpoladas** (item B11).
+ * premissas finais, e não as interpoladas**.
  */
 function conclude(
   laneContext: Lane,
@@ -1723,7 +1723,7 @@ function conclude(
   const assumptions = d.cost.assumptions;
   if (outcome.fairValuePerShare <= 0) return null;
 
-  // **O que a perpetuidade supõe sobre o capital que já existe** (item B12, decisão 107).
+  // **O que a perpetuidade supõe sobre o capital que já existe**.
   const excess = outcome.discountedTerminalExcess;
   const excessFraction = excess === null || outcome.equityValue <= 0 ? null : excess / outcome.equityValue;
   const installedReturn = outcome.impliedTerminalReturn;
@@ -1765,7 +1765,7 @@ function conclude(
     });
   }
 
-  // **A segunda leitura** (item B5, decisão 118): mesmo exercício-base e
+  // **A segunda leitura**: mesmo exercício-base e
   // mesmo divisor do fluxo descontado.
   const triangulation = PeerTriangulation.build({
     latest: laneContext.latest,
@@ -1818,7 +1818,7 @@ function conclude(
       terminalReturnOnCapital: assumptions.terminalReturnOnCapital,
       firmTaxRate: lane === ValuationLane.firm ? d.output1.taxRate : null,
       terminalCostOfEquity: d.cost.rates?.terminalCostOfEquity ?? null,
-      // A estrutura de capital da perpetuidade é a do ano N do modelo (item B15, decisão 105).
+      // A estrutura de capital da perpetuidade é a do ano N do modelo.
       terminalEquityShare: d.cost.rates?.equityShareAt(inputs.projectionYears) ?? null,
       postStatementCapital: laneContext.subsequentCapital > 0 ? laneContext.subsequentCapital : null,
       retentionPath,
@@ -1828,7 +1828,7 @@ function conclude(
 }
 
 /**
- * **O custo de capital realavancado ano a ano** (decisões 41, 44, 46 e 51),
+ * **O custo de capital realavancado ano a ano**,
  * com o veredito da vantagem competitiva refeito contra a taxa resolvida até
  * o par parar de mudar. Sem beta desalavancado — ou em instituição
  * financeira na via do acionista — vale a interpolação.
@@ -1849,13 +1849,13 @@ function resolveCost(laneContext: Lane, b: Base, p: LaneAssumptions, base: numbe
   let rejectedStructure: string | null = null;
   const betaU = inputs.unleveredBeta;
 
-  // **A exceção é a instituição financeira, e é de direito** (decisão 46).
+  // **A exceção é a instituição financeira, e é de direito**.
   const isFinancial = FinancialSectors.isFinancial({ sectorKey: inputs.sectorKey, industry: inputs.industry });
   const resolvesRates =
     betaU !== null && Number.isFinite(betaU) && (lane === ValuationLane.firm || !isFinancial);
   if (resolvesRates) {
     const n = inputs.projectionYears;
-    // Com curva, o forward de um ano de cada ano (decisão 74); sem ela, o
+    // Com curva, o forward de um ano de cada ano; sem ela, o
     // decaimento linear de dois pontos da decisão 31.
     const curve = inputs.riskFreeCurve;
     let rfPath: number[];
@@ -1883,14 +1883,14 @@ function resolveCost(laneContext: Lane, b: Base, p: LaneAssumptions, base: numbe
             riskFreePath: rfPath,
             terminalRiskFree: inputs.terminalRiskFreeRate,
             marketPremium: inputs.capm.marketPremium,
-            // O prêmio de crédito da classificação sintética (item B11).
+            // O prêmio de crédito da classificação sintética.
             creditSpread: p.creditSpread,
             taxRate: ValuationParameters.statutoryTaxRate,
             // O caixa rende `R_f`, e não `R_f + spread`.
             cash: latest.totalCash,
             terminalBetaWeight: inputs.terminalBetaWeightOverride,
             terminalLeverage: inputs.terminalLeverageOverride,
-            // O ponto fixo é tentado de dois lugares (item B18).
+            // O ponto fixo é tentado de dois lugares.
             warnings: local,
           })
         : LeveredCostOfCapital.solveEquity({
@@ -1911,7 +1911,7 @@ function resolveCost(laneContext: Lane, b: Base, p: LaneAssumptions, base: numbe
     if (resolved.isOk) {
       let rates = resolved.unwrap();
       if (rates.converged) {
-        // **Dois passes não fecham a volta** (decisão 51): a volta mora em
+        // **Dois passes não fecham a volta**: a volta mora em
         // `MoatFixedPoint.iterate`, e o veredito só é adotado com a taxa dele.
         const roundTrip = MoatFixedPoint.iterate<MoatVerdict, LeveredRates>({
           verdict: moatVerdict,
@@ -1991,7 +1991,7 @@ function resolveCost(laneContext: Lane, b: Base, p: LaneAssumptions, base: numbe
     }
   }
 
-  // **A condição de exposição do minoritário** (item B23, decisão 120).
+  // **A condição de exposição do minoritário**.
   if (lane === ValuationLane.firm && resolvedRates === null) {
     const minority = latest.minorityInterest ?? 0;
     const controllingEquity = latest.totalStockholderEquity ?? 0;
@@ -2041,7 +2041,7 @@ function laneAssumptions(laneContext: Lane, b: Base, g: number, local: string[])
       : { rate: inputs.capm.costOfEquity, costOfDebtEstimated: false, costOfDebt: null, creditSpread: 0.0 };
   const discount = currentCost.rate;
 
-  // Custo de capital de **equilíbrio** (item B15): avisos e auditoria saem só
+  // Custo de capital de **equilíbrio**: avisos e auditoria saem só
   // da montagem corrente.
   const capmTerminal = inputs.terminalCapm;
   const terminalDiscount =
@@ -2053,7 +2053,7 @@ function laneAssumptions(laneContext: Lane, b: Base, g: number, local: string[])
   auditPerpetualGrowth(audit, g, inputs.perpetualGrowthCap, perpetual);
 
   // **Com a curva, a taxa de cada ano é montada sobre o forward daquele ano**
-  // (decisão 74; item B37).
+  //.
   const curveAtDate = inputs.riskFreeCurve;
   const curvePath: number[] | null =
     curveAtDate === null
@@ -2066,7 +2066,7 @@ function laneAssumptions(laneContext: Lane, b: Base, g: number, local: string[])
               : inputs.capm.withRiskFree(rf).costOfEquity,
           );
 
-  // **Concessão não preserva excedente** (decisão 50).
+  // **Concessão não preserva excedente**.
   const fixedTerm = ConcessionSectors.hasFiniteTerm({ sectorKey: inputs.sectorKey, industry: inputs.industry });
 
   const moatVerdict = moatVerdictFor(inputs, b, fixedTerm, terminalDiscount);
@@ -2101,7 +2101,7 @@ function laneAssumptions(laneContext: Lane, b: Base, g: number, local: string[])
     );
   }
 
-  // **O controle estatal é declarado, e não cobrado** (item B46).
+  // **O controle estatal é declarado, e não cobrado**.
   if (inputs.stateControlled) {
     local.push(
       'A companhia é de controle estatal, pelo Formulário Cadastral da CVM. ' +
@@ -2192,7 +2192,7 @@ function laneAssumptions(laneContext: Lane, b: Base, g: number, local: string[])
   };
 }
 
-/** Veredito da vantagem competitiva residual contra a taxa de equilíbrio [rInf] (decisões 36, 44 e 50). */
+/** Veredito da vantagem competitiva residual contra a taxa de equilíbrio [rInf]. */
 function moatVerdictFor(inputs: ValuationInputs, b: Base, fixedTerm: boolean, rInf: number): MoatVerdict {
   const excessReturns: { year: number; excess: number }[] = [];
   for (const yv of b.series.returns) {
@@ -2320,7 +2320,7 @@ function output1(laneContext: Lane, local: string[]): Base | null {
     normalization,
   });
 
-  // **O ano corrente anualizado é declarado** (decisão 153): ele supõe que o
+  // **O ano corrente anualizado é declarado**: ele supõe que o
   // resto do ano repete o acumulado.
   const months = laneContext.latest.annualizedMonths;
   if (months !== null) {
@@ -2410,7 +2410,7 @@ function output1(laneContext: Lane, local: string[]): Base | null {
 }
 
 /**
- * **A reconstrução do fluxo-base pelo ciclo** (decisão 53): o retorno do
+ * **A reconstrução do fluxo-base pelo ciclo**: o retorno do
  * ciclo sobre o capital de hoje, quando o último exercício veio no prejuízo,
  * o ciclo é positivo, a trava de saúde não reprova e ao menos
  * `minPositiveFlow` da janela é positiva.
@@ -2435,7 +2435,7 @@ function reconstructionOf(
 /**
  * **O fluxo-base da via**: o exercício mais recente vezes o fator do ciclo,
  * ou, com o exercício no prejuízo, o retorno do ciclo sobre o capital de hoje
- * (decisão 53). `null` sem base positiva.
+ *. `null` sem base positiva.
  */
 function baseFlow(laneContext: Lane, b: Base, local: string[]): { base: number; rebuilt: boolean } | null {
   const lane = laneContext.lane;
@@ -2519,7 +2519,7 @@ function output2(laneContext: Lane, b: Base, local: string[]): { origin: GrowthO
 }
 
 /**
- * O que o prazo da concessão faz com a avaliação, em texto (decisão 88).
+ * O que o prazo da concessão faz com a avaliação, em texto.
  * [capitalMeasured] é `false` sem retorno sobre o capital utilizável.
  */
 function contractWarning(inputs: ValuationInputs, options: { capitalMeasured: boolean }): string {
@@ -2623,7 +2623,7 @@ function diagnose(args: {
   if (args.rebuiltBase) caveats.push(ValuationCaveat.rebuiltBase);
   if (args.stateControlled) caveats.push(ValuationCaveat.stateControl);
   if (outcome.equityShare < ValuationDiagnostics.fragileEquityShare) caveats.push(ValuationCaveat.fragileBridge);
-  // **O excedente perpétuo do capital instalado** (item B12), contra o valor
+  // **O excedente perpétuo do capital instalado**, contra o valor
   // do capital próprio, o mesmo denominador de `terminalShare`.
   const excess = outcome.discountedTerminalExcess;
   const excessWeight = excess === null || outcome.equityValue <= 0 ? null : excess / outcome.equityValue;
@@ -2694,25 +2694,25 @@ function wacc(
 ): CurrentCost {
   const capm = options.capmOverride ?? inputs.capm;
   const terminal = options.terminal ?? false;
-  // **A dívida dos pesos é a líquida** (decisão 104).
+  // **A dívida dos pesos é a líquida**.
   const raw = latest.totalDebt;
   const imposedLeverage = terminal ? inputs.terminalLeverageOverride : null;
   const debt = imposedLeverage === null ? latest.netDebt : divisor.count * inputs.marketPrice * imposedLeverage;
   // O peso do capital próprio é o valor de mercado **pelo divisor da ponte**
-  // (decisão 83); **o minoritário não entra neste peso** (item B23).
+  //; **o minoritário não entra neste peso**.
   const equity = divisor.count * inputs.marketPrice + (inputs.minorityEquityValue ?? 0);
 
-  // O observado entra apenas como **conferência** (decisão 31).
+  // O observado entra apenas como **conferência**.
   const kd = latest.costOfDebt;
   // O escudo fiscal usa a alíquota **marginal estatutária**.
   const tax = ValuationParameters.statutoryTaxRate;
   const effective = latest.effectiveTaxRate;
 
-  // **Companhia sem dívida e com caixa não degenera para o Ke** (decisão 58).
+  // **Companhia sem dívida e com caixa não degenera para o Ke**.
   const noContractedDebt = raw <= 0;
-  // A faixa da despesa financeira é medida na taxa da **data** (item B10).
+  // A faixa da despesa financeira é medida na taxa da **data**.
   const reference = inputs.creditReferenceRiskFree ?? inputs.capm.riskFreeRate;
-  // **O prêmio de crédito existe mesmo quando o WACC estático não** (item B26).
+  // **O prêmio de crédito existe mesmo quando o WACC estático não**.
   const premium = noContractedDebt
     ? 0.0
     : CostOfCapital.syntheticSpread({
@@ -2722,7 +2722,7 @@ function wacc(
         riskFreeRate: reference,
       });
 
-  // **Só a falta de valor de mercado impede o WACC estático** (item B26).
+  // **Só a falta de valor de mercado impede o WACC estático**.
   if (equity <= 0) {
     warnings.push(
       'Estrutura de capital indisponível: sem valor de mercado utilizável o ' +
@@ -2812,7 +2812,7 @@ function wacc(
         `(${pct(capm.riskFreeRate)} a.a.) como piso do desconto.`,
     );
   }
-  // **Caixa líquido**: o peso da dívida é negativo e o WACC fica acima do Ke (decisão 104).
+  // **Caixa líquido**: o peso da dívida é negativo e o WACC fica acima do Ke.
   if (debt < 0 && coc.totalCapital > 0) {
     warnings.push(
       `${inputs.ticker.value} tem caixa líquido: o peso da dívida no WACC é ` +
@@ -2834,7 +2834,7 @@ function wacc(
 
 /**
  * O fator que traduz o deslocamento do cenário em deslocamento do `Ke` (item
- * B20, decisão 121). Participação fora de `(0, 1]` devolve 1.
+ * B20). Participação fora de `(0, 1]` devolve 1.
  */
 function scenarioFactor(laneContext: Lane, cost: Cost): number {
   const reading = laneContext.inputs.scenarioTranslation;
@@ -2861,7 +2861,7 @@ function scenarioFactor(laneContext: Lane, cost: Cost): number {
 
 /**
  * O aviso de quando o custo da dívida adotado se afasta do observado.
- * **Descreve a regra que a conta aplica** (item B32).
+ * **Descreve a regra que a conta aplica**.
  */
 function costOfDebtWarning(args: {
   observed: number;
@@ -2905,7 +2905,7 @@ function costOfDebtWarning(args: {
 
 /**
  * As emissões por valor **depois** do balanço usado e até a data da
- * avaliação (item B28), somadas em centavos inteiros ([Money]). Só a emissão
+ * avaliação, somadas em centavos inteiros ([Money]). Só a emissão
  * **declarada** entra no valor; a sem declaração sai à parte, para o aviso.
  */
 function subsequentCapital(
@@ -2960,7 +2960,7 @@ function withPosteriorCapital(laneContext: Lane, o: DcfOutcome): DcfOutcome {
     enterpriseValue: o.enterpriseValue,
     equityValue: e1,
     fairValuePerShare: o.fairValuePerShare + perShare,
-    // O capital novo não é terminal: a razão encolhe na mesma proporção (decisão 51).
+    // O capital novo não é terminal: a razão encolhe na mesma proporção.
     terminalShare: Math.abs(e0) > 0 && Math.abs(e1) > 0 ? (o.terminalShare * e0) / e1 : o.terminalShare,
     equityShare: o.equityShare,
     discountedTerminalExcess: o.discountedTerminalExcess,
@@ -3027,7 +3027,7 @@ function withScenarios(args: {
       model,
       fairValue: Money.fromReais(baseValue),
       marketPrice: Money.fromReais(inputs.marketPrice),
-      // **A taxa do ano 1, e não o campo escalar** (item B11).
+      // **A taxa do ano 1, e não o campo escalar**.
       discountRate: assumptions.discountRateAt(1),
       marginOfSafety: inputs.marginOfSafety,
       warnings: [...args.warnings, 'Cenários não puderam ser gerados; apresentado apenas o cenário base.'],
@@ -3161,7 +3161,7 @@ function inputPayload(inputs: ValuationInputs): JsonMap {
     }
     payload['peerMultiples'] = peers;
   }
-  // Só com emissão: o rastro de quem não tem fica como era (item B28).
+  // Só com emissão: o rastro de quem não tem fica como era.
   if (inputs.shareIssues.length > 0) {
     payload['shareIssues'] = inputs.shareIssues.map((i) => {
       const issue: JsonMap = { date: fmtDate(i.date), amount: r(i.amount.reais), shares: i.shares };
@@ -3242,7 +3242,7 @@ function outputPayload(result: ValuationResult): JsonMap {
     diagnostics['retentionPath'] = d.retentionPath.map((b) => r(b, 6));
     payload['diagnostics'] = diagnostics;
   }
-  // O insumo da faixa calibrada, que a tela monta com ele (decisão 100).
+  // O insumo da faixa calibrada, que a tela monta com ele.
   payload['priceVolatility'] = result.priceVolatility === null ? null : r(result.priceVolatility, 6);
   const t = result.triangulation;
   if (t !== null) {
@@ -3373,7 +3373,7 @@ function auditQuotedShares(
   });
 }
 
-/** De onde veio o prêmio de mercado, em texto (decisão 142). */
+/** De onde veio o prêmio de mercado, em texto. */
 function premiumOrigin(capm: CapmInputs): string {
   if (capm.premiumSource === MarketPremiumSource.impliedNormalized) {
     return (
@@ -3446,7 +3446,7 @@ function auditWacc(audit: AuditTransaction | null, coc: CostOfCapital): void {
   const separates = wGross !== null && wCash !== null;
   const income = coc.afterTaxCashYield;
   const debtLeg = separates ? wGross * afterTax - wCash * income : coc.debtShare * afterTax;
-  // **O Passo 3 diz a regra que a conta usa** (item B25).
+  // **O Passo 3 diz a regra que a conta usa**.
   const leverageSpreadValue = CostOfCapital.leverageSpread(coc.netDebtToEbitda);
   const reference = coc.creditReferenceRate ?? coc.capm.riskFreeRate;
   const observed = coc.costOfDebt;
@@ -4061,7 +4061,7 @@ function auditDcf(
   for (const v of outcome.discountedFlows) sumPv = sumPv + v;
   const unit = perShareAlready ? 'R$ por papel' : 'R$';
 
-  // **O rastro descreve a conta que foi feita** (item B35).
+  // **O rastro descreve a conta que foi feita**.
   let rates: readonly number[];
   if (outcome.discountRates !== null) {
     rates = outcome.discountRates;
@@ -4078,7 +4078,7 @@ function auditDcf(
   }
   const finalFactor = n === 0 ? 1.0 : factors[n - 1]!;
 
-  // **A convenção de caixa entra na fórmula, não só na conta** (decisão 48).
+  // **A convenção de caixa entra na fórmula, não só na conta**.
   const midYear = assumptions.cashTiming === CashTiming.midYear;
   const midYearLift = midYear ? String.raw`\,\sqrt{1 + k_t}` : '';
   const pathOrigin =
@@ -4230,7 +4230,7 @@ function auditDcf(
   // Três formas de terminal, e o rastro precisa dizer qual foi aplicada.
   const moat = assumptions.terminalReturnOnCapital;
   const neutral = moat === null && assumptions.neutralTerminalReturn;
-  // **A concessão tem terminal próprio, e o rastro tem de dizê-lo** (decisão 88).
+  // **A concessão tem terminal próprio, e o rastro tem de dizê-lo**.
   const contract = neutral ? assumptions.contractYearsAfterHorizon : null;
   const reinvestment =
     moat !== null ? clamp(gInf / moat, 0.0, 0.95) : assumptions.retentionAt(assumptions.projectionYears);
@@ -4259,7 +4259,7 @@ function auditDcf(
       : neutral
         ? 'retorno neutro, RONIC_inf = r_inf'
         : 'Gordon com reinvestimento';
-  // **O que o retorno neutro não diz** (item B12).
+  // **O que o retorno neutro não diz**.
   const excessStep = (rate: number): string | null =>
     contract === null && neutral && outcome.impliedTerminalReturn !== null
       ? 'o retorno neutro vale para o capital **novo**; o instalado ' +
@@ -4398,7 +4398,7 @@ function auditDcf(
 
 /**
  * O capital próprio da via da firma, **como ele é calculado**: pelo fluxo do
- * acionista derivado do da firma, e não pela subtração `EV − D` (decisão 102).
+ * acionista derivado do da firma, e não pela subtração `EV − D`.
  */
 function auditEquityBridge(
   audit: AuditTransaction | null,
@@ -4420,7 +4420,7 @@ function auditEquityBridge(
   for (const v of outcome.discountedFlows) explicitValue = explicitValue + v;
   const terminal = outcome.discountedTerminalValue;
   const minorityValue = minorityInterest < 0 ? 0.0 : minorityInterest;
-  // O capital emitido depois do balanço entra depois do fluxo (item B28).
+  // O capital emitido depois do balanço entra depois do fluxo.
   const capital = subsequentCapitalValue > 0 ? subsequentCapitalValue : 0.0;
   const fromBalanceSheet = outcome.equityValue - capital;
   const variables: JsonMap = {
@@ -4499,7 +4499,7 @@ function auditVerdict(audit: AuditTransaction | null, result: ValuationResult): 
 // --------------------------------------------------------------- API pública --
 
 /**
- * Roteia o ativo por portas e aplica a via correspondente (decisão 25):
+ * Roteia o ativo por portas e aplica a via correspondente:
  * **Porta 0** elegibilidade; **Porta 1** instituição financeira fora da via da
  * firma; **Porta 3** sustentação do lucro operacional; **Porta 2** base e
  * taxa de crescimento. A via aplicada **vai no resultado**, junto dos avisos.

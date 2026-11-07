@@ -38,7 +38,7 @@
 //   npm run tool -- conditional-regression --pacote-habilidade  # B1.0
 //
 // `--trimestral` grava também `public/assets/validacao/habilidade.json`, a
-// leitura que a tela de metas mostra (item B1.0); `--pacote-habilidade` regrava
+// leitura que a tela de metas mostra; `--pacote-habilidade` regrava
 // só o pacote, a partir de `docs/validacao/habilidade_trimestral.json`, sem
 // remedir.
 import { existsSync, writeFileSync } from 'node:fs';
@@ -166,7 +166,7 @@ export class PerCohort {
     readonly icEarningsYield: number | null,
     /**
      * IC do composto — a média dos escores robustos dos três sinais, pela mesma
-     * função que o aplicativo usa (item B1, `ordenacao_lado_a_lado.md` §1).
+     * função que o aplicativo usa (`ordenacao_lado_a_lado.md` §1).
      */
     readonly compositeIc: number | null,
   ) {}
@@ -244,7 +244,7 @@ function runCohort(cohort: string, obs: readonly Obs[]): PerCohort {
 /**
  * - [lag]: coortes vizinhas cujas janelas se sobrepõem — `h/12 − 1` em
  *   coortes anuais, `h/3 − 1` nas trimestrais —, para o `t` de Newey-West
- *   (item C1a) e para a correção da sobreposição (item C1c).
+ * e para a correção da sobreposição.
  */
 function horizon(raw: readonly unknown[], field: string, options: LoadOptions & { lag?: number } = {}): Json {
   const lag = options.lag ?? 0;
@@ -369,7 +369,7 @@ export async function main(args: string[]): Promise<void> {
     h36ajustado: horizon(raw, 'ret36aj'),
   };
 
-  // Retorno total, com os proventos da B3 reinvestidos na data ex (item A4,
+  // Retorno total, com os proventos da B3 reinvestidos na data ex (
   // decisão 89). Vem de `tool/dividends-check.ts`, que grava as mesmas
   // coortes com `ret12tot` e `ret36tot`.
   const withTotal = 'docs/validacao/backtest_valuation_total.json';
@@ -395,7 +395,7 @@ export async function main(args: string[]): Promise<void> {
 /**
  * As leituras do `t` de uma série de coeficientes de coorte em ordem de data.
  *
- * **O critério do R3 (decisão 96).** O `t` corrigido pela estrutura da
+ * **O critério do R3.** O `t` corrigido pela estrutura da
  * sobreposição, contra o crítico que a mesma estrutura dá ao nível de `t > 2`,
  * **e** o Newey-West acima de 2. O corrigido não estima nada da série; o
  * Newey-West pega a persistência que vá além da sobreposição.
@@ -428,7 +428,7 @@ function difference(series: readonly number[], lag: number): Json | null {
 
 /**
  * A série ancorada no trimestre contra a de DFPs, nas mesmas observações e com
- * o mesmo B/M da série anual como controle (item C1c).
+ * o mesmo B/M da série anual como controle.
  *
  * Três perguntas: qual ordena mais sozinha (IC), qual ordena mais dado o B/M,
  * e se uma acrescenta à outra — o coeficiente da ancorada com a anual e o B/M
@@ -499,7 +499,7 @@ function anchoredComparison(raw: readonly unknown[], field: string, lag: number)
 
 /**
  * Coortes trimestrais, com as deslistadas da ponte ampliada, na montagem na
- * base da data (itens C1c, C1d e C3).
+ * base da data (C1d e C3).
  *
  * Tudo sai da **mesma execução** de `npm run tool -- backtest-valuation
  * --montagem aplicativo --com-deslistadas --trimestral --contrafactual-base`.
@@ -531,7 +531,7 @@ function quarterly(): void {
     ancoradaContraAnual: anchoredComparison(allRows, field, intDiv(months, 3) - 1),
   });
 
-  // O contrafactual da base (item C3): as mesmas observações de 30/09 das
+  // O contrafactual da base: as mesmas observações de 30/09 das
   // listadas, na montagem da rodada anterior e na da data.
   const base = (field: string, months: number): Json => {
     const require = ['upside', 'upsideBaseAntiga', 'bookToMarket', 'bookToMarketBaseAntiga'];
@@ -575,15 +575,15 @@ function quarterly(): void {
   skillPackage(result);
 }
 
-/** Caminho do pacote da habilidade que o aplicativo lê (item B1.0). */
+/** Caminho do pacote da habilidade que o aplicativo lê. */
 const skillPackageFile = 'public/assets/validacao/habilidade.json';
 
 /**
  * Grava a leitura que a tela de metas mostra: 36 meses, coortes trimestrais,
- * com as deslistadas — a amostra do R3 (decisões 93 e 96).
+ * com as deslistadas — a amostra do R3.
  *
  * O pacote leva os números, e não o veredito: o critério da decisão 96 e a
- * regra que escolhe a ordenação do prêmio (item B1, `ordenacao_lado_a_lado.md`
+ * regra que escolhe a ordenação do prêmio (`ordenacao_lado_a_lado.md`
  * §1) moram em `SkillReading`, e o teste do pacote confere que eles concordam
  * com o `passaR3` desta medição.
  */
@@ -667,7 +667,7 @@ function app(): void {
 }
 
 /**
- * A habilidade sobre o retorno **líquido** de custo de transação (item C4).
+ * A habilidade sobre o retorno **líquido** de custo de transação.
  *
  * O custo de ida e volta de cada observação sai de `tool/custos_spread.py`:
  * tarifa da B3 nas duas pontas e meio spread de Abdi e Ranaldo em cada uma.

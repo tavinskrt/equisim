@@ -33,7 +33,7 @@ export class IneligibilityReason extends DartEnum {
   /**
    * Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a
    * decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na
-   * apresentação (decisão 125).
+   * apresentação.
    */
   get diagnostic(): string {
     switch (this) {
@@ -109,7 +109,7 @@ function insolvent(s: readonly FundamentalsSnapshot[]): boolean {
  * R$ 1.541,9 mi. A mediana do universo negociável da B3 é de R$ 9,2 mi e o
  * primeiro quartil, R$ 1,9 mi — a amostra está inteira no decil superior de
  * liquidez. A Porta 0 torna essa fronteira explícita em vez de extrapolá-la em
- * silêncio (decisão 25).
+ * silêncio.
  */
 export const EligibilityGate = {
   /**
@@ -166,7 +166,7 @@ export const EligibilityGate = {
     }
 
     // **Exercício completo**: o ano corrente anualizado não conta como
-    // exercício publicado (decisão 153).
+    // exercício publicado.
     const periods = snapshots.filter((s) => !s.isAnnualized).length;
     if (periods < minPeriods) {
       reasons.push(IneligibilityReason.shortHistory);

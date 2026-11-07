@@ -4,7 +4,7 @@ Medido em 14/09/2026 por `tool/cobertura_banda.py`, sobre
 `docs/validacao/backtest_aplicativo.json` (de
 `dart run tool/backtest_valuation.dart --montagem aplicativo`). Dados em
 [cobertura_banda.json](cobertura_banda.json). Decisão:
-[92](../decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md).
+92.
 
 > **Remedido em 21/09/2026, sobre o motor da Fase 3.** O item C5 restaurou a
 > base bruta — CVM ingerida, COTAHIST, Tesouro, FRE, registro e complemento da
@@ -157,7 +157,7 @@ Medido em 15/09/2026 por `python tool/cobertura_banda.py`, sobre
 por data **com as deslistadas da ponte**, listadas e deslistadas na mesma
 execução ([habilidade_aplicativo.md](habilidade_aplicativo.md) §2). Dados em
 [cobertura_banda_deslistadas.json](cobertura_banda_deslistadas.json). Decisão:
-[94](../decisoes/094-a-faixa-calibrada-sai-da-amostra-com-as-deslistadas.md).
+94.
 
 **A pergunta que a §6 deixou**: a faixa dos sobreviventes cobre o mundo em que
 também há quem saiu da bolsa? A remedição é cruzada — calibrada nas listadas ou
@@ -212,7 +212,7 @@ na base de ações da data** (C3). Dados em
 [cobertura_banda_trimestral.json](cobertura_banda_trimestral.json) e, só com as
 coortes de 30/09, em
 [cobertura_banda_setembro.json](cobertura_banda_setembro.json). Decisão:
-[97](../decisoes/097-a-coorte-forma-preco-contagem-e-valor-de-mercado-na-base-da-data.md).
+97.
 
 **Por que remedir.** As §§2 a 7 foram medidas com o preço da coorte na base de
 ações de hoje (ver [ponte_por_papel.md](ponte_por_papel.md) §1): o preço justo
@@ -301,7 +301,7 @@ este texto foi escrito está declarado abaixo.
    (§8); por isso cobre 68,9% e 64,8% no terço de maior potencial.
 4. **A calibragem de 36 meses tem pouca informação.** Cada coorte de teste é
    calibrada com no máximo dez coortes sobrepostas — 1,4 janela independente pela
-   estrutura da [decisão 96](../decisoes/096-o-t-da-habilidade-e-corrigido-pela-sobreposicao-contra-o-critico-dela.md).
+   estrutura da decisão 96.
 5. **Seis formas já foram medidas** na terceira rodada (§8). Esta é a sétima, e a
    única desta rodada.
 
@@ -355,7 +355,7 @@ montagem da §8 reexecutada com a volatilidade do papel em cada observação
 (`docs/validacao/backtest_trimestral.json`). A execução reproduz a da §8 —
 10.863 observações idênticas, três valores de liquidez e um papel a mais que a
 fonte passou a listar, 10.874 no total. Decisão:
-[100](../decisoes/100-a-faixa-calibrada-sai-da-volatilidade-do-papel-e-o-justo-entra-com-o-peso-medido.md).
+100.
 
 **A forma da §9 cobre nos dois horizontes, e é a única que cobre:**
 
@@ -438,9 +438,9 @@ O centro mudou pouco: `a = 0,078` e `b = 0,023` em 12 meses, `a = 0,130` e
 
 **A variável que a faixa tenta cobrir mudou.** O retorno total das coortes
 perdia o fator das bonificações que a fonte de preços não ajusta (item B29,
-[decisão 136](../decisoes/136-o-evento-de-acoes-que-a-fonte-nao-ajustou-e-ajustado.md))
+decisão 136)
 e compunha entre si os proventos da mesma data ex (item B31,
-[decisão 139](../decisoes/139-proventos-da-mesma-data-ex-entram-juntos-no-retorno-total.md)).
+decisão 139).
 A volatilidade do papel, que dá a largura, lê a série completada. `python
 tool/cobertura_banda.py` refez a medição **sem mudar a forma nem a regra**, com o
 centro e os `z` recalibrados.

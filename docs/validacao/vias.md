@@ -17,11 +17,11 @@ dart run tool/vias.dart   # grava vias.json
 
 A pós-condição da ponte de equity escolhia entre a via da firma e a do
 acionista por um limiar de 20% de participação do capital próprio. A
-[decisão 37](../decisoes/037-aliquota-estrutural-no-fluxo-da-firma.md) mostrou
+decisão 37 mostrou
 o quanto essa escolha decide: nove ativos trocaram de via ao receber a alíquota
 correta, e caíram de 58,9% a 92,1%.
 
-A [decisão 34](../decisoes/034-fronteira-das-vias-medida-na-taxa-estrutural.md)
+A decisão 34
 já havia registrado o problema sem resolvê-lo — *"Isto não concilia as duas
 vias, que seguem discordando por medirem crescimento e base em séries de
 capital diferentes"*. Conciliar exige primeiro saber o tamanho e a forma da
@@ -106,7 +106,7 @@ não é lei.
 
 ## 5. A correção
 
-Implementada pela [decisão 38](../decisoes/038-transicao-continua-entre-as-vias.md).
+Implementada pela decisão 38.
 
 **O peso da via da firma passa a ser contínuo na participação**, percorrendo a
 faixa que o projeto **já declarava frágil**:

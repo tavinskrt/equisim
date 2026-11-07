@@ -36,7 +36,7 @@ export function shortenedWindowMessage(result: PortfolioComparison): string {
 /**
  * **O Laboratório de backtest**: Principal contra Reserva na mesma janela, com
  * **uma ação de cada ativo** comprada no primeiro pregão, pelo mercado
- * fracionário, e nenhuma compra depois (decisão 161). Sem rebalanceamento,
+ * fracionário, e nenhuma compra depois. Sem rebalanceamento,
  * tarifa da B3 — e só preço: a simulação não distribui provento.
  */
 export function BacktestPage() {
@@ -56,7 +56,7 @@ export function BacktestPage() {
   );
 }
 
-/** A janela e o prazo da meta, sem texto explicativo ao lado (decisão 160). */
+/** A janela e o prazo da meta, sem texto explicativo ao lado. */
 function SettingsCard({ settings, goal }: { settings: BacktestSettings; goal: FinancialGoal | null }) {
   return (
     <Panel title="Parâmetros da simulação" subtitle="Uma ação de cada ativo, no fracionário, comprada no início da janela">

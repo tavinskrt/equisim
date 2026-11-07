@@ -16,7 +16,7 @@ interface TornadoBar {
 
 /**
  * **Sensibilidade: quanto o preço justo se move com as premissas** (decisão
- * 148). É sensibilidade, e não cenário (decisão 92): a faixa cobriu 8% do que
+ * 148). É sensibilidade, e não cenário: a faixa cobriu 8% do que
  * aconteceu nas coortes, e a incerteza medida é a faixa calibrada.
  */
 export function SensitivityCard({ result }: { result: ValuationResult }) {

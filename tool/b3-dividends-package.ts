@@ -1,6 +1,6 @@
 // A4 — empacota os proventos da B3 para o aplicativo.
 //
-// O beta do aplicativo sai do retorno total do ativo (decisão 89), e o índice
+// O beta do aplicativo sai do retorno total do ativo, e o índice
 // de retorno total precisa do provento **e** do preço com direito
 // (`TotalReturnIndex`). Entra no pacote o provento com data ex a partir de
 // 2015 — a janela do beta é de cinco anos, e a folga cobre a avaliação de

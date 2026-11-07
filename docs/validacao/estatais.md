@@ -6,7 +6,7 @@
 > Dados em [estatais.json](estatais.json) e
 > [backtest_estatais.json](backtest_estatais.json).
 > A ressalva de controle estatal entrou no motor pela
-> [decisão 145](../decisoes/145-a-avaliacao-declara-o-controle-estatal-sem-mudar-o-preco.md);
+> decisão 145;
 > **cobrar um prêmio a mais das estatais não está decidido**.
 
 ## 1. A pergunta
@@ -50,7 +50,7 @@ formulários de 2010 a 2026, com a data da mudança tirada da coluna
   outras nove companhias são recusadas pela liquidez. A Copasa só entrou depois
   de corrigido, na mesma rodada, o defeito que a recusava como insolvente com
   R$ 8,6 bilhões de patrimônio (item B47,
-  [decisão 146](../decisoes/146-sem-o-par-vpa-e-contagem-a-base-e-o-pl-da-demonstracao.md)).
+  decisão 146).
 
 ## 4. O potencial que o motor dá às estatais
 
@@ -182,7 +182,7 @@ que é o mesmo em todas as linhas.
 
 A avaliação de uma estatal passa a levar a ressalva **controle estatal** e um
 aviso que diz o que foi medido; o preço justo não muda
-([decisão 145](../decisoes/145-a-avaliacao-declara-o-controle-estatal-sem-mudar-o-preco.md)).
+(decisão 145).
 A montagem do aplicativo nas ferramentas — a entrada congelada, o gabarito e o
 backtest — leva a mesma ressalva, pela espécie na data.
 

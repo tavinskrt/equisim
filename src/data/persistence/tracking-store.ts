@@ -20,7 +20,7 @@ export interface StoredTracking {
 }
 
 /**
- * Onde moram os acompanhamentos da carteira (decisão 159).
+ * Onde moram os acompanhamentos da carteira.
  *
  * **As compras só se acrescentam.** Uma compra gravada é a prova de que a
  * decisão usou só o que se sabia no dia; por isso não há operação que a

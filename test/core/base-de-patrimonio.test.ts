@@ -1,5 +1,5 @@
 // Sem o par VPA × contagem, a base de patrimônio é o PL da demonstração
-// (item B47).
+//.
 //
 // A fonte de mercado devolve, para Fleury, Copasa e Armac, o VPA vazio e a
 // contagem do exercício zerada; a mescla da decisão 81 não tinha por onde

@@ -73,14 +73,14 @@ pergunta que o cartão faz.
 
 ## 3. O que se decidiu, e o que custa
 
-[Decisão 121](../decisoes/121-o-cenario-move-o-ke-um-por-um-e-as-tres-leituras-estao-medidas.md):
+Decisão 121:
 **o um a um fica, e as outras duas ficam no enum como imposição de
 diagnóstico.**
 
 **O custo declarado:** a faixa de cenários da via da firma é **1,25× mais
 estreita** do que a leitura de estrutura fixa daria. Isso importaria se a faixa
 fosse a medida de incerteza do projeto — e ela não é. A
-[decisão 92](../decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md)
+decisão 92
 separou as duas: **a incerteza é a faixa calibrada**, que sai da volatilidade
 realizada e não passa por aqui; os cenários são sensibilidade a uma premissa
 nomeada.

@@ -3,7 +3,7 @@ import { memoizedPackage, type PackageLoader } from './package-loader';
 
 /**
  * Medianas de múltiplos por grupo de pares, empacotadas com o aplicativo
- * (item B5, decisão 118).
+ *.
  *
  * Dão à avaliação a **segunda leitura** — o preço justo que os pares do ativo
  * implicam, ao lado do fluxo descontado. Geradas por

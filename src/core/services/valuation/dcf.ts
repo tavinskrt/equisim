@@ -38,7 +38,7 @@ export class ReinvestmentPolicy extends DartEnum implements WireKeyed {
 
   /**
    * `b_t = b` para todo `t`, inclusive na perpetuidade. **É a forma do cálculo
-   * do usuário, e não da produção** (decisão 147).
+   * do usuário, e não da produção**.
    */
   static readonly fixedFraction = new ReinvestmentPolicy('fixedFraction', 5, 'parcelaFixa');
 
@@ -140,7 +140,7 @@ export class DcfAssumptions {
   readonly returnOnCapital: number;
 
   /**
-   * Retorno terminal igual ao custo de capital (decisão 25): o valor terminal
+   * Retorno terminal igual ao custo de capital: o valor terminal
    * vira `lucro_{N+1} / desconto` e deixa de depender do crescimento perpétuo.
    */
   readonly neutralTerminalReturn: boolean;
@@ -169,7 +169,7 @@ export class DcfAssumptions {
 
   /**
    * Anos de contrato que restam depois do fim da projeção, ou `null` sem prazo
-   * (item A6, decisão 88). Com prazo, o excedente sobre o capital existente
+   *. Com prazo, o excedente sobre o capital existente
    * acaba no contrato.
    */
   readonly contractYearsAfterHorizon: number | null;
@@ -177,7 +177,7 @@ export class DcfAssumptions {
   /** Parcela do lucro reinvestida em todo ano, sob [ReinvestmentPolicy.fixedFraction]. */
   readonly fixedRetention: number | null;
 
-  /** Crescimento explícito de cada ano, no lugar do decaimento linear (decisão 147). */
+  /** Crescimento explícito de cada ano, no lugar do decaimento linear. */
   readonly growthPath: readonly number[] | null;
 
   /** Declara as premissas. **Não valida** — quem confere é [DcfCalculator]. */
@@ -253,7 +253,7 @@ export class DcfAssumptions {
   /** Crescimento aplicado ao ano [t], já confinado ao que o retorno financia. */
   growthAt(t: number): number {
     const g = this.plannedGrowthAt(t);
-    // Com a parcela fixa, o crescimento não sai do retorno (decisão 147).
+    // Com a parcela fixa, o crescimento não sai do retorno.
     if (this.reinvestmentPolicy === ReinvestmentPolicy.fixedFraction) return g;
     return DcfAssumptions.sustainable(g, this.returnOnCapitalAt(t));
   }
@@ -402,13 +402,13 @@ export class DcfOutcome {
   /** Participação do equity no valor da firma. `1.0` na via do acionista. */
   readonly equityShare: number;
 
-  /** Excedente perpétuo do capital instalado, a valor presente (item B12). Pode ser negativo. */
+  /** Excedente perpétuo do capital instalado, a valor presente. Pode ser negativo. */
   readonly discountedTerminalExcess: number | null;
 
-  /** `lucro_{N+1} ÷ capital_N`, implícito na projeção (item B12). */
+  /** `lucro_{N+1} ÷ capital_N`, implícito na projeção. */
   readonly impliedTerminalReturn: number | null;
 
-  /** Taxa que descontou o fluxo de cada ano (item B35). */
+  /** Taxa que descontou o fluxo de cada ano. */
   readonly discountRates: readonly number[] | null;
 
   /** Taxa que capitalizou o valor terminal descontado aqui. */
@@ -432,7 +432,7 @@ export class DcfOutcome {
   /** Fluxo do acionista do ano N+1, que o terminal capitaliza. */
   readonly terminalEquityFlow: number | null;
 
-  /** Lucro de cada ano, **antes** do reinvestimento (decisão 147). */
+  /** Lucro de cada ano, **antes** do reinvestimento. */
   readonly projectedProfits: readonly number[] | null;
 
   /** Parcela do lucro reinvestida em cada ano. */
@@ -493,7 +493,7 @@ export interface EquityFromFirmArgs {
 
 /**
  * Os insumos do fluxo do acionista derivado do da firma que **não** são
- * premissa de projeção (decisão 147). Existe para que a cascata e o cálculo
+ * premissa de projeção. Existe para que a cascata e o cálculo
  * do usuário descontem pela mesma chamada.
  */
 export class FirmDiscountRoute {
@@ -721,7 +721,7 @@ export const DcfCalculator = {
 
   /**
    * O **excedente perpétuo do capital instalado**, embutido no terminal neutro
-   * (item B12): `VT = lucro_{N+1}/r = capital_N + EVA_{N+1}/r`. **É premissa, e
+   *: `VT = lucro_{N+1}/r = capital_N + EVA_{N+1}/r`. **É premissa, e
    * não identidade.** `null` quando a decomposição não se aplica; pode ser
    * negativo.
    */
@@ -762,7 +762,7 @@ export const DcfCalculator = {
       return err(new InvalidInput('Taxa de desconto deve ser positiva.'));
     }
 
-    // Parcela fixa: Gordon com a mesma parcela (decisão 147). Vem antes do
+    // Parcela fixa: Gordon com a mesma parcela. Vem antes do
     // contrato e da vantagem competitiva.
     if (assumptions.reinvestmentPolicy === ReinvestmentPolicy.fixedFraction) {
       const spread = r - g;
@@ -779,7 +779,7 @@ export const DcfCalculator = {
     }
 
     // Contrato que acaba: o capital volta, e o excedente sobre ele só dura os
-    // anos que faltam (decisão 88).
+    // anos que faltam.
     const years = assumptions.contractYearsAfterHorizon;
     if (
       years !== null &&
@@ -885,7 +885,7 @@ export const DcfCalculator = {
         impliedTerminalReturn: p.impliedTerminalReturn,
         discountRates: p.rates,
         terminalDiscountRateUsed: assumptions.terminalDiscountRate,
-        // **Contra o capital próprio, e não contra o valor da firma** (decisão 51).
+        // **Contra o capital próprio, e não contra o valor da firma**.
         terminalShare: controllingEquity > 0 ? p.discountedTerminal / controllingEquity : 0.0,
         equityShare: ev > 0 ? equity / ev : 0.0,
         projectedProfits: p.profits,
@@ -965,11 +965,11 @@ export const DcfCalculator = {
 
     const netKd = costOfDebt * (1 - taxRate);
     // **O caixa rende a taxa livre de risco, e não o custo de empréstimo**
-    // (decisão 119). Sem [cashYield], vale `K_d` nos dois lados.
+    //. Sem [cashYield], vale `K_d` nos dois lados.
     const netCashYield = (cashYield ?? costOfDebt) * (1 - taxRate);
     const n = assumptions.projectionYears;
 
-    // **Com caminho, o juro e o rendimento do ano t são os do ano t** (item B24).
+    // **Com caminho, o juro e o rendimento do ano t são os do ano t**.
     const kdAt = (t: number): number => (costOfDebtPath === null ? netKd : costOfDebtPath[t - 1]! * (1 - taxRate));
     const cashAt = (t: number): number =>
       cashYieldPath === null ? netCashYield : cashYieldPath[t - 1]! * (1 - taxRate);
@@ -1048,7 +1048,7 @@ export const DcfCalculator = {
     const fcfeTerminal = fcffTerminal - terminalDebtService;
     const perpetual = fcfeTerminal / spread;
     // **Com contrato que acaba, o terminal do acionista é o perpétuo truncado**
-    // (decisões 88 e 102): `VT = VT_∞·(1 − qᴹ) + (K − D)·qᴹ`.
+    //: `VT = VT_∞·(1 − qᴹ) + (K − D)·qᴹ`.
     let vt: number;
     if (contract) {
       const q = (1 + gInf) / (1 + terminalEquityDiscountRate);
@@ -1059,7 +1059,7 @@ export const DcfCalculator = {
     }
     const discountedTv = (vt * assumptions.lift(terminalEquityDiscountRate)) / factor;
 
-    // **O excedente perpétuo do capital instalado, pela mesma rota** (item B12).
+    // **O excedente perpétuo do capital instalado, pela mesma rota**.
     const firmExcess = DcfCalculator.neutralTerminalExcess({
       finalProfit: p.finalProfit,
       finalCapital: p.capitalFinal,
@@ -1115,7 +1115,7 @@ export const DcfCalculator = {
   /**
    * DCF sobre o fluxo do acionista, descontado ao Ke: `Dividendo_t = LPA_t × (1 − b)`,
    * com o dividendo obtido pela identidade da retenção, e não por dado
-   * publicado de provento (decisão 23). Sem ponte de dívida.
+   * publicado de provento. Sem ponte de dívida.
    */
   shareholder(args: { baseProfit: number; assumptions: DcfAssumptions }): Result<DcfOutcome> {
     const { baseProfit, assumptions } = args;

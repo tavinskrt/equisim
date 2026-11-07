@@ -32,7 +32,6 @@ import {
   type QaProvider,
 } from './qa/providers/types.ts';
 import { collectLens, type AdvisorTarget } from './qa/advisor/collect.ts';
-import { openBoundaries } from './qa/advisor/postura.ts';
 import { LENSES, SUGGESTED_ORDER, resolveLens } from './qa/advisor/lentes.ts';
 import {
   buildAdvisorInstructions,
@@ -139,8 +138,8 @@ function renderReport(
     // `evidence` e impresso PRIMEIRO, e nunca omitido: e a unica coisa que
     // permite ao leitor conferir se o item existe no material ou foi deduzido.
     // Escondida, uma invencao passa por observacao -- foi o que aconteceu na
-    // primeira execucao desta lente, que inventariou como "decisao registrada"
-    // cinco numeros que nao existem em arquivo algum do repositorio.
+    // primeira execucao desta lente, que inventariou como registrados cinco
+    // numeros que nao existiam em arquivo algum do repositorio.
     const anchor = o.evidence.replace(/\s+/g, ' ').trim();
     out.write(
       `      ${anchor === '' ? red('SEM ANCORA') : dim('citado    ')}  ` +
@@ -408,12 +407,7 @@ async function run(): Promise<void> {
 
   const target = collectLens(root, lens);
   const images = screenshots.length > 0 ? loadScreenshots(screenshots) : [];
-  // A fronteira de reconstrucao vem do REGISTRO, nao de configuracao: e uma
-  // decisao aceita com `postura: reconstrucao`. Sem isso nao haveria como
-  // saber depois por que meio repositorio virou acionavel, nem quando aquilo
-  // deveria ter fechado.
-  const boundaries = openBoundaries(root);
-  const system = buildAdvisorSystem(lens, boundaries);
+  const system = buildAdvisorSystem(lens);
   const instructions =
     buildAdvisorInstructions(target) +
     (images.length > 0 ? visualInstructions(images.map((i) => i.label)) : '');

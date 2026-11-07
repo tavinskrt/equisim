@@ -12,9 +12,9 @@ estrutura recusada na [RAPT4](../estudo/casos/rapt4.md).
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
 | `Ke = Rf + β × prêmio` | [cost-of-capital.ts, `CapmInputs.costOfEquity`](../../src/core/services/valuation/cost-of-capital.ts) | Sharpe (1964), Lintner (1965) | — |
-| Prêmio de mercado = **média de dez anos do prêmio implícito** no preço da bolsa: 1,21% em 14/09/2026 | [implied-premium.ts, `ImpliedPremiumPackage.normalizedAt`](../../src/core/services/valuation/implied-premium.ts); `MarketPremiumSource.impliedNormalized` | em cada trimestre, `r = rendimento × (1 + g) + g` (Gordon/Damodaran: o valor de mercado somado das listadas igualado aos dividendos e JCP de doze meses, crescendo com a economia nominal); o prêmio do trimestre é `r − Rf`, com `Rf` o prefixado de dez anos — a forma que o CAPM soma; a média é a dos trimestres com fim em `(data − 10 anos, data]`, com pelo menos 20 | decisão 142, [premio_implicito.md](../validacao/premio_implicito.md); a média fica positiva em todas as coortes e concorda com o prêmio histórico de dez anos |
-| A série chega por pacote (`public/assets/mercado/premio_implicito.json`, gerado por `tool/implied-premium.ts`); sem pacote, o prêmio é o parametrizado de 5,5% (`CapmInputs.defaultMarketPremium`) e a avaliação diz isso; pacote com mais de 183 dias continua valendo, com ressalva da data | [market-premium-repository.ts](../../src/data/repositories/market-premium-repository.ts) | a média de dez anos anda um quadragésimo por trimestre: trocá-la pelos 5,5% seria salto maior que a defasagem | decisão 142 |
-| O Ke "do dia" (CDI corrente) serve ao WACC estático e à tela de metas; o de cada ano da projeção usa o forward daquele ano | `assumptions`, `auditCapm` | a curva dá a taxa que o mercado atribui a cada prazo | decisões 74 e 103; rastro explica desde 28/09/2026 |
+| Prêmio de mercado = **média de dez anos do prêmio implícito** no preço da bolsa: 1,21% em 14/09/2026 | [implied-premium.ts, `ImpliedPremiumPackage.normalizedAt`](../../src/core/services/valuation/implied-premium.ts); `MarketPremiumSource.impliedNormalized` | em cada trimestre, `r = rendimento × (1 + g) + g` (Gordon/Damodaran: o valor de mercado somado das listadas igualado aos dividendos e JCP de doze meses, crescendo com a economia nominal); o prêmio do trimestre é `r − Rf`, com `Rf` o prefixado de dez anos — a forma que o CAPM soma; a média é a dos trimestres com fim em `(data − 10 anos, data]`, com pelo menos 20 | [premio_implicito.md](../validacao/premio_implicito.md); a média fica positiva em todas as coortes e concorda com o prêmio histórico de dez anos |
+| A série chega por pacote (`public/assets/mercado/premio_implicito.json`, gerado por `tool/implied-premium.ts`); sem pacote, o prêmio é o parametrizado de 5,5% (`CapmInputs.defaultMarketPremium`) e a avaliação diz isso; pacote com mais de 183 dias continua valendo, com ressalva da data | [market-premium-repository.ts](../../src/data/repositories/market-premium-repository.ts) | a média de dez anos anda um quadragésimo por trimestre: trocá-la pelos 5,5% seria salto maior que a defasagem | [premio_implicito.md](../validacao/premio_implicito.md) |
+| O Ke "do dia" (CDI corrente) serve ao WACC estático e à tela de metas; o de cada ano da projeção usa o forward daquele ano | `assumptions`, `auditCapm` | a curva dá a taxa que o mercado atribui a cada prazo | [curva_de_juros.md](../validacao/curva_de_juros.md); o rastro explica qual dos dois valeu |
 
 ---
 
@@ -22,10 +22,10 @@ estrutura recusada na [RAPT4](../estudo/casos/rapt4.md).
 
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
-| Peso da medida `w = (1/SE²) ÷ (1/SE² + 1/σ²)`; `β = w·βmedido + (1 − w)·βprior` | [beta-shrinkage.ts, `BetaShrinkage.shrink`](../../src/core/services/metrics/beta-shrinkage.ts) | encolhimento bayesiano (Vasicek, 1973) | decisão 40; peso mediano 0,98 |
+| Peso da medida `w = (1/SE²) ÷ (1/SE² + 1/σ²)`; `β = w·βmedido + (1 − w)·βprior` | [beta-shrinkage.ts, `BetaShrinkage.shrink`](../../src/core/services/metrics/beta-shrinkage.ts) | encolhimento bayesiano (Vasicek, 1973) | peso mediano 0,98 ([beta_setorial.md](../validacao/beta_setorial.md)) |
 | `βprior` = beta desalavancado mediano do setor (recuo: universo), realavancado pela estrutura do ativo; `σ` = dispersão robusta dos betas do universo (0,53) | [resolve-beta-prior.ts](../../src/core/usecases/resolve-beta-prior.ts), [public/assets/mercado/beta_prior.json](../../public/assets/mercado/) | "bottom-up beta" (Damodaran) | [beta_setorial.md](../validacao/beta_setorial.md) |
-| Hamada: `fator = 1 + (1 − 34%) × D/E`, com D/E limitado a [0; 3]; `βU = βL ÷ fator` | `BetaShrinkage.leverageFactor` | Hamada (1972) | decisões 54 e 55 (D/E da janela do beta) |
-| Financeiras não se desalavancam nem realavancam | `resolveCost` | a alavancagem do banco é permanente e regulada, e o beta medido a contém | decisão 46 |
+| Hamada: `fator = 1 + (1 − 34%) × D/E`, com D/E limitado a [0; 3]; `βU = βL ÷ fator` | `BetaShrinkage.leverageFactor` | Hamada (1972) | D/E mediano da janela em que o beta foi estimado ([beta_ida_volta.md](../validacao/beta_ida_volta.md)) |
+| Financeiras não se desalavancam nem realavancam | `resolveCost` | a alavancagem do banco é permanente e regulada, e o beta medido a contém | [via_acionista.md](../validacao/via_acionista.md) |
 
 ---
 
@@ -33,12 +33,12 @@ estrutura recusada na [RAPT4](../estudo/casos/rapt4.md).
 
 | Regra | Código | Evidência |
 |---|---|---|
-| `Kd = Rf + prêmio sintético`; o observado (despesa ÷ dívida) **não** entra na taxa | `CostOfCapital.effectiveCostOfDebt` | decisão 31: o observado caía fora da banda defensável em 70 de 120 avaliados e carrega arrendamento e câmbio |
+| `Kd = Rf + prêmio sintético`; o observado (despesa ÷ dívida) **não** entra na taxa | `CostOfCapital.effectiveCostOfDebt` | o observado caía fora da banda defensável em 70 de 120 avaliados e carrega arrendamento e câmbio ([auditoria_cruzada_valuation.md](../validacao/auditoria_cruzada_valuation.md)) |
 | Prêmio pela alavancagem (dívida líquida ÷ EBITDA): ≤ 0 → 1,0%; ≤ 1 → 1,3%; ≤ 2 → 1,8%; ≤ 2,5 → 2,4%; ≤ 3 → 3,1%; ≤ 3,5 → 4,0%; ≤ 4 → 5,5%; ≤ 5 → 7,5%; acima, ou EBITDA ≤ 0 → 10% | `CostOfCapital.leverageSpread` | tabela no estilo das agências (Damodaran, "synthetic rating") |
-| Prêmio pela cobertura (EBIT ÷ despesa): ≥ 8,5 → 1,0% … < 0,8 → 10%; **só fala** quando despesa ÷ dívida bruta cai em [Rf; Rf + 10 p.p.], e aí vale o maior dos dois | `coverageSpread`, `syntheticSpread` | decisão 130 |
+| Prêmio pela cobertura (EBIT ÷ despesa): ≥ 8,5 → 1,0% … < 0,8 → 10%; **só fala** quando despesa ÷ dívida bruta cai em [Rf; Rf + 10 p.p.], e aí vale o maior dos dois | `coverageSpread`, `syntheticSpread` | sem despesa financeira publicada, a cobertura sai da conta e o prêmio vem da alavancagem |
 | Sem dívida contratada: `Kd = Rf` | `effectiveCostOfDebt` | — |
-| Aviso quando o Kd adotado se afasta mais de 1 p.p. do observado, com a regra aplicada | `costOfDebtWasClamped`, `costOfDebtWarning` | item B32 |
-| Escudo fiscal: 34% (estatutária), reduzido proporcionalmente quando a cobertura é menor que 1 | `effectiveTaxShield` | decisão 37: a dedução vale na margem, que é a alíquota cheia no Lucro Real |
+| Aviso quando o Kd adotado se afasta mais de 1 p.p. do observado, com a regra aplicada | `costOfDebtWasClamped`, `costOfDebtWarning` | — |
+| Escudo fiscal: 34% (estatutária), reduzido proporcionalmente quando a cobertura é menor que 1 | `effectiveTaxShield` | a dedução vale na margem, que é a alíquota cheia no Lucro Real |
 
 ---
 
@@ -51,9 +51,9 @@ V = E + D_líquida;   E = papéis da ponte × preço
 
 | Regra | Código | Evidência |
 |---|---|---|
-| Pesos sobre a dívida **líquida**, a mesma do resto do modelo | `wacc`, em compute-valuation.ts, `CostOfCapital.rawWacc` | decisão 104 |
-| O caixa rende a taxa livre de risco, tributada, e não o custo de empréstimo | idem | decisão 113 |
-| E = divisor da ponte × preço, e não o valor de mercado da fonte | `wacc` | decisão 83 |
+| Pesos sobre a dívida **líquida**, a mesma do resto do modelo | `wacc`, em compute-valuation.ts, `CostOfCapital.rawWacc` | [divida_do_wacc.md](../validacao/divida_do_wacc.md) |
+| O caixa rende a taxa livre de risco, tributada, e não o custo de empréstimo | idem | [terminal_excedente.md](../validacao/terminal_excedente.md) |
+| E = divisor da ponte × preço, e não o valor de mercado da fonte | `wacc` | [b3_registro.md](../validacao/b3_registro.md) |
 | Caixa líquido: peso de dívida negativo, WACC acima do Ke, com aviso | `wacc` | — |
 | Piso: WACC ≥ Rf, com aviso | `wacc` | — |
 | Sem valor de mercado: desconto = Ke | `wacc` | — |
@@ -64,13 +64,10 @@ V = E + D_líquida;   E = papéis da ponte × preço
 
 | Situação | Taxa do ano t | Código | Evidência |
 |---|---|---|---|
-| Com beta desalavancado e não financeira: **resolvida** (4.6) | WACC_t e Ke_t do ponto fixo, sobre o forward do ano | `resolveCost`, [levered-rates.ts](../../src/core/services/valuation/levered-rates.ts) | decisões 41, 42, 46, 105 |
-| Banco, ou sem beta desalavancado, **com curva** | o custo de hoje (beta, prêmio, estrutura de hoje) remontado sobre o forward do ano | `assumptions` (`curvePath`), `discountFromBalanceSheet` | **item B37, corrigido em 28/09/2026**: antes interpolava em linha reta do CDI de hoje à perpetuidade |
+| Com beta desalavancado e não financeira: **resolvida** (4.6) | WACC_t e Ke_t do ponto fixo, sobre o forward do ano | `resolveCost`, [levered-rates.ts](../../src/core/services/valuation/levered-rates.ts) | [identidade_das_vias.md](../validacao/identidade_das_vias.md), [prior_no_aplicativo.md](../validacao/prior_no_aplicativo.md) |
+| Banco, ou sem beta desalavancado, **com curva** | o custo de hoje (beta, prêmio, estrutura de hoje) remontado sobre o forward do ano | `assumptions` (`curvePath`), `discountFromBalanceSheet` | a curva dá a taxa de cada prazo; nos 19 financeiros do aplicativo, a diferença contra a interpolação em linha reta é de −0,4% a −0,5% no preço justo |
 | Sem curva | linha reta do custo sobre o CDI corrente ao custo sobre o CDI de dez anos | `DcfAssumptions.discountRateAt` | recuo |
-| Perpetuidade | custo sobre o forward depois do ano N (ou o CDI de dez anos, sem curva), com a estrutura do ano N quando resolvida | `terminalCapm`, `wacc(terminal: true)` | decisão 105 |
-
-Efeito do B37 medido no gabarito: os 19 financeiros do aplicativo mudaram de
-−0,4% a −0,5%; nenhuma via da firma mudou (ela já era resolvida).
+| Perpetuidade | custo sobre o forward depois do ano N (ou o CDI de dez anos, sem curva), com a estrutura do ano N quando resolvida | `terminalCapm`, `wacc(terminal: true)` | [perpetuidade.md](../validacao/perpetuidade.md) |
 
 ---
 
@@ -86,14 +83,14 @@ circularidades juntas.
 | Valor da firma por acumulação regressiva: `V_{t−1} = (FCFF_t × √(1+WACC_t) + V_t) ÷ (1 + WACC_t)`, terminal levantado por meio ano | idem |
 | `E_t = V_t − D_t`; `βL,t = βU × (1 + 0,66 × D_{t−1}/E_{t−1})`; `Ke_t = Rf_t + βL,t × prêmio`; `Kd_t = Rf_t + prêmio`; WACC_t com os pesos do início do ano | idem |
 | Amortecimento de 0,5 no capital próprio, tolerância de 10⁻¹⁰ na variação relativa de E₀, até 100 iterações | idem |
-| Duas partidas: o caminho sem realavancagem e o custo desalavancado `Rf_t + βU × prêmio`; se as duas convergem e divergem mais de 0,1%, aviso; se só uma converge, vale ela, com aviso; se nenhuma, recusa "do método, e não do chute" | `LeveredCostOfCapital.solve` (decisão 110) |
-| Capital próprio ≤ 0 em algum ano, ou valor da firma ≤ 0: **estrutura de capital recusada**, e o ativo é recusado (não muda de via) | decisões 45 e 102 |
-| Via do acionista não financeira: mesma ideia pelo lado do acionista, `E_t = (LPA_t + E_{t+1}) ÷ (1 + Ke_t)` | `solveEquity` (decisão 46) |
-| O veredito da vantagem competitiva é refeito contra a taxa de equilíbrio resolvida, até estabilizar (no máximo 10 passes) | [moat-fixed-point.ts](../../src/core/services/valuation/moat-fixed-point.ts) (decisões 44 e 51) |
+| Duas partidas: o caminho sem realavancagem e o custo desalavancado `Rf_t + βU × prêmio`; se as duas convergem e divergem mais de 0,1%, aviso; se só uma converge, vale ela, com aviso; se nenhuma, recusa "do método, e não do chute" | `LeveredCostOfCapital.solve` |
+| Capital próprio ≤ 0 em algum ano, ou valor da firma ≤ 0: **estrutura de capital recusada**, e o ativo é recusado (não muda de via) | `evaluateLane` |
+| Via do acionista não financeira: mesma ideia pelo lado do acionista, `E_t = (LPA_t + E_{t+1}) ÷ (1 + Ke_t)` | `solveEquity` |
+| O veredito da vantagem competitiva é refeito contra a taxa de equilíbrio resolvida, até estabilizar (no máximo 10 passes) | [moat-fixed-point.ts](../../src/core/services/valuation/moat-fixed-point.ts) |
 
 A identidade entre a rota da firma e a do acionista (capítulo 5, seção 5.5) só é
-exata com as taxas resolvidas; ela está travada por teste (decisão 43,
-[identidade_das_vias.md](../validacao/identidade_das_vias.md)).
+exata com as taxas resolvidas; ela está travada por teste
+([identidade_das_vias.md](../validacao/identidade_das_vias.md)).
 
 ## Limitações deste capítulo
 
@@ -105,14 +102,14 @@ exata com as taxas resolvidas; ela está travada por teste (decisão 43,
   ponto a mais ou a menos de crescimento move o prêmio em cerca de um ponto),
   não conta a recompra de ações e soma só as companhias listadas hoje
   ([premio_implicito.md](../validacao/premio_implicito.md)).
-- **Nenhum prêmio a mais para as estatais**, e isso está medido (item B46,
-  [estatais.md](../validacao/estatais.md)): o beta delas é menor que o das
+- **Nenhum prêmio a mais para as estatais**, e isso está medido
+  ([estatais.md](../validacao/estatais.md)): o beta delas é menor que o das
   privadas, o encolhimento ao setor quase não o mexe, e a exposição ao risco
   soberano além do Ibovespa não é maior. O risco do controlador público fica no
   fluxo do minoritário, e a avaliação declara o controle com a ressalva
-  `controleEstatal` (decisão 145).
+  `controleEstatal`.
 - Custo da dívida sintético, não de crédito observado.
 - Hamada com D/E limitado a 3, e escudo a 34% (bancos pagam 45%, mas não passam
   por aqui).
 - O cenário de desconto move o Ke e a perpetuidade, mas não o alvo do retorno
-  sobre o capital nem o Kd (decisão 121; item B38).
+  sobre o capital nem o Kd ([cenario.md](../validacao/cenario.md)).

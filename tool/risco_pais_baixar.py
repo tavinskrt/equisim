@@ -1,6 +1,6 @@
 """Baixa o prêmio-país do Brasil (EMBI+ Risco-Brasil) do IPEADATA para data/indices/.
 
-**Por que existe (item B46).** O lambda de Damodaran mede quanto cada companhia
+**Por que existe.** O lambda de Damodaran mede quanto cada companhia
 está exposta ao risco do país: a sensibilidade do retorno da ação à variação do
 prêmio-país, comparada à das outras. A pergunta do item é se as estatais estão
 mais expostas que as privadas, e o prêmio-país diário é a outra ponta da

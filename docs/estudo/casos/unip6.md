@@ -33,7 +33,7 @@ O EBIT de 2026 anualizado é um quarto do de 2021, com receita só 13% menor, e
 o capital investido quase dobrou desde 2023. O negócio não encolheu nessa
 proporção: caiu o preço do que ele vende.
 
-**O último ponto é 2026 anualizado** (decisão 153): o primeiro semestre vezes
+**O último ponto é 2026 anualizado**: o primeiro semestre vezes
 2, com o balanço de 30/06/2026.
 
 ---
@@ -74,7 +74,7 @@ por isso que o motor usa a mediana (capítulo 6, seção 6.1).
 | 2 — capital externo | Φ = 0,57 | abaixo de 1,0: base comparável |
 | 3 — desvio | 12,36% contra 30,02%: razão 0,41, fora de [0,75; 1,33] | **destoa** |
 | Precedência do ciclo | setor "materiais básicos" | commodity: vale o ciclo mesmo que houvesse tendência |
-| Trava de saúde | lucro caiu 59,4% em três anos (791,3 → 321,1) | acima de 50%, mas **commodity é isenta** (decisão 30) |
+| Trava de saúde | lucro caiu 59,4% em três anos (791,3 → 321,1) | acima de 50%, mas **commodity é isenta** |
 
 ```
 fator = ROIC do ciclo ÷ ROIC atual = 30,02% ÷ 12,36% = 2,43   (dentro de [1/3; 3])

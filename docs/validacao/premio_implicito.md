@@ -1,6 +1,6 @@
 # O prêmio de risco implícito no preço do mercado
 
-> **Ligado no motor em 01/10/2026 pela [decisão 142](../decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md).**
+> **Ligado no motor em 01/10/2026 pela decisão 142.**
 > O prêmio de mercado do CAPM passou a ser a média de dez anos desta série, na
 > forma que o CAPM soma (`r − Rf`, e não a razão de Fisher das tabelas abaixo):
 > **1,21%** em 14/09/2026. A série foi remedida com os dois defeitos de dado que
@@ -298,15 +298,15 @@ da metade dos 5,5%.
 ## 10. A série remedida, e o que ela faz ao motor (01/10/2026)
 
 A série foi medida de novo com os dois defeitos de dado da §3 corrigidos, e é
-esta que o motor usa ([decisão 142](../decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md)).
+esta que o motor usa (decisão 142).
 
-- **A contagem é conferida contra o preço** ([decisão 143](../decisoes/143-a-contagem-da-coorte-e-conferida-contra-o-salto-do-preco.md)),
+- **A contagem é conferida contra o preço** (decisão 143),
   com a regra refinada: mudança de mais de três vezes sem o salto do preço só é
   descartada quando vem de uma **correção** de formulário. A emissão grande e a
   fusão, que a regra da §3.1 descartava, voltam a valer. Foram **36 entradas
   descartadas** (eram 275), todas correções; nenhuma companhia fica fora da soma
   por contagem em data nenhuma.
-- **Os nove emissores com barra no nome têm proventos** ([decisão 144](../decisoes/144-o-nome-de-pregao-da-consulta-de-proventos-vai-sem-barra.md)):
+- **Os nove emissores com barra no nome têm proventos** (decisão 144):
   a B3 foi consultada de novo com o nome sem barra e sem espaço.
 
 Na data congelada entram 268 companhias (eram 259), 189 com provento nos doze

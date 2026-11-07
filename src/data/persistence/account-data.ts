@@ -4,7 +4,7 @@ import { collection, deleteDoc, doc, type Firestore, getDocs, query, where, writ
  * As coleções em que um documento é do usuário pelo campo `userId`: os
  * valuations confirmados, os estudos, os estudos do escopo anterior, que a
  * aplicação não grava mais mas continuam no banco (ver `firestore.rules`), e
- * os acompanhamentos da Meta com as compras deles (decisão 159) — as compras
+ * os acompanhamentos da Meta com as compras deles — as compras
  * antes do plano, para uma falha no meio não deixar compra sem plano.
  */
 export const ACCOUNT_COLLECTIONS = ['valuations', 'portfolios', 'backtests', 'trackingOrders', 'trackings'] as const;

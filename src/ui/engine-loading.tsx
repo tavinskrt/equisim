@@ -26,7 +26,7 @@ const letterVariants: Variants = {
 };
 
 /**
- * **O motor trabalhando**, dito em palavras (decisão 155): enquanto a
+ * **O motor trabalhando**, dito em palavras: enquanto a
  * avaliação não chega, as etapas do cálculo se revezam com uma onda leve de
  * brilho pelas letras, no lugar de um esqueleto mudo.
  *

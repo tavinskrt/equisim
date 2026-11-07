@@ -11,7 +11,7 @@ teoria que a justifica**, e foi validado contra o que aconteceu no mercado
 brasileiro de 2018 a 2025. O resultado da validação está declarado com
 honestidade: a incerteza está calibrada, a habilidade de escolher ações foi
 testada e **não** foi comprovada. É uma ferramenta de análise, e não um oráculo
-([decisão 140](docs/decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)).
+([capítulo 7 do guia](docs/estudo/07-como-o-motor-foi-validado.md)).
 
 ---
 
@@ -23,8 +23,8 @@ testada e **não** foi comprovada. É uma ferramenta de análise, e não um orá
 | ver cada regra com código, fórmula, teoria e evidência | a [documentação do motor](docs/motor/README.md) |
 | saber o que o motor **não** faz ou faz com limitação | as [limitações](docs/validacao/limitacoes.md) |
 | entender o painel de logs do aplicativo | [AUDITORIA_DE_CALCULOS.md](docs/AUDITORIA_DE_CALCULOS.md) |
-| saber o estado do projeto e o que falta | o [plano do motor de referência](docs/plano-motor-de-referencia.md) e o [estado](docs/estado.md) |
-| saber por que cada coisa é como é | o [registro de decisões](docs/decisoes/README.md) |
+| saber o que mudou em cada versão | o [changelog](CHANGELOG.md), também no aplicativo (menu da conta, **Changelog**) |
+| saber o estado do projeto | o [estado](docs/estado.md), gerado do repositório |
 | trabalhar no código (pessoa ou agente) | o [CLAUDE.md](CLAUDE.md) |
 
 ---
@@ -32,15 +32,15 @@ testada e **não** foi comprovada. É uma ferramenta de análise, e não um orá
 ## O que o aplicativo faz
 
 Quatro áreas, a página de Raio-X de cada ação e um painel. Tudo em
-TypeScript, no navegador ([decisão 152](docs/decisoes/152-o-equisim-passa-a-typescript-e-o-dart-sai-do-repositorio.md)).
+TypeScript, no navegador.
 
 | Área | Para quê |
 |---|---|
 | **Estudo** | montar a carteira **Principal** (até 15 ações, equiponderadas) e a **Reserva** (candidatas), arrastando entre as duas; ver o potencial de cada ação — o do motor, ou o seu, quando você confirmou um valuation que discorda dele — e os setores da Principal; salvar e reabrir estudos |
-| **Raio-X** (página `/ativo/<AÇÃO>`; busca por Ctrl/⌘ + K) | a avaliação de uma ação: preço justo, potencial, régua de preço, faixa calibrada de 12 e 36 meses, sensibilidade ou Monte Carlo, múltiplos de pares e ressalvas, tudo numa página só (decisão 162); e o botão **Simular minhas premissas**, que abre a conta do motor para você trocar lucro, crescimento, taxa e perpetuidade e ver o preço mudar na hora (decisão 147) |
+| **Raio-X** (página `/ativo/<AÇÃO>`; busca por Ctrl/⌘ + K) | a avaliação de uma ação: preço justo, potencial, régua de preço, faixa calibrada de 12 e 36 meses, sensibilidade ou Monte Carlo, múltiplos de pares e ressalvas, tudo numa página só; e o botão **Simular minhas premissas**, que abre a conta do motor para você trocar lucro, crescimento, taxa e perpetuidade e ver o preço mudar na hora |
 | **Meta** | a rentabilidade anual que um plano (aporte inicial, aporte mensal, valor desejado, prazo) exige, comparada ao CDI e ao Ibovespa da década, e o acompanhamento da carteira realizada contra ela |
 | **Backtest** | a história das duas carteiras com uma ação de cada ativo comprada no início da janela, de 1 a 10 anos para trás: patrimônio, TWR, CAGR, volatilidade, drawdown, Sharpe, Sortino, Calmar |
-| **Meus valuations** | os valuations que você confirmou, gravados com as premissas e o resultado do dia (decisão 150) |
+| **Meus valuations** | os valuations que você confirmou, gravados com as premissas e o resultado do dia |
 | **Painel de logs** (menu da conta, em janela própria) | cada passo de cada avaliação, com a fórmula, os números e o resultado |
 
 ### Como o preço justo é calculado, em cinco linhas
@@ -56,7 +56,7 @@ TypeScript, no navegador ([decisão 152](docs/decisoes/152-o-equisim-passa-a-typ
 4. **A que taxa:** o custo do capital próprio (CAPM) sobre a curva de juros do
    Tesouro, ano a ano, com o risco recalculado conforme a dívida projetada. O
    prêmio de risco do mercado é o que o próprio preço da bolsa embute: a média
-   de dez anos do prêmio implícito, 1,21% em 14/09/2026 (decisão 142).
+   de dez anos do prêmio implícito, 1,21% em 14/09/2026.
 5. **Depois de dez anos:** o retorno do capital novo converge ao custo dele, a
    menos que a história mostre uma vantagem competitiva que persiste.
 
@@ -67,7 +67,7 @@ passo; o [caso WEGE3](docs/estudo/casos/wege3.md) mostra todas as contas.
 
 | | Condição | Situação |
 |---|---|---|
-| **R1** | nenhum defeito conhecido | ver o [plano](docs/plano-motor-de-referencia.md): a rodada de 02/10/2026 achou e fechou mais um — companhias com patrimônio positivo recusadas como insolventes (B47); o B38, o rótulo do cenário otimista, aguarda decisão |
+| **R1** | nenhum defeito conhecido | nenhum defeito de correção aberto; o que o motor ainda não resolve está nas [limitações](docs/validacao/limitacoes.md) |
 | **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,0% (12 meses) e 79,1% (36 meses) dos casos fora da amostra (remedida em 03/11/2026) |
 | **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,034, `t` de 0,25 contra 2,70, remedido em 03/11/2026), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
 
@@ -86,7 +86,7 @@ se comprovou** que comprar as ações de maior upside rende mais.
 | **Node** | 22.13 ou mais recente (LTS). O aplicativo compila a partir do 20.19, o piso do Vite; as ferramentas de `tool/` leem o cache da validação pelo `node:sqlite`, que pede o 22.13 |
 | **Python 3** | só para baixar as bases públicas (`tool/*_baixar.py`) e para as conferências em Python de `tool/` |
 | **Credencial** | token gratuito da [brapi.dev](https://brapi.dev/dashboard) |
-| **Flutter** | só para rodar o motor **pré-registrado** da réplica selada (C7), que é o núcleo Dart do commit selado (decisão 152) |
+| **Flutter** | só para rodar o motor **pré-registrado** da réplica selada, que é o núcleo Dart do commit selado |
 
 ### Preparação
 
@@ -150,7 +150,7 @@ firebase deploy --only hosting
 
 **Antes de publicar, regere a curva de juros** (seção seguinte): o navegador
 não lê o arquivo do Tesouro, então a avaliação usa a curva empacotada no build,
-que só vale por **sete dias** ([decisão 86](docs/decisoes/086-na-web-a-curva-vem-so-do-pacote.md)).
+que só vale por **sete dias**.
 Um clone do GitHub traz o pacote do dia em que foi gerado, e passada uma semana
 o aplicativo **funciona, mas sem a curva**, com preços que não são os do motor.
 
@@ -175,7 +175,7 @@ script Dart que ela substituiu.
 | Pacote | O que o aplicativo faz quando ele envelhece | Quando acontece |
 |---|---|---|
 | `public/assets/tesouro/curva.json` — a curva dos títulos prefixados | **com mais de 7 dias, a curva é recusada** e a taxa livre de risco recua para os dois pontos do CDI: o de hoje no ano 1 e a média de dez anos (cerca de 9,4%) na perpetuidade. Medido no gabarito (montagens com e sem a curva, prêmio de 5,5%), isso sobe o preço justo em 16% na mediana | uma semana depois de gerado: **regere antes de publicar** |
-| `public/assets/mercado/premio_implicito.json` — o prêmio de mercado ([decisão 142](docs/decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md)) | com mais de 183 dias, continua valendo, com uma ressalva da data; sem o pacote, o prêmio volta aos 5,5% e a avaliação diz isso | a partir de 17/03/2027 |
+| `public/assets/mercado/premio_implicito.json` — o prêmio de mercado ([premio_implicito.md](docs/validacao/premio_implicito.md)) | com mais de 183 dias, continua valendo, com uma ressalva da data; sem o pacote, o prêmio volta aos 5,5% e a avaliação diz isso | a partir de 17/03/2027 |
 | `public/assets/cvm/documentos.json` — as demonstrações da CVM | com mais de 100 dias, a avaliação avisa que demonstrações entregues depois não entraram | a partir de 24/12/2026 |
 
 ### Antes de publicar: a curva
@@ -262,11 +262,11 @@ Sem mexer na entrada congelada:
 O gabarito gravado pelo Dart **não serve de comparação ao TypeScript** sem ser
 regravado uma vez: o JSON do JavaScript escreve `1` onde o do Dart escrevia
 `1.0`, e a impressão muda sem que número algum mude. A igualdade dos números
-entre os dois motores é conferida por `npm run test:parity` (decisão 152).
+entre os dois motores é conferida por `npm run test:parity`.
 
 ### Atualizar o conjunto inteiro (avançar a entrada congelada)
 
-É uma rodada própria, com registro: todos os números da documentação, do
+É uma rodada própria, com entrada no changelog: todos os números da documentação, do
 gabarito e dos casos mudam. **Hoje não é só rodar comandos.** A data 14/09/2026
 está fixa no código de `tool/validation/frozen.ts`, `tool/cascade-golden.ts`,
 `tool/beta-prior-package.ts`, `tool/unit-package.ts`,
@@ -282,7 +282,7 @@ os de `npm run tool -- …`):
 | 2. Ingestão, pontes e contagens por data, nesta ordem | `cvm-ingest data/cvm` (com 16 GB de memória ou menos, `cvm-ingest data/cvm --partes 4`); `python tool/b3_ponte.py`, que lê o que a ingestão gravou; `python tool/b3_complemento_baixar.py --deslistadas` e `python tool/cvm_versoes_baixar.py`, que leem a ponte; `cvm-ingest` de novo, para montar as versões antigas; `b3-delisted-count` |
 | 3. Pacotes de dado | `cvm-package`, `b3-package`, `b3-dividends-package`, `capital-package --agora`, `fre-grants`, `unit-package --agora`, `control-package --agora` e `curve-package` |
 | 4. Congelar a entrada nova | `cascade-golden`, sem `--regravar`: copia o cache do dia para `data/gabarito/` |
-| 5. Pacotes medidos sobre ela | `beta-prior-package`, `multiples-package` e `implied-premium --so-serie` — que recusa regravar trimestre já gravado que tenha mudado; confira a causa antes de usar `--aceitar-mudanca-do-passado` (item B48) |
+| 5. Pacotes medidos sobre ela | `beta-prior-package`, `multiples-package` e `implied-premium --so-serie` — que recusa regravar trimestre já gravado que tenha mudado; confira a causa antes de usar `--aceitar-mudanca-do-passado` |
 | 6. O gabarito com os pacotes novos | `cascade-golden --regravar` |
 | 7. Validação, casos e conferência | os passos 2 a 6 de "Depois de mudar o motor" |
 
@@ -315,6 +315,24 @@ Detalhes no [CLAUDE.md](CLAUDE.md) e no
 
 ---
 
+## Versões e changelog
+
+A numeração segue o [Versionamento Semântico 2.0.0](https://semver.org/lang/pt-BR/),
+e o histórico, o formato do [Keep a Changelog 1.1.0](https://keepachangelog.com/pt-BR/1.1.0/).
+O que conta como interface pública é o que você grava (estudos, valuations,
+acompanhamentos) e o método que produz o preço justo: mudança que reconstrói
+o método ou deixa de ler o que foi gravado sobe a versão maior; funcionalidade
+ou regra de cálculo nova, a do meio; só correção, a última.
+
+A versão em uso aparece no menu da conta e em **Meu perfil**. O item
+**Changelog** do menu (ou "Ver o changelog" na busca, Ctrl/⌘ + K) abre o
+histórico, da versão mais recente à mais antiga. A fonte única é
+`src/data/changelog.ts`; o [CHANGELOG.md](CHANGELOG.md) sai dela por
+`npm run changelog`, e um teste reprova quando os dois, a versão do
+`package.json` e a do aplicativo divergem.
+
+---
+
 ## Fontes de dados
 
 | Dado | Fonte |
@@ -322,7 +340,7 @@ Detalhes no [CLAUDE.md](CLAUDE.md) e no
 | Demonstrações anuais | CVM (dados abertos, pacote `public/assets/cvm/`) e brapi |
 | Cotações e índice | brapi |
 | Contagem de ações e setor | registro de emissores da B3 (`public/assets/b3/emissores.json`) |
-| Proventos | B3 (`public/assets/b3/proventos.json`) — no retorno total do beta e da validação; somados na bolsa inteira, na série do prêmio implícito (decisão 142) |
+| Proventos | B3 (`public/assets/b3/proventos.json`) — no retorno total do beta e da validação; somados na bolsa inteira, na série do prêmio implícito |
 | Eventos de capital, units, concessões | CVM, formulários cadastral e de referência (`public/assets/cvm/`) |
 | Curva de juros | Tesouro Direto (`public/assets/tesouro/curva.json`) |
 | CDI, IPCA, IBC-Br | Banco Central, SGS 12, 433 e 24364 |
@@ -352,6 +370,7 @@ src/
   ui/                  componentes (Radix UI e Tailwind) e gráficos (Recharts)
   styles.css           os tokens de cor, tipo e espaço dos dois temas
 public/assets/         pacotes de dados versionados
+CHANGELOG.md           o histórico de versões, gerado de src/data/changelog.ts
 tool/                  medições, backtest, gabarito, empacotadores, casos de estudo
 test/                  toda a suíte de testes, separada pelo que ela testa
   core/                o núcleo, inclusive o teste de pureza
@@ -364,7 +383,6 @@ test/                  toda a suíte de testes, separada pelo que ela testa
 scripts/               a cadeia de QA (auditor, conselheiro, gate local, estado, capturas)
 docs/estudo/           o guia de estudo
 docs/motor/            a documentação do motor
-docs/decisoes/         o registro de decisões, uma por arquivo
 docs/validacao/        as medições e as limitações
 functions/             proxy opcional da credencial
 ```

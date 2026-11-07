@@ -10,10 +10,10 @@
 > Montagem conferida contra o gabarito ativo a ativo: zero divergências.
 >
 > **Remedido** depois das decisões
-> [113](../decisoes/113-o-caixa-rende-a-taxa-livre-de-risco-e-nao-o-custo-de-emprestimo.md)
-> e [119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md),
+> 113
+> e 119,
 > que subiram o custo de capital e reduziram os avaliados de 103 para 97. A
-> [decisão 112](../decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md)
+> decisão 112
 > foi escrita com os números anteriores — 18,6% de custo e 12,9% de retorno
 > implícito —, e a conclusão dela fica de pé com os de hoje: o destino medido
 > continua sendo 9,5%, e o motor continua entre ele e o custo de capital.
@@ -23,7 +23,7 @@
 O terminal neutro mantém, para sempre, o retorno que o capital instalado alcança
 na projeção — e ele é de **0,70 vez** o custo de capital na mediana
 ([terminal_excedente.md](terminal_excedente.md)). A
-[decisão 107](../decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md)
+decisão 107
 manteve o número por não haver medição de reversão à média; convergir o terminal
 ao custo de capital move **+12,2%** do preço justo mediano.
 
@@ -100,7 +100,7 @@ para cerca de metade do que o capital delas custa.
 
 ## 4. O que se decidiu
 
-[Decisão 112](../decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md):
+Decisão 112:
 **o terminal fica**, agora por medição em vez de por ausência dela.
 
 - Convergir ao custo de capital seria afirmar uma rentabilidade que a seção

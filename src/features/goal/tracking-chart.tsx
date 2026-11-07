@@ -47,7 +47,7 @@ function monthEnds(dates: readonly DateTime[]): number[] {
  * **A carteira realizada contra a Meta**: o patrimônio dia a dia da carteira
  * que compra o maior potencial, e os mesmos aportes, nas mesmas datas, no
  * caminho exigido pela meta, no CDI e no Ibovespa que de fato aconteceram
- * (decisão 159). O esperado da carteira saiu com a decisão 160.
+ *. O esperado da carteira saiu com a decisão 160.
  *
  * É a curva de acumulação da Meta com o eixo de datas reais: onde ela dizia
  * "em 5 anos", esta diz "de março de 2021 até hoje".

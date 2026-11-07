@@ -28,7 +28,7 @@ const premium = 0.055;
 const betaU = 0.6;
 const rf = 0.09;
 // O `K_d` aplicado é `Rf + spread` — a classificação sintética, a mesma do
-// WACC estático (item B11). Com a taxa livre de risco constante nestes
+// WACC estático. Com a taxa livre de risco constante nestes
 // testes, ele é o número único de antes.
 const kd = rf + spread;
 
@@ -230,7 +230,7 @@ describe('Ponto fixo do custo de capital', () => {
     }
     expect(Number.isFinite(r.terminalWacc)).toBe(true);
     // Com caixa dominando, o peso do capital próprio passa de 1 — e **não é
-    // confinado** (decisão 104): o peso da dívida fica negativo e o `WACC`
+    // confinado**: o peso da dívida fica negativo e o `WACC`
     // sobe acima do `Ke`, que é o mesmo tratamento do WACC estático.
     expect(r.equityShareAt(0)!).toBeGreaterThan(1.0);
     expect(

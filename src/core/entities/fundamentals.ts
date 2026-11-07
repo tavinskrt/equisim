@@ -105,7 +105,7 @@ export class FundamentalsSnapshot {
    * alíquota estatutária: ver `ValuationParameters.statutoryTaxRate`.
    *
    * Não existe para instituição financeira, que não tem EBIT publicado; é uma
-   * das confirmações numéricas da Porta 1 (decisão 25).
+   * das confirmações numéricas da Porta 1.
    */
   readonly nopat: number | null;
 
@@ -197,7 +197,7 @@ export class FundamentalsSnapshot {
 
   /**
    * Meses do acumulado do ano que os fluxos **anualizam**, ou `null` no
-   * exercício completo (decisão 153).
+   * exercício completo.
    *
    * Preenchido só no ponto do ano corrente que fecha a série: o acumulado do
    * último ITR vezes `12 ÷ meses`, com o balanço na data do ITR. É ele que
@@ -288,7 +288,7 @@ export class FundamentalsSnapshot {
     };
   }
 
-  /** `true` no ponto do ano corrente anualizado (decisão 153). */
+  /** `true` no ponto do ano corrente anualizado. */
   get isAnnualized(): boolean {
     return this.annualizedMonths !== null;
   }
@@ -341,7 +341,7 @@ export class FundamentalsSnapshot {
    * Alavancagem observada: dívida **líquida** sobre o valor de mercado.
    *
    * **É a régua de desalavancar o beta, e existe para ser a mesma da
-   * realavancagem** (decisão 54). Devolve `null` sem valor de mercado
+   * realavancagem**. Devolve `null` sem valor de mercado
    * utilizável. Pode ser **negativa** — caixa líquido —, e quem consome
    * confina: ver [BetaShrinkage.leverageFactor].
    */
@@ -355,7 +355,7 @@ export class FundamentalsSnapshot {
 
   /**
    * Dívida bruta: curto mais longo prazo. **Trata ausência como zero.**
-   * **Não é a dívida dos pesos do WACC**, que é a líquida (decisão 104).
+   * **Não é a dívida dos pesos do WACC**, que é a líquida.
    */
   get totalDebt(): number {
     return (this.shortTermDebt ?? 0) + (this.longTermDebt ?? 0);
@@ -368,7 +368,7 @@ export class FundamentalsSnapshot {
 
   /**
    * Dívida líquida: [totalDebt] menos [totalCash]. **É a dívida do modelo
-   * inteiro** (decisões 41, 54, 102 e 104).
+   * inteiro**.
    */
   get netDebt(): number {
     return this.totalDebt - this.totalCash;
@@ -378,7 +378,7 @@ export class FundamentalsSnapshot {
    * Cobertura de juros: `EBIT ÷ despesa financeira`.
    *
    * **Serve ao escudo fiscal**, e ao prêmio de crédito só quando a despesa é
-   * juro de verdade (decisão 130). Devolve `null` sem EBIT ou sem despesa
+   * juro de verdade. Devolve `null` sem EBIT ou sem despesa
    * financeira, e **zero** quando o EBIT é negativo.
    */
   get interestCoverage(): number | null {
@@ -416,7 +416,7 @@ export class FundamentalsSnapshot {
   /**
    * Patrimônio líquido reconstituído: `VPA × ações do exercício`.
    *
-   * **Sem o par, vale o patrimônio da demonstração** (item B47). **O VPA
+   * **Sem o par, vale o patrimônio da demonstração**. **O VPA
    * negativo continua sendo insolvência**: o recuo só vale quando o par
    * falta.
    */

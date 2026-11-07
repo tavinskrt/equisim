@@ -7,7 +7,7 @@ import { expectClose } from '../core/helpers';
 import { isServed, readPublicJson } from './public-assets';
 
 /**
- * O prior transversal do beta versionado é o que o build leva (item B11).
+ * O prior transversal do beta versionado é o que o build leva.
  *
  * **Sem ele o motor é outro**: beta cru, WACC estático, e nenhum dos caminhos
  * que as decisões 40 a 46 descrevem. No aplicativo isso vira ressalva — a
@@ -36,7 +36,7 @@ it('o pacote é legível pelo codec deste build', () => {
 
 it('cada mediana setorial usa a chave da B3, e não a da fonte de preços', () => {
   const parsed = BetaPriorCodec.decode(readPublicJson(AssetPaths.betaPrior))!;
-  // As chaves são as do setor econômico da B3 (decisão 87). Uma chave fora
+  // As chaves são as do setor econômico da B3. Uma chave fora
   // dessa lista diz que o prior foi resolvido sobre outra camada de dados, e
   // aí ele agrupa outros pares.
   const fromB3 = new Set([

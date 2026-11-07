@@ -2,8 +2,8 @@
 
 > **Medido com o preço da coorte na base de ações de hoje, e com o `t` da
 > decisão 93.** Os dois foram corrigidos à tarde — o preço pela
-> [decisão 97](../decisoes/097-a-coorte-forma-preco-contagem-e-valor-de-mercado-na-base-da-data.md),
-> o `t` pela [96](../decisoes/096-o-t-da-habilidade-e-corrigido-pela-sobreposicao-contra-o-critico-dela.md).
+> decisão 97,
+> o `t` pela 96.
 > A leitura com o instrumento pronto está em
 > [habilidade_trimestral.md](habilidade_trimestral.md).
 
@@ -11,7 +11,7 @@ Medido em 15/09/2026 por `dart run tool/regressao_condicional.dart --aplicativo`
 sobre `docs/validacao/backtest_aplicativo_deslistadas.json` (de
 `dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas`).
 Dados em [habilidade_aplicativo.json](habilidade_aplicativo.json). Decisão:
-[93](../decisoes/093-as-deslistadas-entram-nas-coortes-e-o-t-e-o-menor.md).
+93.
 
 ## 1. O que mudou desde a §0 do plano
 

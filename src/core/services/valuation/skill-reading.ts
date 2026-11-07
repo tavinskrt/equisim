@@ -41,12 +41,12 @@ export class OrderingReading {
  *
  * - **O potencial acrescenta ao book-to-market?** O coeficiente dele
  *   condicionado ao B/M, com o `t` corrigido pela sobreposição e o crítico dela
- *   (decisão 96). É o critério do R3, e é o que a ressalva da tela de metas
+ *. É o critério do R3, e é o que a ressalva da tela de metas
  *   cita.
  * - **Qual ordenação tem habilidade?** O IC do composto, do book-to-market e do
  *   potencial, sobre as mesmas observações, e a regra fixada antes de medir que
  *   escolhe de qual sai o prêmio do retorno esperado — [premiumOrdering]
- *   (decisão 103).
+ *.
  *
  * **É a leitura do motor do dia da medição, e não o veredito do C1**, que é
  * medido com as fases completas.
@@ -143,7 +143,7 @@ function finiteNumbers(values: readonly unknown[]): values is number[] {
  * `tool/conditional-regression.ts --trimestral` e lido pelo aplicativo.
  */
 export const SkillReadingCodec = {
-  /** Versão do formato: a 2 traz as ordenações lado a lado (item B1). */
+  /** Versão do formato: a 2 traz as ordenações lado a lado. */
   version: 2,
 
   /** A chave de cada ordenação no pacote. */

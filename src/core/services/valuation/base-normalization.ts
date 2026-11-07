@@ -42,7 +42,7 @@ export class BaseNormalizationOutcome extends DartEnum implements WireKeyed {
 
   /**
    * O último exercício deu prejuízo: não há fator a aplicar, e a base é o
-   * retorno típico sobre o capital de hoje (decisão 53).
+   * retorno típico sobre o capital de hoje.
    */
   static readonly rebuilt = new BaseNormalizationOutcome('rebuilt', 5, 'reconstruida');
 
@@ -149,7 +149,7 @@ export class BaseNormalization {
 
   /**
    * Meses do acumulado quando o último ponto é o ano corrente anualizado
-   * (decisão 153), ou `null` quando ele é um exercício completo.
+   *, ou `null` quando ele é um exercício completo.
    */
   readonly latestMonths: number | null;
 
@@ -187,19 +187,19 @@ export class BaseNormalization {
 
   /**
    * `true` em commodity e cíclico pesado, onde a reversão ao ciclo tem
-   * precedência sobre a tendência (decisão 28).
+   * precedência sobre a tendência.
    */
   readonly cyclicalPrecedence: boolean;
 
   /** Queda do lucro ou do EBITDA no triênio, em fração, ou `null` sem medida. */
   readonly operationalDecline: number | null;
 
-  /** `true` quando a queda impediu a base de subir (decisões 28 e 29). */
+  /** `true` quando a queda impediu a base de subir. */
   readonly healthCapped: boolean;
 
   /**
    * `true` quando a queda passou do limite, mas o setor é cíclico e está
-   * isento da trava (decisão 30).
+   * isento da trava.
    */
   readonly healthExempt: boolean;
 
@@ -213,7 +213,7 @@ export class BaseNormalization {
   readonly saturated: boolean;
 
   /**
-   * `true` quando a base foi reconstruída do ciclo (decisão 53), e a fração
+   * `true` quando a base foi reconstruída do ciclo, e a fração
    * positiva da janela que a autorizou.
    */
   readonly rebuilt: boolean;

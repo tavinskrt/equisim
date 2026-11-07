@@ -100,12 +100,12 @@ export function plotPoints(rows: readonly Row[], keys: readonly SeriesKey[]): { 
  * **Evolução comparada**: o patrimônio das duas carteiras **em reais**, dia a
  * dia — o valor de mercado da cesta comprada no primeiro pregão.
  *
- * **Uma vista só** (decisão 161). Com uma compra no primeiro pregão e nenhum
+ * **Uma vista só**. Com uma compra no primeiro pregão e nenhum
  * aporte depois, a base 100 era esta mesma curva em outra escala, e as duas
  * vistas confundiam mais do que explicavam; ficou a dos reais, a pedido. O
  * percentual segue no TWR das métricas, e a série em base 100, no CSV.
  *
- * O desenho é o gráfico de linha da Bklit UI (decisão 158). O eixo parte do
+ * O desenho é o gráfico de linha da Bklit UI. O eixo parte do
  * zero: as duas cestas custam valores diferentes, e cortar o eixo exageraria a
  * distância entre elas.
  */

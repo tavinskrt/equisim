@@ -8,7 +8,7 @@ import {
 import { memoizedPackage, type PackageLoader } from './package-loader';
 
 /**
- * A espécie do controle acionário, empacotada com o aplicativo (item B46).
+ * A espécie do controle acionário, empacotada com o aplicativo.
  *
  * Vem do Formulário Cadastral da CVM, gerada por `tool/control-package.ts`
  * e versionada em `public/assets/cvm/controle.json`, pela raiz do código de

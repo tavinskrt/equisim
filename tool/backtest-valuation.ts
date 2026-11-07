@@ -19,27 +19,27 @@
 // **Vieses que esta medição NÃO remove**, e que o relatório declara:
 //
 // 1. *Sobrevivência.* Sem `--com-deslistadas`, o universo é o que está listado
-//    hoje. Com ele, entram as companhias da ponte do A3.2 (item C1b) — e as que
-//    a fonte de preços não traz, como a Tupy (item C1d).
+//    hoje. Com ele, entram as companhias da ponte do A3.2 — e as que
+//    a fonte de preços não traz, como a Tupy.
 // 2. *Reapresentação.* Os exercícios vêm como a fonte os publica hoje, não
 //    como estavam no dia da coorte (B8).
 // 3. *Provento.* O retorno de referência continua o de preço, e ao lado dele
 //    sai o **retorno total** — `ret12tot` e `ret36tot` —, com os proventos da
-//    B3 reinvestidos na data ex (item A4, decisão 89).
+//    B3 reinvestidos na data ex.
 //
 // **Duas montagens.** `mercado` é a das medições de 11/09/2026: só a fonte de
 // preços, com a taxa de dois pontos — e com o defeito de base descrito abaixo,
 // mantido para reproduzir aquelas medições. `aplicativo` é a montagem do
 // aplicativo **na data de cada coorte**, peça a peça:
 //
-// - a curva do Tesouro daquele dia (decisão 74);
+// - a curva do Tesouro daquele dia;
 // - a CVM mesclada, com os documentos recebidos até ali (decisões 69 a 81) —
 //   pela série de DFPs, que é o padrão, e pela ancorada no trimestre ao lado;
-// - o setor da B3 (decisão 87);
+// - o setor da B3;
 // - o prazo das outorgas do Formulário de Referência recebido até ali
-//   (decisão 88, `tool/cvm/grants-by-date.ts`);
-// - o beta sobre retorno total, com os proventos da B3 (decisão 89);
-// - **o preço, a contagem e o valor de mercado na base da data** (item C3,
+//   (`tool/cvm/grants-by-date.ts`);
+// - o beta sobre retorno total, com os proventos da B3;
+// - **o preço, a contagem e o valor de mercado na base da data** (
 //   `tool/cohorts/as-of-base.ts`): a série da fonte vem ajustada por todo
 //   evento até hoje, e a coorte a multiplicava pela contagem do exercício, na
 //   base daquele ano. Agora a série é levada à base da data pelo COTAHIST, a
@@ -53,7 +53,7 @@
 // Porta 0 e, para ativo recusado, o potencial sem o corte de liquidez.
 //
 // **Coortes.** Anuais, em 30/09 de 2018 a 2025, ou trimestrais com
-// `--trimestral` (item C1c): o último dia de cada trimestre, de 31/03/2018 a
+// `--trimestral`: o último dia de cada trimestre, de 31/03/2018 a
 // 30/09/2025. A primeira é 2018 porque a Porta 0 exige oito exercícios
 // publicados, e a CVM começa em 2010.
 //
@@ -184,7 +184,7 @@ class CvmAtDate implements FundamentalsRepository {
       market: this.hist,
       published: (s) => view.isPublished(s),
       anchored: this.anchored,
-      // A mesma série do aplicativo: o ano corrente anualizado (decisão 153).
+      // A mesma série do aplicativo: o ano corrente anualizado.
       yearToDate: CvmSeries.yearToDateByDefault,
     }).series;
     return new Ok([...merged]);
@@ -341,7 +341,7 @@ function rescale(snaps: readonly FundamentalsSnapshot[], priceAtDate: number): F
 
 /**
  * O valor de mercado e a contagem corrente **da data** em todo exercício
- * (item C3): a contagem do Formulário de Referência e o valor de mercado da
+ *: a contagem do Formulário de Referência e o valor de mercado da
  * companhia espécie a espécie. Sem contagem da data, recua para a contagem do
  * exercício vezes o preço bruto da data — na base certa, e com a razão de
  * unidade de volta a 1 por construção, o que a linha declara.
@@ -431,8 +431,8 @@ function adjustedAt(s: PriceSeries, date: DateTime): number | null {
 
 /**
  * Contagem por data e divisão entre espécies de cada listada, gravadas por
- * `tool/b3-delisted-count.ts` (item C3), com a conferência contra o salto do
- * preço (item B43, decisão 143).
+ * `tool/b3-delisted-count.ts`, com a conferência contra o salto do
+ * preço.
  */
 class ListedCount {
   private checkedResult: { accepted: AcceptedCount[]; discarded: DiscardedCount[] } | null = null;
@@ -509,7 +509,7 @@ function compact(v: unknown): unknown {
   return v;
 }
 
-/** Primeira coorte da réplica fora da amostra (decisão 129). */
+/** Primeira coorte da réplica fora da amostra. */
 export const firstC7Cohort = DateTime.local(2025, 12, 31);
 
 /**
@@ -542,7 +542,7 @@ export async function main(args: string[]): Promise<void> {
   const stateOwnedPremiums = stateOwnedPremiumArg === null ? [] : stateOwnedPremiumArg.split(',').map((x) => parseDouble(x));
   const stateOwnedOnly = args.includes('--so-estatais');
   const output = args.includes('--saida') ? argAfter('--saida') : null;
-  // **A réplica fora da amostra** (item C7, decisões 129 e 133): as coortes a
+  // **A réplica fora da amostra**: as coortes a
   // partir de 31/12/2025, que nenhuma decisão do motor viu, na mesma montagem
   // da amostra do R3. Saem em `data/c7/coortes.json`, e quem as sela é
   // `tool/c7-seal.ts` — este modo não escreve nada versionado.
@@ -573,7 +573,7 @@ export async function main(args: string[]): Promise<void> {
   const treasury = app ? readTreasury('data/tesouro/precotaxatesourodireto.csv') : null;
   const cvmDocs = app ? loadDocuments('data/cvm_exercicios.json', { withOldVersions: true }) : null;
   const registry = app ? B3RegistryCodec.decodePackage(readJson<JsonObject>('public/assets/b3/emissores.json')) : null;
-  // **O prêmio de mercado de cada coorte** (decisão 142): a média de dez anos
+  // **O prêmio de mercado de cada coorte**: a média de dez anos
   // do prêmio implícito, do pacote que o aplicativo lê. A série é medida
   // trimestre a trimestre, cada um com o dado da data dele, e a média de cada
   // coorte usa só os trimestres até ela.
@@ -582,7 +582,7 @@ export async function main(args: string[]): Promise<void> {
     errln('sem public/assets/mercado/premio_implicito.json utilizável: rode npm run tool -- implied-premium --so-serie');
     process.exit(2);
   }
-  // O controle acionário de cada emissor, do FCA (item B46): a ressalva da
+  // O controle acionário de cada emissor, do FCA: a ressalva da
   // montagem do aplicativo, na data de cada coorte, e a medição do item.
   const controlFile = 'public/assets/cvm/controle.json';
   const control = app && existsSync(controlFile) ? (ShareholderControlHistory.decode(readJson<JsonObject>(controlFile))?.byIssuer ?? null) : null;
@@ -610,7 +610,7 @@ export async function main(args: string[]): Promise<void> {
   const shareClass = (t: Ticker): B3Classification | null =>
     registry?.get(t.value.length >= 4 ? t.value.slice(0, 4) : '')?.classification ?? null;
 
-  // A base da data das listadas (item C3): a ponte ticker → CNPJ, os códigos
+  // A base da data das listadas: a ponte ticker → CNPJ, os códigos
   // que a FCA declara e a contagem por data do Formulário de Referência.
   const listedBridge = app
     ? new Map(Object.entries(readJson<{ ponte: Record<string, string> }>('docs/validacao/ponte_cvm.json').ponte))
@@ -624,7 +624,7 @@ export async function main(args: string[]): Promise<void> {
     process.exit(2);
   }
 
-  // As deslistadas (item C1b), com o setor da B3 ou o representante do setor
+  // As deslistadas, com o setor da B3 ou o representante do setor
   // da CVM, medido nas listadas.
   let delisted: Delisted | null = null;
   if (withDelisted) {
@@ -703,7 +703,7 @@ export async function main(args: string[]): Promise<void> {
       return s;
     };
 
-    // **Os eventos de ações e as emissões por valor** (itens B28, B29 e B30).
+    // **Os eventos de ações e as emissões por valor** (B29 e B30).
     // Os eventos corrigem a série da fonte onde ela não ajustou e a contagem
     // do FRE onde ela não absorveu; as emissões entram no patrimônio da ponte.
     const freIssuances = app ? FreIssuances.read() : null;
@@ -728,7 +728,7 @@ export async function main(args: string[]): Promise<void> {
     const unadjustedOf = new Map<string, ShareEvent[]>();
     // As emissões por valor conhecidas na data: o quadro de aumentos do FRE,
     // até 2023, e a variação do capital integralizado que nenhum evento de
-    // ações explica no preço, depois (item B28).
+    // ações explica no preço, depois.
     const issuancesOf = (cnpj: string | null, t: DateTime, rawSessions: readonly TradingDay[], events: readonly ShareEvent[]): ShareIssue[] => {
       if (cnpj === null || freIssuances === null) return [];
       return [...freIssuances.known(cnpj, t), ...issuancesWithoutEvent(freIssuances.byCapitalChange(cnpj, t), rawSessions, events)];
@@ -755,7 +755,7 @@ export async function main(args: string[]): Promise<void> {
       let evaluatedDelisted = 0;
       const valueByCnpj = new Map<string, MarketValue | null>();
 
-      // **O prior transversal do beta da coorte** (item B11). Sem ele não há
+      // **O prior transversal do beta da coorte**. Sem ele não há
       // beta desalavancado, e a montagem padrão media um motor — beta cru e
       // WACC estático — que não é o que as decisões 40 a 46 descrevem. É
       // resolvido **na data da coorte**, sobre o universo listado dela: um
@@ -816,9 +816,9 @@ export async function main(args: string[]): Promise<void> {
             dividends: o.betaDividends,
             betaPrior: cohortPrior,
             declaredSharesPerUnit: o.sharesInUnit,
-            // As emissões por valor do FRE conhecidas na data (item B28).
+            // As emissões por valor do FRE conhecidas na data.
             shareIssues: o.issuances ?? [],
-            // O controle estatal na data: só a ressalva (item B46).
+            // O controle estatal na data: só a ressalva.
             stateControlled: stateOwnedAtDate(ticker, t),
           });
         const prep = await prepare(premium);
@@ -829,7 +829,7 @@ export async function main(args: string[]): Promise<void> {
         const upside = r.isOk ? r.unwrap().upside : null;
         if (upside !== null) o.onEvaluated();
 
-        // **O prêmio a mais das estatais** (item B46). Soma-se ao prêmio de
+        // **O prêmio a mais das estatais**. Soma-se ao prêmio de
         // mercado na proporção do beta — `β × (prêmio + x ÷ β) = β × prêmio +
         // x` —, o que é exato no Ke de hoje; no caminho realavancado, o
         // acréscimo anda com `β_t ÷ β`.
@@ -896,7 +896,7 @@ export async function main(args: string[]): Promise<void> {
         const pub = view.published(inputs.fundamentals);
 
         // A ponte por papel como o motor a faz, pelas funções públicas dele
-        // (item C3): a razão de unidade e a origem do divisor.
+        //: a razão de unidade e a origem do divisor.
         let unitRatio: number | null = null;
         let divisor: QuotedShares | null = null;
         const last = naiveFactors.last;
@@ -916,13 +916,13 @@ export async function main(args: string[]): Promise<void> {
           });
         }
 
-        // A série ancorada no trimestre, sobre os mesmos insumos (item C1c).
+        // A série ancorada no trimestre, sobre os mesmos insumos.
         let anchored: Row = {};
         if (o.anchoredSource !== null) {
           const h = await o.anchoredSource.history(ticker);
           if (h.isOk) {
             const anchoredSeries = h.unwrap();
-            // **Pela cópia do núcleo** (item B27): a versão à mão perdia a
+            // **Pela cópia do núcleo**: a versão à mão perdia a
             // composição declarada da unit, a taxa de referência do crédito e
             // a janela do beta, e a leitura ancorada saía com outro divisor
             // nas units.
@@ -1004,7 +1004,7 @@ export async function main(args: string[]): Promise<void> {
           recusa: result !== null ? null : (r.failureOrNull?.message ?? null),
           bookToMarket: naiveFactors.bm,
           earningsYield: naiveFactors.ey,
-          // **Os ingredientes do múltiplo de pares** (item B22, decisão 123).
+          // **Os ingredientes do múltiplo de pares**.
           // `bookToMarket` é `1 ÷ (P/VP)` e `earningsYield` é `1 ÷ (P/L)`:
           // dois dos três já estavam aqui, e faltava a firma sobre EBITDA.
           //
@@ -1041,7 +1041,7 @@ export async function main(args: string[]): Promise<void> {
             ke: result === null ? null : result.diagnostics!.costOfEquity,
             premioDeMercado: inputs.capm.marketPremium,
             mcQuantis: quantiles,
-            // A janela que a série de fato deu ao beta (item B17): a fonte
+            // A janela que a série de fato deu ao beta: a fonte
             // devolve dez anos, e a coorte de 2018 pede cinco que ela não
             // tem. Sem isto, a janela curta entrava sem aparecer.
             janelaDoBeta: inputs.betaWindowYears,
@@ -1079,7 +1079,7 @@ export async function main(args: string[]): Promise<void> {
 
         const seriesResult = await prices.daily(ticker, new DateRange(DateTime.local(2010, 1, 1), dataEnd));
         if (seriesResult.isErr) continue;
-        // **O ajuste que a fonte deixou de fazer** (item B29): a bonificação
+        // **O ajuste que a fonte deixou de fazer**: a bonificação
         // que ela não ajustou é uma queda que não aconteceu, e entrava no
         // retorno de toda janela que a atravessa, no beta e na volatilidade.
         // O fator entre o bruto e a fonte diz, sem ruído, quais ficaram assim.
@@ -1128,7 +1128,7 @@ export async function main(args: string[]): Promise<void> {
           continue;
         }
 
-        // A base da data (item C3). Sem pregão do papel no COTAHIST até dez
+        // A base da data. Sem pregão do papel no COTAHIST até dez
         // dias antes, não há preço da data, e a observação sai.
         const ofCompany = tickerCodes.get(ticker.value) ?? new Set([ticker.value]);
         const rawSessions = rawOf(ticker.value, ofCompany);
@@ -1181,7 +1181,7 @@ export async function main(args: string[]): Promise<void> {
         const betaDividends = CashDividendsCodec.forTicker(dividendsPackage!, ticker.value);
         const contractEnd = grants!.atDate(ticker.value, t)?.end ?? null;
 
-        // O contrafactual da base (item C3): a montagem da rodada anterior —
+        // O contrafactual da base: a montagem da rodada anterior —
         // preço e volume da fonte, contagem do exercício, sem contagem
         // oficial — sobre o mesmo ativo e a mesma data, só nas coortes de
         // 30/09.
@@ -1255,7 +1255,7 @@ export async function main(args: string[]): Promise<void> {
           betaDividends,
           contractEnd,
           officialCount: shares === null ? null : new OfficialShareCount({ total: shares, asOf: t }),
-          // A composição declarada da unit na FCA vigente na data (item B16).
+          // A composição declarada da unit na FCA vigente na data.
           sharesInUnit: cnpj === null ? null : (UnitCompositionCodec.at(fca?.unitsByCnpj.get(cnpj) ?? [], t)?.shares ?? null),
           onEvaluated: () => evaluated++,
           issuances: issuancesOf(cnpj, t, rawSessions, declared),
@@ -1264,7 +1264,7 @@ export async function main(args: string[]): Promise<void> {
         });
       }
 
-      // As deslistadas da ponte (item C1b): só o papel que negociava na data,
+      // As deslistadas da ponte: só o papel que negociava na data,
       // e sem evento declarado e não localizado, nem salto que a série
       // ajustada não explica, na janela do beta — ela não estaria ajustada
       // por eles. No horizonte do retorno, a janela que os atravessa fica sem
@@ -1360,7 +1360,7 @@ export async function main(args: string[]): Promise<void> {
     if (app && quarterly && withDelisted && sample === null && !c7 && output === null) {
       // O universo que as coortes observam como listado: é o que a ponte das
       // deslistadas (`tool/b3_ponte.py`) exclui, para não dar duas pontas à
-      // mesma companhia (item C1d).
+      // mesma companhia.
       writeText(
         'docs/validacao/universo_coortes.json',
         jsonPretty({ geradoPor: 'tool/backtest-valuation.ts', tickers: [...listedTickers].sort(compareStr) }, ' '),

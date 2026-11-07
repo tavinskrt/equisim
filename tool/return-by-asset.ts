@@ -137,7 +137,7 @@ function synthetic(): void {
     ]),
     plan: plan(),
     range: new DateRange(days[0]!, days[days.length - 1]!),
-    // A demonstração é de TWR contra XIRR, e não de custo (item C4).
+    // A demonstração é de TWR contra XIRR, e não de custo.
     costs: TransactionCosts.none,
   });
   if (r.isErr) {

@@ -2,7 +2,7 @@ import { type DateTime, err, InsufficientData, isJsonObject, ok, type Result, Tr
 import type { ApiClient } from '../network/api-client';
 
 /**
- * Cotações do dia dos títulos prefixados do Tesouro Direto (item A2.1).
+ * Cotações do dia dos títulos prefixados do Tesouro Direto.
  *
  * Lê o arquivo **direto**, e só o começo: ele vem em ordem decrescente de
  * data-base, e as linhas do dia mais recente estão nos primeiros quilobytes de
@@ -11,7 +11,7 @@ import type { ApiClient } from '../network/api-client';
  * **Só no Node, nas ferramentas de `tool/`.** O arquivo libera CORS apenas
  * para o domínio do próprio Tesouro, e o navegador não pode lê-lo: na web o
  * aplicativo nem chama esta fonte, e a curva vem do pacote do build
- * (decisão 86).
+ *.
  */
 export class TreasuryDatasource {
   /**

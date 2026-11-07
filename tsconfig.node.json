@@ -12,5 +12,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["scripts/**/*.ts", "vite.config.ts", "vitest.config.ts"]
+  "include": ["scripts/**/*.ts", "vite.config.ts", "vitest.config.ts"],
+  // O gerador do changelog importa src/data, que segue a resolucao do aplicativo
+  // (imports sem extensao); quem o confere e tool/tsconfig.json.
+  "exclude": ["scripts/gerar-changelog.ts"]
 }

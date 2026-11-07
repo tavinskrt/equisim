@@ -1,4 +1,4 @@
-// A cópia de `ValuationInputs` preserva todo campo (item B27).
+// A cópia de `ValuationInputs` preserva todo campo.
 //
 // Cada cópia repetia a lista de campos à mão, e três campos novos se perderam
 // em todas: `withProjectionYears` — que a concessão que acaba dentro da

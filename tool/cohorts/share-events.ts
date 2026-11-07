@@ -145,7 +145,7 @@ export class ShareEvents {
       if (!repeatedEvent) out.push(e);
     };
 
-    // **Cada fonte com a sua prova** (decisão 136). O quadro do FRE declara o
+    // **Cada fonte com a sua prova**. O quadro do FRE declara o
     // fator e a aprovação, não a data ex: ela é o pregão em que o preço
     // confirma — a primeira troca de `DISMES` depois da aprovação, que é o que
     // `CorporateEvents.locate` devolve para fator pequeno, é muitas vezes um
@@ -210,7 +210,7 @@ export class ShareEvents {
 
 /**
  * Os eventos que a fonte de preços **não** ajustou, com a data ex em que o
- * salto está (item B29).
+ * salto está.
  *
  * Para cada evento, procura a dez dias da data dada o pregão em que o bruto
  * salta pelo fator. Se nele o fator entre o bruto e a fonte também salta pelo
@@ -268,7 +268,7 @@ export function notAdjustedBySource(source: PriceSeries, rawSessions: readonly T
 
 /**
  * A contagem do FRE em [t] com os eventos que ele ainda não absorveu
- * (item B30).
+ *.
  *
  * O quadro de eventos do FRE parou em 2022, e daí em diante a contagem só muda
  * quando a companhia corrige o formulário — o que pode levar mais de um ano.
@@ -354,7 +354,7 @@ function locateInPrice(rawSessions: readonly TradingDay[], d: DateTime, q: numbe
 
 /**
  * As variações de capital do FRE que nenhum evento de ações explica, como
- * emissões **sem valor declarado** (item B28): a cascata não as soma, e diz
+ * emissões **sem valor declarado**: a cascata não as soma, e diz
  * quanto o preço justo mudaria se fossem emissão por valor.
  *
  * A bonificação também aumenta o capital — capitaliza reserva —, e o que a

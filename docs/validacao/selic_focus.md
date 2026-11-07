@@ -3,7 +3,7 @@
 Medido em 27/09/2026 por `dart run tool/selic_focus.dart`, sobre a entrada
 congelada do gabarito (14/09/2026), com a montagem de referência conferida
 ativo a ativo contra ele. Dados em [selic_focus.json](selic_focus.json).
-Pedido em [2026-09-27-voce.md](../apontamentos/2026-09-27-voce.md); item B33 do
+Pedido em 2026-09-27-voce.md; item B33 do
 plano.
 
 ## 0. A pergunta
@@ -19,15 +19,15 @@ se é recomendado.
 **A média do passado não é mais a taxa do motor.** Até 14/09/2026 a taxa livre
 de risco de cada ano ia, em linha reta, do CDI corrente até a **média decenal do
 CDI** no ano 10, e a perpetuidade era descontada nela — é a «Selic do passado»
-do pedido. A [decisão 74](../decisoes/074-a-taxa-livre-de-risco-segue-a-curva-observada.md)
+do pedido. A decisão 74
 pôs no núcleo a curva dos títulos prefixados do Tesouro. A
-[decisão 84](../decisoes/084-a-curva-e-o-padrao-do-aplicativo.md) a fez padrão:
+decisão 84 a fez padrão:
 **a taxa de cada ano é o forward de um ano da curva**, e a da perpetuidade, o
 forward depois do ano 10. A média decenal ficou só como **recuo**, quando falta
 curva de até sete dias.
 
 **E o recuo está acontecendo na web.** Lá, a curva vem só do pacote do build
-([decisão 86](../decisoes/086-na-web-a-curva-vem-so-do-pacote.md)). O pacote
+(decisão 86). O pacote
 versionado é de 10/09/2026, e desde 17/09 ele passou dos sete dias. **O
 aplicativo web de hoje desconta pela média decenal do CDI** — exatamente a taxa
 que o orientador quer trocar —, e o aviso da avaliação diz «sem curva de juros
@@ -75,11 +75,11 @@ a 33% na mediana. É esta a troca que o pedido descreve no efeito.
 
 **O nível melhora pouco.** O potencial mediano vai de −45% a −40% ou −42%, e o
 motor continua dizendo que a ação mediana vale menos da metade do preço. É o
-que a [decisão 116](../decisoes/116-o-premio-de-mercado-fica-em-5-5-por-cento-por-medicao-das-duas-alternativas.md)
+que a decisão 116
 já tinha medido pelo prêmio de risco: zerar o prêmio levava a mediana só a
 −30%. O desacordo de nível vem da rentabilidade das companhias abertas, abaixo
 do custo de capital delas
-([decisão 112](../decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md)),
+(decisão 112),
 e nenhuma taxa livre de risco plausível o fecha.
 
 **A ordenação quase não muda**: postos de 0,974 a 0,989. Taxa é botão de nível,
@@ -108,7 +108,7 @@ fixado sobre a curva, e a soma dos dois é que é o custo de capital.
 - **como cenário de sensibilidade declarado** — «se os juros seguirem o que o
   Focus espera, o preço justo seria X» —, ao lado do preço justo e sem
   substituí-lo, que é o papel dos cenários desde a
-  [decisão 92](../decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md);
+  decisão 92;
 - **na projeção do resultado financeiro**, que é fluxo, e não desconto: o juro
   do caixa e da dívida indexados ao CDI. O motor de hoje não projeta o resultado
   financeiro linha a linha, e esta seria uma mudança de modelo maior.

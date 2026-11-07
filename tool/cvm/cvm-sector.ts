@@ -1,4 +1,4 @@
-// O setor das companhias deslistadas que a B3 não classifica (item C1b).
+// O setor das companhias deslistadas que a B3 não classifica.
 //
 // A decisão 87 põe o setor da B3 em todo ativo, e o portal responde também
 // para 43 das 164 deslistadas da ponte. Para as outras, a única classificação

@@ -69,7 +69,7 @@ export const VerdictCopy = {
         };
   },
 
-  /** A linha do valuation do usuário, quando ele confirmou um que discorda do motor (decisão 151). */
+  /** A linha do valuation do usuário, quando ele confirmou um que discorda do motor. */
   mine(record: ManualValuationRecord, marketToday: number): string {
     const upside = marketToday > 0 ? record.fairValuePerShare / marketToday - 1 : null;
     return (

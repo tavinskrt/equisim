@@ -16,7 +16,7 @@ export interface MarketPremiumReading {
 
 /**
  * O prêmio de risco de mercado do CAPM, da série do prêmio implícito
- * empacotada com o aplicativo (decisão 142).
+ * empacotada com o aplicativo.
  *
  * **Por que vem empacotado.** O prêmio implícito iguala o valor de mercado
  * somado das companhias listadas ao dinheiro que elas distribuem — somar a
@@ -61,7 +61,7 @@ export class MarketPremiumRepository {
       note:
         'A série do prêmio implícito não veio no pacote do build: o ' +
         'prêmio de mercado é o parametrizado de 5,5%, e não a média de dez ' +
-        'anos do prêmio implícito no preço da bolsa (decisão 142).',
+        'anos do prêmio implícito no preço da bolsa.',
     };
     const p = await this.pkg();
     if (p === null) return noPackage;

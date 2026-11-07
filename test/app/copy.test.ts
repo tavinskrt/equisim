@@ -88,14 +88,14 @@ describe('Rótulos de tela dos enums', () => {
 
   it('a tela lê o que lia antes da mudança', () => {
     expect(DomainCopy.model(ValuationModel.dcfFcff)).toBe('DCF por fluxo da firma');
-    // Pelas premissas, e não pelo resultado (decisão 148, item B38).
+    // Pelas premissas, e não pelo resultado.
     expect(DomainCopy.band(ScenarioBand.bear)).toBe('Premissas mais duras');
     expect(DomainCopy.band(ScenarioBand.bull)).toBe('Premissas mais brandas');
     expect(DomainCopy.multiple(MultipleKind.evToEbitda)).toBe('EV/EBITDA');
   });
 });
 
-describe('A ressalva do prêmio segue a medição, e não um texto fixo (item B1.0)', () => {
+describe('A ressalva do prêmio segue a medição, e não um texto fixo', () => {
   const order = (ic: number, passes = false) =>
     new OrderingReading({ ic, overlapT: passes ? 3.1 : 0.7, overlapCritical: 2.7, neweyWestT: passes ? 3.0 : 1.2 });
 

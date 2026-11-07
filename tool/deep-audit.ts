@@ -110,7 +110,7 @@ export function diagnose(inputs: ValuationInputs): Record<string, unknown> {
           costOfDebt: kd,
           taxRate: ValuationParameters.statutoryTaxRate,
           equityValue: equityMkt,
-          // A líquida, como o motor (decisão 104).
+          // A líquida, como o motor.
           debtValue: latest.netDebt,
           interestCoverage: latest.interestCoverage,
           netDebtToEbitda: latest.netDebtToEbitda,

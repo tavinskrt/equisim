@@ -9,7 +9,7 @@ const MAX_TILT = 3;
 const spring = { stiffness: 260, damping: 26, mass: 0.6 };
 
 /**
- * **Profundidade à moda do Linear** (decisão 155): o cartão inclina poucos
+ * **Profundidade à moda do Linear**: o cartão inclina poucos
  * graus seguindo o ponteiro, em perspectiva, e um brilho acompanha o cursor
  * por cima da superfície. É CSS 3D (`perspective`, `rotateX`, `rotateY`)
  * movido por mola — sem biblioteca 3D.

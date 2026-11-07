@@ -40,7 +40,7 @@ describe('Money', () => {
     expect(() => Money.fromReais(Number.POSITIVE_INFINITY)).toThrow(UnsupportedError);
   });
 
-  it('o número do balanço não perde centavo (B21, decisão 125)', () => {
+  it('o número do balanço não perde centavo (B21)', () => {
     // A CVM é lida em centavos exatos (`CvmAccountLine.fromText`), e o
     // `FundamentalsSnapshot` a guarda em reais `number`. A ida e volta
     // centavo → número → Money é exata em toda a faixa de um balanço: o

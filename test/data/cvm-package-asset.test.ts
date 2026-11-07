@@ -5,7 +5,7 @@ import { AssetPaths } from '../../src/data/config/asset-paths';
 import { asObject, isServed, readPublicJson, universeTickers } from './public-assets';
 
 /**
- * O pacote da CVM versionado é o que o build leva (decisão 80).
+ * O pacote da CVM versionado é o que o build leva.
  *
  * No aplicativo, pacote ausente ou ilegível vira ressalva — a avaliação segue.
  * Aqui, **reprova a suíte**: um build que sai sem a CVM por descuido não é

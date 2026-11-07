@@ -1,7 +1,7 @@
 /**
  * O ano corrente anualizado: o acumulado do último ITR vezes `12 ÷ meses`.
  *
- * **O problema que isto resolve** (decisão 153). Entre uma DFP e a seguinte,
+ * **O problema que isto resolve**. Entre uma DFP e a seguinte,
  * o lucro de partida da cascata ficava congelado no exercício anterior, mesmo
  * com dois ou três ITRs do ano corrente já públicos. O BBAS3 em 25/10/2026
  * partia do lucro de 2025, com o 1S26 publicado desde 12/08/2026.
@@ -49,7 +49,7 @@ export const YearToDate = {
    *
    * **Fluxo vezes `12 ÷ meses`, estoque como está.** O balanço é o da data do
    * ITR: é o mais recente publicado, e anualizá-lo inventaria um balanço que
-   * ninguém fechou. Campo de fluxo ausente fica ausente (decisão 52). LPA não
+   * ninguém fechou. Campo de fluxo ausente fica ausente. LPA não
    * se anualiza: é por ação, e a cascata não o lê deste ponto.
    */
   annualize(itr: CvmPeriodDocument, months: number): FundamentalsSnapshot {

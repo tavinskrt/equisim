@@ -84,11 +84,11 @@ Detalhes que o motor cuida:
 - **Retorno total dos dois lados.** O Ibovespa já inclui os proventos
   reinvestidos. Se a ação entrasse só pelo preço, o dia em que ela paga
   dividendo (e o preço cai por isso) pareceria uma queda de risco. O motor monta
-  o retorno da ação com os proventos da B3 (decisão 89).
+  o retorno da ação com os proventos da B3.
 - **Pelo menos 30 dias pareados**; com menos, o beta é fixado em 1 e isso fica
   registrado.
 - **Janela curta é declarada.** Empresa listada há menos de quatro anos gera
-  aviso (decisão 111).
+  aviso.
 
 **No código:** [beta.ts](../../src/core/services/metrics/beta.ts)
 e [prepare-valuation-inputs.ts, `estimateBeta`](../../src/core/usecases/prepare-valuation-inputs.ts).
@@ -120,8 +120,7 @@ Na prática o peso mediano é 0,98: quase sempre vale a própria medida. O
 encolhimento só age onde ela é ruim. Essa é a mesma lógica do "beta de Vasicek"
 (1973) e dos ajustes que a Bloomberg aplica.
 
-**No código:** [beta-shrinkage.ts](../../src/core/services/metrics/beta-shrinkage.ts)
-(decisão 40).
+**No código:** [beta-shrinkage.ts](../../src/core/services/metrics/beta-shrinkage.ts).
 
 ---
 
@@ -191,7 +190,7 @@ Na data dos casos deste guia (14/09/2026), os forwards anuais da curva daquele d
 ![Os forwards da curva do Tesouro em 14/09/2026](img/curva-forwards.svg)
 
 **O Equisim usa um forward para cada ano da projeção** e o forward depois do
-décimo ano para a perpetuidade (decisão 74). Sem a curva (o pacote do
+décimo ano para a perpetuidade. Sem a curva (o pacote do
 aplicativo web vence em sete dias), o motor recua para duas pontas: o CDI de
 hoje no ano 1 e a média de dez anos do CDI na perpetuidade, ligadas por uma
 reta.
@@ -205,7 +204,7 @@ reta.
 Quanto um investidor exige, a mais que a taxa livre de risco, para ficar no
 mercado de ações em vez da renda fixa? Esse adicional é o **prêmio de risco de
 mercado**. É uma das premissas mais discutidas de finanças, e o Equisim o tira
-do próprio preço da bolsa (decisão 142).
+do próprio preço da bolsa.
 
 **A ideia, com um título de renda fixa.** Se um título paga R$ 100 por ano para
 sempre e custa R$ 1.000, quem o compra está aceitando ganhar 10% ao ano: a taxa
@@ -236,14 +235,13 @@ em todas as datas testadas desde 2018, e bate com o que o Ibovespa rendeu acima
 do CDI em dez anos (+1,85%) — dois caminhos independentes dando a mesma ordem
 de grandeza ([premio_implicito.md](../validacao/premio_implicito.md)).
 
-**Antes era 5,5%.** Até 01/10/2026 o prêmio era um parâmetro fixo, o meio da
-faixa de 5% a 6% que os livros costumam usar
-([decisão 116](../decisoes/116-o-premio-de-mercado-fica-em-5-5-por-cento-por-medicao-das-duas-alternativas.md)).
-O orientador perguntou se dava para capturá-lo do mercado em vez de fixá-lo;
-medido, o mercado brasileiro paga muito menos que 5,5% acima do prefixado — o
-título do Tesouro já rende tanto que sobra pouco prêmio para a bolsa. Os 5,5%
-continuam no código só como recuo, se a série do prêmio implícito não chegar ao
-aplicativo.
+**E os 5,5% dos livros?** A faixa de 5% a 6% que os livros costumam usar
+para o prêmio é parâmetro, e não medida. Medido, o mercado brasileiro paga
+muito menos que 5,5% acima do prefixado — o título do Tesouro já rende tanto que
+sobra pouco prêmio para a bolsa
+([premio_de_mercado.md](../validacao/premio_de_mercado.md)). Os 5,5% ficam no
+código só como recuo, se a série do prêmio implícito não chegar ao aplicativo, e
+a avaliação diz quando isso acontece.
 
 **O que o número carrega:** supõe que os dividendos crescem com a economia (um
 ponto a mais de crescimento sobe o prêmio em cerca de um ponto), não conta a
@@ -286,7 +284,7 @@ todo ele é a taxa do Tesouro.
   CDI (seção 3.6), e o risco do sócio recalculado com a dívida daquele ano
   (seção 3.10);
 - **na tela de metas**, o retorno esperado de cada ação é o Ke calculado com o
-  CDI de hoje (decisão 103).
+  CDI de hoje.
 
 **E as estatais? Não deveriam pagar uma taxa maior?** A intuição é boa: o
 governo controlador pode segurar o preço do combustível, a tarifa da água ou o
@@ -299,7 +297,7 @@ o das privadas, e elas também são **menos** sensíveis ao risco do país — o
 deu cerca de 0,7, abaixo de 1. Pela teoria, o risco do controlador está em
 outro lugar: no lucro que o minoritário pode esperar receber, e não na taxa.
 Por isso o motor não cobra um prêmio a mais, e a tela mostra a ressalva
-**controle estatal** ([estatais.md](../validacao/estatais.md); item B46).
+**controle estatal** ([estatais.md](../validacao/estatais.md)).
 
 ---
 
@@ -310,8 +308,7 @@ de risco mais um **prêmio de crédito** (*spread*) que depende de quão arrisca
 é emprestar para ela.
 
 O motor não usa "despesa financeira ÷ dívida" diretamente, porque essa conta
-mistura arrendamentos, variação cambial e dívidas antigas a taxas velhas
-(decisão 31). Em vez disso, classifica a empresa por duas réguas, no estilo das
+mistura arrendamentos, variação cambial e dívidas antigas a taxas velhas. Em vez disso, classifica a empresa por duas réguas, no estilo das
 agências de rating:
 
 | Dívida líquida ÷ EBITDA | Prêmio | | Cobertura (EBIT ÷ juros) | Prêmio |
@@ -330,7 +327,7 @@ agências de rating:
 
 A alavancagem vale sempre. A cobertura só entra quando a despesa financeira
 parece juro de verdade (entre a taxa livre de risco e ela mais 10 pontos), e aí
-vale o **maior** dos dois prêmios (decisão 130)
+vale o **maior** dos dois prêmios
 ([cost-of-capital.ts, `syntheticSpread`](../../src/core/services/valuation/cost-of-capital.ts)).
 
 **O escudo fiscal.** Juro é despesa dedutível: cada R$ 100 de juros reduz o
@@ -359,7 +356,7 @@ WACC = 0,8 × 18% + 0,2 × 16% × 0,66 = 14,4% + 2,11% = 16,51%
 
 **Um refinamento do motor: o caixa rende a taxa livre de risco.** A dívida
 líquida é "dívida menos caixa", mas a dívida custa `Kd` e o caixa rende só a taxa
-livre de risco. O motor separa as duas pernas (decisão 113):
+livre de risco. O motor separa as duas pernas:
 
 ```
 WACC = (E÷V) × Ke + (D_bruta÷V) × Kd × (1−34%) − (Caixa÷V) × Rf × (1−34%)
@@ -377,11 +374,11 @@ Há uma circularidade: o peso `E ÷ V` usa o valor das ações, e o valor das a�
 é justamente o que se quer calcular. Além disso, conforme a empresa cresce, a
 dívida muda, e com ela o beta do sócio (Hamada).
 
-O motor resolve isso por **ponto fixo** (decisões 41 e 105): chuta um caminho de
+O motor resolve isso por **ponto fixo**: chuta um caminho de
 taxas, avalia, recalcula a dívida e o beta de cada ano com o valor obtido,
 recalcula as taxas, e repete até que nada mude (tolerância de 10⁻¹⁰, no máximo
 100 voltas). Começa de dois pontos diferentes, para garantir que a resposta não
-depende do chute (decisão 110). Bancos não passam por isso: neles a
+depende do chute. Bancos não passam por isso: neles a
 dívida é matéria-prima, e o beta medido já carrega a alavancagem de sempre
 (capítulo 5).
 

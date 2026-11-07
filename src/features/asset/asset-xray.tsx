@@ -31,7 +31,7 @@ import { SensitivityCard } from './sensitivity-card';
 
 /**
  * **O corpo do Raio-X**: a avaliação inteira de um ativo, com as premissas à
- * vista. Mora na página própria do ativo (`/ativo/:ticker`, decisão 155), que
+ * vista. Mora na página própria do ativo (`/ativo/:ticker`), que
  * põe o cabeçalho e o Voltar em volta dele.
  */
 export function XRayBody({ ticker }: { ticker: Ticker }) {

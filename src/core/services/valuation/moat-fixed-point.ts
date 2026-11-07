@@ -4,7 +4,7 @@
  * **Por que mora fora da cascata.** O veredito do moat usa a taxa terminal
  * para medir o excedente, e a taxa terminal sai de um ponto fixo que depende
  * do retorno terminal que o veredito concede. A cascata repõe a pergunta até
- * ela parar de mudar, com teto declarado (decisão 51) — e o caminho em que o
+ * ela parar de mudar, com teto declarado — e o caminho em que o
  * teto é alcançado, com o par ainda alternando, não tinha teste: fabricar um
  * ativo exatamente na fronteira do veredito é frágil, e a primeira mudança de
  * parâmetro o tiraria de lá sem aviso (lente `risco`, item D3).

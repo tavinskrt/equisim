@@ -1,4 +1,4 @@
-/** Contagem de ações por data, do Formulário de Referência (item A3.4). */
+/** Contagem de ações por data, do Formulário de Referência. */
 
 import { DartEnum } from '../../lang/dart-enum';
 import { DateTime } from '../../lang/date-time';

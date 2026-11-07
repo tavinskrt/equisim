@@ -1,4 +1,4 @@
-// A série do motor pré-registrado do C7, produzida pelo commit dele (item C7,
+// A série do motor pré-registrado do C7, produzida pelo commit dele (
 // decisões 133 e 138).
 //
 // **Quando o motor muda, a selagem do dia sela a série «motor da data».** A
@@ -9,7 +9,7 @@
 // base bruta — que o git não versiona — por junção, roda nele o backtest em
 // modo `--c7` e sela o resultado com a impressão pré-registrada.
 //
-// **O motor pré-registrado é o núcleo em Dart** (decisão 152): o commit dele
+// **O motor pré-registrado é o núcleo em Dart**: o commit dele
 // tem o `pubspec.yaml` e o `tool/backtest_valuation.dart`, e por isso este
 // programa roda nele o `flutter pub get` e o `dart run` — o SDK do Flutter
 // precisa estar no PATH. Um motor pré-registrado já em TypeScript rodaria com

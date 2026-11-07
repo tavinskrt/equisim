@@ -71,7 +71,7 @@ const complete = (year: number, scale = 1.0): FundamentalsSnapshot =>
  *
  * Dez exercícios por padrão: a Porta 0 exige ao menos oito publicados, que é o
  * mínimo em que a janela de ciclo existe e os testes das guardas têm graus de
- * liberdade (decisão 25).
+ * liberdade.
  */
 const growingHistory = (o: { rate: number; years?: number; endYear?: number }): FundamentalsSnapshot[] => {
   const years = o.years ?? 10;
@@ -88,11 +88,11 @@ const growingHistory = (o: { rate: number; years?: number; endYear?: number }): 
 describe('GrowthEstimator', () => {
   it('perpetuidade nunca supera o crescimento da economia', () => {
     // O teto passa a ser informado, não constante: 6,52% é a composição do
-    // crescimento real medido do IBC-Br com o IPCA observado (decisão 25).
+    // crescimento real medido do IBC-Br com o IPCA observado.
     const cap = 0.0652;
     expect(GrowthEstimator.perpetual({ explicitGrowth: 0.15, economyGrowth: cap })).toBe(cap);
     expect(GrowthEstimator.perpetual({ explicitGrowth: 0.01, economyGrowth: cap })).toBe(0.01);
-    // **O piso é o da banda de sanidade, e não zero** (decisão 56). O piso
+    // **O piso é o da banda de sanidade, e não zero**. O piso
     // em zero afirmava que toda empresa em declínio volta a crescer zero em
     // dez anos, e tornava inalcançável o limite que o projeto já declarara
     // em `floorRate` — com a razão escrita lá.
@@ -452,7 +452,7 @@ describe('MarketAnchors — unidades', () => {
   it('crescimento perpétuo composto real com inflação', () => {
     const anchors = new MarketAnchors({ riskFreeCagr: 0.094, marketCagr: 0.1126, inflationCagr: 0.05, observedYears: 10 });
     // (1 + 1,45%) × (1 + 5%) − 1. A parcela real deixou de ser a constante
-    // de 3% e passou a ser medida do IBC-Br (decisão 25).
+    // de 3% e passou a ser medida do IBC-Br.
     expectClose(anchors.nominalEconomyGrowth, 0.0652, 1e-4);
     expect(
       anchors.nominalEconomyGrowth,

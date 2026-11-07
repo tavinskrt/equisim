@@ -38,7 +38,7 @@ fundamenta. Entre colchetes, o capítulo desta documentação onde a regra apare
   1233–1239. Encolhimento do beta. [4]
 - **Dimson, E.** (1979). Risk measurement when shares are subject to infrequent
   trading. *Journal of Financial Economics*, 7(2), 197–226. Correção medida e
-  recusada (decisão 57). [1]
+  recusada ([beta_sincronia.md](../validacao/beta_sincronia.md)). [1]
 - **Damodaran, A.** *Equity Risk Premiums: Determinants, Estimation and
   Implications* (atualização anual, SSRN). Prêmio de mercado e risco-país. [4]
 

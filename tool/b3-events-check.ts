@@ -1,7 +1,7 @@
 // A3.1 — o registro oficial da B3 contra a inferência pelo preço.
 //
 // `CorporateEvents` infere desdobramento, grupamento e bonificação da razão
-// entre pregões (decisão 75). O registro da B3 declara o fator (decisão 83).
+// entre pregões. O registro da B3 declara o fator.
 // Aqui os dois se encontram, papel a papel, de 2010 em diante, para os
 // emissores do universo:
 //

@@ -2,7 +2,7 @@ import { CalibratedBandCodec, type CalibratedBandTable } from '../../core';
 import { memoizedPackage, type PackageLoader } from './package-loader';
 
 /**
- * Faixa calibrada empacotada com o aplicativo (item C2, decisão 92).
+ * Faixa calibrada empacotada com o aplicativo.
  *
  * Gerada por `tool/cobertura_banda.py` a partir das coortes da validação.
  * **Sem pacote, o repositório é transparente**: a tela de avaliação não mostra

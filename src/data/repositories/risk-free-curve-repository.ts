@@ -15,7 +15,7 @@ export interface CurveReading {
 }
 
 /**
- * A curva de juros da avaliação de hoje (item A2.1, decisões 84 e 86).
+ * A curva de juros da avaliação de hoje.
  *
  * **A curva é o padrão do aplicativo**, por decisão do usuário: com ela, a
  * taxa de cada ano da projeção é o forward da curva dos prefixados, e a da

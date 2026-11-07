@@ -1,4 +1,4 @@
-import { AtSign, ChevronRight, KeyRound, LogOut, Mail, Trash2 } from 'lucide-react';
+import { AtSign, ChevronRight, History, KeyRound, LogOut, Mail, Trash2 } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
@@ -7,6 +7,7 @@ import { getRuntime } from '../../app/runtime';
 import { PreferencesActions, usePreferences } from '../../app/state/preferences-store';
 import { signOutSession, useSession } from '../../app/state/session-store';
 import { emptyStudy, StudyActions } from '../../app/state/study-store';
+import { APP_VERSION_LABEL } from '../../app/version';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { Card, Panel } from '../../ui/card';
@@ -14,11 +15,12 @@ import { ConfirmDialog } from '../../ui/dialog';
 import { TextField } from '../../ui/field';
 import { Segmented } from '../../ui/segmented';
 import { toast } from '../../ui/toast';
+import { ChangelogActions } from '../changelog/changelog-store';
 import { FormError, PasswordField } from './auth-layout';
 
 /**
  * **Meu perfil**: o nome e o e-mail da conta, as preferências, a troca de
- * senha e a exclusão. No modo local não há conta a editar — a tela diz onde
+ * senha, a versão do Equisim em uso e a exclusão. No modo local não há conta a editar — a tela diz onde
  * os dados ficam e oferece entrar.
  */
 export function ProfilePage() {
@@ -41,6 +43,7 @@ export function ProfilePage() {
           )}
         </Card>
         <PreferencesCard />
+        <AboutCard />
       </div>
     );
   }
@@ -77,6 +80,7 @@ export function ProfilePage() {
           Sair
         </Button>
       </Panel>
+      <AboutCard />
       <DeleteAccount />
     </div>
   );
@@ -170,6 +174,25 @@ function PreferencesCard() {
             ]}
           />
         </div>
+      </div>
+    </Panel>
+  );
+}
+
+/** A versão em uso, com o caminho para o histórico de versões. */
+function AboutCard() {
+  return (
+    <Panel title="Sobre o Equisim">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-body-sm text-fg-2">
+          Versão em uso{' '}
+          <Badge tone="neutral" className="num ml-1 align-middle">
+            {APP_VERSION_LABEL}
+          </Badge>
+        </p>
+        <Button variant="ghost" icon={<History aria-hidden className="size-4" />} onClick={() => ChangelogActions.open()}>
+          Ver o changelog
+        </Button>
       </div>
     </Panel>
   );
