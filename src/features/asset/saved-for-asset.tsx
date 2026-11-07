@@ -4,7 +4,7 @@ import { Panel } from '../../ui/card';
 import { SavedValuationItem } from '../valuations/saved-valuation-item';
 
 /**
- * Os valuations que o usuário confirmou para este ativo (decisão 150), logo
+ * Os valuations que o usuário confirmou para este ativo, logo
  * abaixo do preço do motor com que eles se comparam. Sem nenhum, não ocupa
  * espaço.
  */

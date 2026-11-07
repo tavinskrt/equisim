@@ -3,7 +3,7 @@
 Medido em 11/09/2026, sobre DFP 2024, ITR 2024 e sete anos de FCA
 (2019–2025), contra os **375 tickers** do universo.
 
-O [plano](../plano-motor-de-referencia.md) exigia isto antes de qualquer
+O plano exigia isto antes de qualquer
 código: *"o registro deste projeto não aceita plano escrito sobre suposição de
 campo"*. Este documento é a conferência, e ela **corrigiu duas conclusões que
 eu tinha tirado cedo demais**.

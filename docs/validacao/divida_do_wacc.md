@@ -31,7 +31,7 @@ O peso do WACC ficou de fora daquela decisão.
 ## 2. O que mudou
 
 A dívida dos pesos passou a ser a líquida
-([decisão 104](../decisoes/104-a-divida-do-wacc-e-a-liquida-como-no-resto-do-modelo.md)).
+(decisão 104).
 O `K_d` observado continua sendo `despesa financeira ÷ dívida bruta` — razão
 sobre o que de fato paga juro —, e o prêmio de crédito continua saindo de
 `dívida líquida ÷ EBITDA`.

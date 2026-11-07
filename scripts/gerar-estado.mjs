@@ -3,28 +3,24 @@
  *
  *     node scripts/gerar-estado.mjs
  *
- * Este arquivo existe por causa de um defeito especifico e ja observado: o
- * `PLANO_ARQUITETURA.md` mantinha o estado das fases a mao, com marcadores
- * "CONCLUIDA (19/08/2026)" e itens "- [x]". Nove commits depois, ele nao sabia
- * que as quatro Ondas de refatoracao de UI existiam. Estado escrito a mao
- * apodrece porque muda a cada commit e ninguem reescreve documento a cada
- * commit.
- *
- * A saida e DERIVADA, nunca redigida. Se um numero aqui esta errado, o conserto
- * e neste script -- editar `docs/estado.md` a mao seria recriar exatamente o
- * problema que ele resolve. Por isso o arquivo gerado abre com um aviso.
+ * Estado escrito a mao apodrece: muda a cada commit, e ninguem reescreve
+ * documento a cada commit. A saida aqui e DERIVADA, nunca redigida -- a versao
+ * do `package.json`, as versoes do `CHANGELOG.md`, a superficie medida e o
+ * historico do git. Se um numero aqui esta errado, o conserto e neste script, e
+ * por isso o arquivo gerado abre com um aviso.
  *
  * POR QUE .mjs E NAO .ts: roda com `node` puro, sem passar pelo `tsx`. Nao ha
  * tipo interessante a declarar aqui, e a partida instantanea importa se um dia
- * isto entrar num hook para manter o arquivo fresco.
+ * isto entrar num hook para manter o arquivo fresco. Pelo mesmo motivo ele le o
+ * `CHANGELOG.md` gerado, e nao importa `src/data/changelog.ts`.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
-const DECISIONS = join(ROOT, 'docs', 'decisoes');
-const REMARKS = join(ROOT, 'docs', 'apontamentos');
+const CHANGELOG = join(ROOT, 'CHANGELOG.md');
+const PACKAGE = join(ROOT, 'package.json');
 const OUTPUT = join(ROOT, 'docs', 'estado.md');
 
 function git(args) {
@@ -36,98 +32,31 @@ function git(args) {
 }
 
 /**
- * Leitor de frontmatter suficiente para o formato de `docs/decisoes/`.
- *
- * NAO e um parser de YAML, e nao pretende ser: entende escalar, bloco dobrado
- * (`>`) e lista de `- `. Um formato que exigisse mais que isso ja seria formato
- * demais para um registro que precisa ser escrito a mao sob pressao.
+ * As versoes do `CHANGELOG.md`, na ordem em que aparecem (da mais recente para
+ * a mais antiga): cabecalho `## [MAJOR.MINOR.PATCH] - AAAA-MM-DD`, seguido do
+ * titulo em italico e das categorias `### ...` com os itens.
  */
-function readFrontmatter(text) {
-  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!m) return null;
-
-  const fields = {};
-  const lines = m[1].split(/\r?\n/);
-  let currentKey = null;
-  let mode = null; // 'lista' | 'bloco'
-
-  for (const line of lines) {
-    const item = line.match(/^\s+-\s+(.*)$/);
-    if (item && mode === 'lista' && currentKey) {
-      fields[currentKey].push(item[1].trim());
+function readReleases() {
+  if (!existsSync(CHANGELOG)) return [];
+  const releases = [];
+  let current = null;
+  for (const line of readFileSync(CHANGELOG, 'utf8').split(/\r?\n/)) {
+    const head = /^## \[(\d+\.\d+\.\d+)\] - (\d{4}-\d{2}-\d{2})$/.exec(line);
+    if (head) {
+      current = { version: head[1], date: head[2], title: '', items: 0 };
+      releases.push(current);
       continue;
     }
-    const continuation = line.match(/^\s{2,}(\S.*)$/);
-    if (continuation && mode === 'bloco' && currentKey) {
-      fields[currentKey] = (fields[currentKey] + ' ' + continuation[1]).trim();
+    if (/^## /.test(line)) {
+      current = null;
       continue;
     }
-
-    const pair = line.match(/^([a-z_]+):\s*(.*)$/i);
-    if (!pair) continue;
-    const [, key, value] = pair;
-    currentKey = key;
-
-    if (value === '' ) {
-      fields[key] = [];
-      mode = 'lista';
-    } else if (value === '>' || value === '|') {
-      fields[key] = '';
-      mode = 'bloco';
-    } else if (value === '[]' || value === '[ ]') {
-      fields[key] = [];
-      mode = null;
-    } else {
-      fields[key] = value.trim();
-      mode = null;
-    }
+    if (current === null) continue;
+    const title = /^_(.+)_$/.exec(line);
+    if (title && current.title === '') current.title = title[1];
+    else if (/^- /.test(line)) current.items += 1;
   }
-  return fields;
-}
-
-function readDecisions() {
-  if (!existsSync(DECISIONS)) return [];
-  const parsed = readdirSync(DECISIONS)
-    .filter((f) => /^\d{3}-.*\.md$/.test(f))
-    .sort()
-    .map((file) => ({
-      file,
-      fields: readFrontmatter(readFileSync(join(DECISIONS, file), 'utf8')),
-    }));
-  // **Caminho retirado não é caminho quebrado.** Decisão aceita não se edita,
-  // e a que apaga um documento declara isso em `retira`: quem o tinha em
-  // `afeta` perde esse objeto sem ser tocada, e o caminho sai da lista de
-  // quebrados para a de retirados, com a decisão que o apagou.
-  const retired = new Map();
-  for (const { fields } of parsed) {
-    if (!fields || !Array.isArray(fields.retira)) continue;
-    for (const p of fields.retira) retired.set(p, Number(fields.numero));
-  }
-  return parsed.map(({ file, fields }) => {
-      if (!fields) return { file, invalid: true };
-      const affects = Array.isArray(fields.afeta) ? fields.afeta : [];
-      const supersedes = (Array.isArray(fields.substitui) ? fields.substitui : [])
-        .map(Number)
-        .filter((n) => Number.isFinite(n));
-      return {
-        file,
-        number: Number(fields.numero),
-        title: fields.titulo ?? '(sem titulo)',
-        status: fields.status ?? '(sem status)',
-        origin: fields.origem ?? '(sem origem)',
-        date: fields.data ?? '',
-        affects,
-        supersedes,
-        // O unico teste que uma maquina consegue fazer sozinha: o caminho
-        // existe? Se a decisao e RESPEITADA e semantico, e cabe a lente.
-        broken: affects.filter(
-          (p) => !existsSync(join(ROOT, p)) && !retired.has(p),
-        ),
-        retired: affects
-          .filter((p) => !existsSync(join(ROOT, p)) && retired.has(p))
-          .map((p) => ({ path: p, retiredBy: retired.get(p) })),
-      };
-    });
+  return releases;
 }
 
 function countLines(filePaths, excludeSuffixes = []) {
@@ -165,11 +94,8 @@ const SURFACE = [
 ];
 
 function generate() {
-  const decisions = readDecisions();
-  const remarks = existsSync(REMARKS)
-    ? readdirSync(REMARKS).filter((f) => f.endsWith('.md') && f !== 'README.md')
-    : [];
-
+  const releases = readReleases();
+  const version = JSON.parse(readFileSync(PACKAGE, 'utf8')).version;
   const commit = git(['rev-parse', '--short', 'HEAD']);
   const now = new Date().toISOString().slice(0, 10);
 
@@ -178,106 +104,33 @@ function generate() {
   L.push('');
   L.push('> **Arquivo gerado. Não edite à mão.**');
   L.push('>');
-  L.push('> Regenere com `node scripts/gerar-estado.mjs`. Se um número aqui está');
-  L.push('> errado, o conserto é no script — editar este arquivo recria o');
-  L.push('> problema que ele existe para resolver: estado escrito à mão apodrece');
-  L.push('> porque muda a cada commit.');
+  L.push('> Regenere com `npm run estado`. Se um número aqui está errado, o');
+  L.push('> conserto é no script — editar este arquivo recria o problema que ele');
+  L.push('> existe para resolver: estado escrito à mão apodrece porque muda a');
+  L.push('> cada commit.');
   L.push('');
   L.push(`Gerado em ${now}, a partir de \`${commit}\`.`);
   L.push('');
 
-  // --- Decisões -----------------------------------------------------------
-  L.push('## Decisões registradas');
+  // --- Versão -------------------------------------------------------------
+  L.push('## Versão');
   L.push('');
-  if (decisions.length === 0) {
-    L.push('Nenhuma decisão registrada em `docs/decisoes/`.');
+  const latest = releases[0];
+  L.push(`Versão do \`package.json\`: **${version}**.`);
+  if (latest === undefined) {
     L.push('');
-    L.push('Isso não significa que o projeto não tenha decisões — significa que');
-    L.push('elas ainda vivem em prosa dentro do parecer, que é exatamente a');
-    L.push('condição que a lente `registro` do conselheiro existe para corrigir.');
-  } else {
-    const superseded = new Set();
-    for (const d of decisions) {
-      for (const target of d.supersedes ?? []) superseded.add(target);
-    }
-    const byStatus = {};
-    for (const d of decisions) {
-      const key = superseded.has(d.number) ? 'substituída' : d.status;
-      byStatus[key] = (byStatus[key] ?? 0) + 1;
-    }
+    L.push('O `CHANGELOG.md` não tem versão publicada. Regenere com `npm run changelog`.');
+  } else if (latest.version !== version) {
+    L.push('');
     L.push(
-      Object.entries(byStatus)
-        .map(([s, n]) => `**${n}** ${s}`)
-        .join(' · '),
+      `**Divergência:** a versão mais recente do \`CHANGELOG.md\` é ${latest.version}. ` +
+        'As duas têm de ser a mesma (`test/data/changelog.test.ts` reprova).',
     );
-    L.push('');
-    // **Quem foi substituído tem de aparecer substituído.** O campo
-    // `substitui` mora em quem substitui, e a tabela mostrava só o `status` de
-    // cada decisão — de modo que a 39, substituída pela 102, continuava
-    // constando como `aceita`. Quem lesse o estado — pessoa ou lente — via
-    // decisão morta como viva, e a lente `rumo` reabriu o mesmo item duas
-    // rodadas seguidas por causa disto.
-    const supersededBy = new Map();
-    for (const d of decisions) {
-      for (const target of d.supersedes ?? []) {
-        const list = supersededBy.get(target) ?? [];
-        list.push(d.number);
-        supersededBy.set(target, list);
-      }
-    }
-
-    L.push('| # | Título | Status | Origem | Data |');
-    L.push('|---|---|---|---|---|');
-    for (const d of decisions) {
-      const supersedingList = supersededBy.get(d.number);
-      const status = supersedingList
-        ? `substituída pela ${supersedingList.sort((a, b) => a - b).join(', ')}`
-        : d.status;
-      L.push(`| ${d.number} | ${d.title} | ${status} | ${d.origin} | ${d.date} |`);
-    }
-
-    const withRetired = decisions.filter((d) => d.retired?.length > 0);
-    if (withRetired.length > 0) {
-      L.push('');
-      L.push('### Caminhos retirados');
-      L.push('');
-      L.push(
-        'Decisões cujo `afeta` cita caminho que uma decisão posterior apagou ' +
-          '(campo `retira`). A decisão antiga não se edita; perdeu esse objeto.',
-      );
-      L.push('');
-      for (const d of withRetired) {
-        for (const r of d.retired) {
-          L.push(`- decisão ${d.number} → \`${r.path}\`, retirado pela ${r.retiredBy}`);
-        }
-      }
-    }
-
-    const withBreak = decisions.filter((d) => d.broken?.length > 0);
-    if (withBreak.length > 0) {
-      L.push('');
-      L.push('### Referências quebradas');
-      L.push('');
-      L.push('Decisões cujo `afeta` aponta para caminho que não existe mais.');
-      L.push('');
-      for (const d of withBreak) {
-        for (const p of d.broken) {
-          L.push(`- decisão ${d.number} → \`${p}\``);
-        }
-      }
-    }
   }
   L.push('');
-
-  // --- Caixa de entrada ---------------------------------------------------
-  L.push('## Caixa de entrada');
-  L.push('');
-  L.push(
-    remarks.length === 0
-      ? 'Vazia.'
-      : `${remarks.length} apontamento(s) não convertidos em decisão:\n\n` +
-          remarks.map((a) => `- \`${a}\``).join('\n'),
-  );
+  L.push('| Versão | Data | Tema | Itens |');
+  L.push('|---|---|---|---:|');
+  for (const r of releases) L.push(`| ${r.version} | ${r.date} | ${r.title} | ${r.items} |`);
   L.push('');
 
   // --- Superfície ---------------------------------------------------------
@@ -302,10 +155,7 @@ function generate() {
   L.push('');
 
   writeFileSync(OUTPUT, L.join('\n'), 'utf8');
-  process.stdout.write(
-    `docs/estado.md gerado -- ${decisions.length} decisao(oes), ` +
-      `${remarks.length} apontamento(s).\n`,
-  );
+  process.stdout.write(`docs/estado.md gerado -- versao ${version}, ${releases.length} versao(oes) no changelog.\n`);
 }
 
 generate();

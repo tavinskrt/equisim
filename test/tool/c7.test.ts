@@ -1,4 +1,4 @@
-// O protocolo da réplica fora da amostra (item C7): cada trava tem teste.
+// O protocolo da réplica fora da amostra: cada trava tem teste.
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -194,7 +194,7 @@ it('a impressão do motor é estável e é a do git', async () => {
 
 it('o motor pré-registrado do índice está num commit, e a árvore dele tem a mesma impressão', async () => {
   // A série pré-registrada das coortes novas sai de um worktree desse commit
-  // (decisão 138): se a impressão do índice não fosse achável no histórico,
+  //: se a impressão do índice não fosse achável no histórico,
   // não haveria de onde refazê-la.
   const preRegistered = Index.read(sealsDir).preRegisteredEngine;
   expect(preRegistered, 'o C7 tem selo desde 24/09/2026').not.toBeNull();

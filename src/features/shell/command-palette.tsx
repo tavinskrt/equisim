@@ -1,5 +1,5 @@
 import { Command } from 'cmdk';
-import { Moon, ScrollText, Search, SlidersHorizontal, Sun } from 'lucide-react';
+import { History, Moon, ScrollText, Search, Sun } from 'lucide-react';
 import { Dialog } from 'radix-ui';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -7,10 +7,12 @@ import { useNavigate } from 'react-router';
 import { useUniverse } from '../../app/hooks';
 import { PreferencesActions, usePreferences } from '../../app/state/preferences-store';
 import { useStudy } from '../../app/state/study-store';
+import { APP_VERSION_LABEL } from '../../app/version';
 import { AuditRoutes } from '../../audit/audit-routes';
 import { auditEnabled } from '../../audit/audit-bus';
 import { Spinner } from '../../ui/feedback';
 import { TickerLogo } from '../../ui/ticker-logo';
+import { ChangelogActions } from '../changelog/changelog-store';
 import { navItems } from './nav-items';
 import { useOpenAsset } from './use-open-asset';
 
@@ -19,15 +21,13 @@ const itemClass =
 
 /**
  * A busca global (⌘K / Ctrl+K): ativo, área ou comando. Escolher um ativo
- * abre a página dele (decisão 155), e o Voltar devolve à área de onde a busca
- * foi aberta.
+ * abre a página dele, e o Voltar devolve à área de onde a busca foi aberta.
  */
 export function CommandPalette(props: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const universe = useUniverse();
   const navigate = useNavigate();
   const openAsset = useOpenAsset();
   const theme = usePreferences((s) => s.theme);
-  const mode = usePreferences((s) => s.mode);
   const study = useStudy((s) => s.study);
   const [query, setQuery] = useState('');
 
@@ -106,13 +106,10 @@ export function CommandPalette(props: { open: boolean; onOpenChange: (open: bool
                   {theme === 'dark' ? <Sun aria-hidden className="size-4 text-fg-3" /> : <Moon aria-hidden className="size-4 text-fg-3" />}
                   {theme === 'dark' ? 'Usar o tema claro' : 'Usar o tema escuro'}
                 </Command.Item>
-                <Command.Item
-                  value="modo completo essencial analista detalhe"
-                  onSelect={() => run(() => PreferencesActions.setMode(mode === 'guided' ? 'analyst' : 'guided'))}
-                  className={itemClass}
-                >
-                  <SlidersHorizontal aria-hidden className="size-4 text-fg-3" />
-                  {mode === 'guided' ? 'Mostrar tudo (modo Completo)' : 'Mostrar o essencial (modo Essencial)'}
+                <Command.Item value="changelog novidades versões histórico" onSelect={() => run(() => ChangelogActions.open())} className={itemClass}>
+                  <History aria-hidden className="size-4 text-fg-3" />
+                  <span className="flex-1">Ver o changelog</span>
+                  <span className="num text-caption text-fg-3">{APP_VERSION_LABEL}</span>
                 </Command.Item>
                 {auditEnabled() && (
                   <Command.Item value="painel logs auditoria cálculo" onSelect={() => run(() => AuditRoutes.openInNewWindow())} className={itemClass}>

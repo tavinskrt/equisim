@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 
 import { Ticker } from '../../core';
 
-/** O endereço da página do ativo (decisão 155). */
+/** O endereço da página do ativo. */
 export const assetPath = (t: Ticker) => `/ativo/${t.value}`;
 
 /**

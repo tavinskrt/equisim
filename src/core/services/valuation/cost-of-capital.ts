@@ -165,7 +165,7 @@ export class CostOfCapital {
    * custo de dívida. Por isso o valor usado no WACC é [effectiveCostOfDebt],
    * não este.
    *
-   * **`null` quando a despesa financeira não está publicada** (item B26). A
+   * **`null` quando a despesa financeira não está publicada**. A
    * ausência não é custo zero nem cobertura ruim: sem ela a cobertura de juros
    * não é medível, e o prêmio sintético sai só da alavancagem.
    */
@@ -245,9 +245,9 @@ export class CostOfCapital {
    *
    * **O que muda é o `K_d`**: sem dívida não há prêmio de crédito a cobrar, e
    * o que sobra é rendimento de caixa — a taxa livre de risco é o que caixa
-   * rende (decisão 58). Os **pesos continuam existindo**, e são negativos: o
+   * rende. Os **pesos continuam existindo**, e são negativos: o
    * caixa é dívida líquida negativa, e a apuração do capital próprio o devolve
-   * ao acionista (decisão 104). Degenerar para o `Ke` aqui contaria o caixa
+   * ao acionista. Degenerar para o `Ke` aqui contaria o caixa
    * duas vezes, que é exatamente o defeito que a decisão 104 corrigiu para
    * quem tem dívida.
    */
@@ -262,7 +262,7 @@ export class CostOfCapital {
    * perpetuidade; esta é a do ambiente em que a despesa foi incorrida, e é
    * fato do dado. Medida contra a do cenário, a faixa andava com a taxa e o
    * custo da dívida saltava — o preço justo subia com o capital mais caro
-   * (item B10).
+   *.
    */
   readonly creditReferenceRate: number | null;
 
@@ -473,7 +473,7 @@ export class CostOfCapital {
             riskFreeRate: this.creditReferenceRate ?? this.capm.riskFreeRate,
           })
       : // Sem dívida contratada não há prêmio de crédito: o que o peso negativo
-        // remunera é caixa, e caixa rende a taxa livre de risco (decisão 58).
+        // remunera é caixa, e caixa rende a taxa livre de risco.
         this.capm.riskFreeRate;
   }
 

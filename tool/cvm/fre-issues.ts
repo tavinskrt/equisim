@@ -1,5 +1,5 @@
 // As emissões de ações por valor do Formulário de Referência, com a data em
-// que cada uma ficou pública (item B28).
+// que cada uma ficou pública.
 //
 // O quadro «aumentos do capital social» do FRE declara, emissão a emissão, a
 // data da deliberação e da emissão, o valor total, a quantidade de ações, o

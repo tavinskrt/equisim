@@ -10,7 +10,7 @@ dart run tool/via_acionista.dart   # grava via_acionista.json
 
 ## 0. O que sobrou para perguntar
 
-A [decisão 45](../decisoes/045-estrutura-de-capital-recusada.md) tirou da via do
+A decisão 45 tirou da via do
 acionista o papel de **segundo estimador**: nos 90 ativos em que as duas vias
 são calculáveis, nenhum resultado mescla e nenhum migra
 ([vias.md §8](vias.md)). A discordância entre elas deixou de decidir.
@@ -41,7 +41,7 @@ omissão.
 
 ## 2. O motor tinha dois custos de capital próprio para o mesmo ativo
 
-Desde a [decisão 41](../decisoes/041-custo-de-capital-realavancado-ano-a-ano.md)
+Desde a decisão 41
 a via da firma resolve o `Ke` ano a ano contra a alavancagem que a própria
 avaliação produz. A via do acionista não resolvia: descontava ao `Ke` do CAPM
 com o beta alavancado de hoje, **supondo essa alavancagem perene** — que é

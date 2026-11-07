@@ -6,7 +6,7 @@ retorno que veio depois?**
 
 Reproduz-se com `dart run tool/backtest_valuation.dart`, que grava
 `backtest_valuation.json`. As correções que este documento sustenta estão na
-[decisão 32](../decisoes/032-validacao-preditiva-e-diagnosticos-do-resultado.md).
+decisão 32.
 
 ---
 
@@ -91,7 +91,7 @@ Ele **não** supera os ordenadores ingênuos. Fica entre os dois.
 | PL/VM | 0,123 | 7/7 |
 | Lucro/VM | 0,066 | 5/7 |
 
-A [decisão 26](../decisoes/026-horizonte-de-convergencia-de-36-meses.md) fixou o
+A decisão 26 fixou o
 horizonte de convergência em 36 meses justamente por não acreditar em
 convergência de um ano. A medição concorda: em doze meses o sinal é fraco para
 os três.
@@ -150,7 +150,7 @@ confiabilidade.
 
 Uma ressalva também saiu do conjunto — *custo da dívida estimado* —, porque
 disparava em **469 das 821** avaliações. Ela deixou de ser exceção quando a
-[decisão 31](../decisoes/031-escala-do-preco-tributo-e-invariancia-das-guardas.md)
+decisão 31
 tornou a classificação sintética o método.
 
 ### Frequência das ressalvas restantes
@@ -189,7 +189,7 @@ O que decide a questão para uso patrimonial é a sensibilidade, medida com
 
 Em todo o intervalo plausível, a **ordenação praticamente não muda** — e é a
 ordenação que a §2 validou e que a
-[decisão 27](../decisoes/027-recalibragem-apos-a-primeira-validacao.md) já
+decisão 27 já
 adotara como o uso do número. O nível muda 11 pontos percentuais de mediana, e
 15 dos 119 trocam o sinal do potencial entre 5,50 e 2,83.
 
@@ -209,7 +209,7 @@ Todos inflam o resultado, e nenhum é corrigível com o dado disponível.
    futuro, para os três ordenadores igualmente.
 
 3. **Provento.** O retorno de referência é de preço, pela
-   [decisão 23](../decisoes/023-remocao-de-proventos.md). O valor que o motor
+   decisão 23. O valor que o motor
    apura **inclui** a distribuição, então a medição o penaliza em ativo de
    *payout* alto. Este viés é o único que trabalha contra o motor.
 

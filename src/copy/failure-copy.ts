@@ -7,7 +7,7 @@ import { Fmt } from './fmt';
  * `Failure.message` é diagnóstico técnico — diz quais tickers ficaram sem
  * cotação, quantos pregões sobraram, quanto os pesos somaram. Aqui a
  * apresentação decide o **rótulo** a partir do tipo e dos campos
- * estruturados, e usa o diagnóstico como detalhe (decisão 122).
+ * estruturados, e usa o diagnóstico como detalhe.
  */
 export const FailureCopy = {
   /** Rótulo curto da natureza da falha, para cabeçalho de aviso. */
@@ -42,7 +42,7 @@ export const FailureCopy = {
     if (failure.kind === 'DataQualityFailure' && f.observedDeviation != null) {
       detail = `${failure.message} Desvio medido: ${Fmt.percent(f.observedDeviation, { decimals: 1 })}.`;
     } else if (failure.kind === 'InvalidInput' && f.actual != null && f.unit != null) {
-      // A grandeza vem do domínio, e a frase é montada aqui (decisão 122).
+      // A grandeza vem do domínio, e a frase é montada aqui.
       detail = `${failure.message} ${quantity(f.actual, f.limit ?? null, f.unit)}`;
     }
     const subject = failure.kind === 'InsufficientData' ? (f.subject ?? null) : null;

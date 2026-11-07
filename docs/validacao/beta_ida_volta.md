@@ -76,7 +76,7 @@ desalavancagem, com a razão escrita ali.
 
 `BetaShrinkage.shrink` devolvia `beta` encolhido e `unlevered` derivado do
 **cru**. Como o caminho resolvido relavanca `unlevered`, o encolhimento da
-[decisão 40](../decisoes/040-beta-encolhido-por-precisao.md) **não alcançava a
+decisão 40 **não alcançava a
 maioria do universo**: ela existe para trocar precisão por viés, e a troca não
 chegava ao número.
 
@@ -176,7 +176,7 @@ desalavancar o beta pela foto de hoje divide por um fator grande demais.
 Dívida líquida de R$ 1,28 bi contra valor de mercado de **R$ 762 mil**. O
 `marketCap` corrente que a fonte publica para ela está errado por três ordens
 de grandeza, e o D/E saturava no teto de 3,0 da
-[decisão 40](../decisoes/040-beta-encolhido-por-precisao.md).
+decisão 40.
 
 A medida por janela a conserta de lado: ela reconstrói o valor de mercado de
 cada exercício por **preço do pregão × ações daquele exercício**, sem tocar no
@@ -224,7 +224,7 @@ estrutural do ativo; a volta, a estatutária.
 
 O `(1 − τ)` de Hamada **é o escudo fiscal do juro**, e o projeto já tinha
 decidido que ele fica na estatutária — está escrito em `nopatAtRate`, da
-[decisão 37](../decisoes/037-aliquota-estrutural-no-fluxo-da-firma.md):
+decisão 37:
 
 > Não confundir com o escudo fiscal do WACC, que continua na estatutária e deve
 > continuar: a dedutibilidade do juro vale na margem, e a margem é a alíquota
@@ -258,6 +258,6 @@ CSAN3 −65,9%, YDUQ3 −16,7%, ANIM3 −14,2%, LOGG3 −12,7%.
 
 Nenhuma delas era visível de fora: cada ponta estava certa isoladamente, e o
 defeito só existe na composição. É o mesmo formato do que a
-[decisão 45](../decisoes/045-estrutura-de-capital-recusada.md) encontrou entre
-recusa e recuo, e do que a [51](../decisoes/051-ponto-fixo-do-veredito-e-referencia-do-terminal.md)
+decisão 45 encontrou entre
+recusa e recuo, e do que a 51
 encontrou entre veredito e taxa — **o motor erra nas costuras, não nas peças**.

@@ -32,7 +32,7 @@
 | Preço de mercado | R$ 50,74 | fechamento de 14/09/2026 |
 | Exercícios publicados | 17 (2010–2026) | CVM |
 
-**O último ponto é 2026 anualizado** (decisão 153): o acumulado do primeiro
+**O último ponto é 2026 anualizado**: o acumulado do primeiro
 semestre, no ITR de 30/06/2026, vezes 2, com o balanço da mesma data. A conta
 supõe que o segundo semestre repete o primeiro, sem correção de sazonalidade, e
 multiplica junto o que for não recorrente; a tela declara isso num aviso. Na
@@ -60,7 +60,7 @@ que arredonda para **1**: cada papel é uma ação.
 
 As duas da fonte concordam (diferença de 4,9%, dentro da banda de 1,5×), e o
 registro oficial da B3 de 14/09/2026 é adotado, porque ele desconta as ações em
-tesouraria, que não recebem nada (decisão 83).
+tesouraria, que não recebem nada.
 
 > **Por quê:** o preço justo é "capital próprio ÷ papéis". Dividir pelo número
 > errado erra o preço na mesma proporção.
@@ -87,7 +87,7 @@ Ke = Rf + β × prêmio = 14,05% + 0,7139 × 1,21% = 14,05% + 0,86% = 14,91%
   Ibovespa, com 32 proventos reinvestidos, encolhida para o setor (a medida é
   precisa e o peso dela é quase 1). A WEG oscila menos que o mercado.
 - **Prêmio = 1,21%**: a média de dez anos do prêmio implícito no preço da bolsa
-  (decisão 142; capítulo 3, seção 3.7).
+  (capítulo 3, seção 3.7).
 
 Este Ke de 14,91% é o "do dia": o da tela de metas e o do WACC estático. O
 desconto de cada ano usa o forward daquele ano (seção 8).
@@ -187,10 +187,10 @@ cobertura de juros não é medível e o prêmio de crédito sai só da alavancag
 tela declara isso num aviso. Mesmo publicada, ela não serviria como custo da
 dívida: em 2025, a despesa financeira dividida pela dívida bruta dava 47,3% ao
 ano, o que é absurdo para a WEG, porque inclui variação cambial e outros itens.
-O motor não usa esse número (decisão 31) e só deixa a cobertura falar quando a
-despesa cai numa faixa defensável (decisão 130).
+O motor não usa esse número e só deixa a cobertura falar quando a
+despesa cai numa faixa defensável.
 
-> **Teoria:** WACC com caixa a Rf (decisão 113). Capítulo 3, seções 3.9 e
+> **Teoria:** WACC com caixa a Rf. Capítulo 3, seções 3.9 e
 > 3.10.
 
 ---
@@ -238,7 +238,7 @@ anos. A WEG recebe, na perpetuidade, um retorno sobre o capital novo de 20,3% �
 acima do custo de 15,7% — e por isso o crescimento perpétuo volta a gerar valor.
 
 > **Teoria:** decaimento do excedente (Koller et al.; Mauboussin e Johnson,
-> "Competitive advantage period"). AR(1) no capítulo 6, seção 6.7. Decisão 36.
+> "Competitive advantage period"). AR(1) no capítulo 6, seção 6.7.
 
 ---
 
@@ -380,7 +380,7 @@ preço justo: `b` é pequeno porque, medido, o preço converge pouco ao justo.
 | **Consolidada (mediana)** | | | **R$ 11,46** |
 
 Cada companhia do setor entra uma vez (com a mediana das suas classes de ação),
-e a própria WEG não entra (item B41).
+e a própria WEG não entra.
 
 A leitura por pares fica 28,2% abaixo do preço justo. **As duas leituras
 independentes dizem R$ 11 a R$ 16**, e o mercado diz R$ 50,74.

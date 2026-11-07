@@ -1,6 +1,6 @@
 # A ordenação, medida lado a lado — item B1
 
-Item B1 do [plano do motor de referência](../plano-motor-de-referencia.md): decidir
+Item B1 do plano do motor de referência: decidir
 o que o potencial serve. O usuário autorizou em 16/09/2026 a saída recomendada na
 §3 do plano — **(c), medir o DCF e um modelo transversal lado a lado, com (a)
 implantado enquanto (b) é perseguido**: o preço justo continua sendo a entrega da
@@ -17,7 +17,7 @@ declaradas abaixo.
 **O que já se sabia.** Nas coortes trimestrais de 36 meses com as deslistadas, na
 base da data, sobre o motor de 15/09/2026: IC do book-to-market de 0,181 com `t`
 corrigido de 2,92 contra o crítico de 2,70 e Newey-West de 7,03 — **o único dos
-três que passava no critério da [decisão 96](../decisoes/096-o-t-da-habilidade-e-corrigido-pela-sobreposicao-contra-o-critico-dela.md)**,
+três que passava no critério da decisão 96**,
 e perto da borda —; IC do lucro sobre o preço de 0,128 com `t` corrigido de 1,00;
 IC do potencial de 0,091 com `t` corrigido de 0,74 ([habilidade_trimestral.md](habilidade_trimestral.md)).
 O composto nunca foi medido. O motor mudou desde então (decisão 102): 16 ativos
@@ -61,10 +61,10 @@ com e sem as deslistadas, e a correlação de postos entre as três.
 
 Medido em 16/09/2026 por `dart run tool/regressao_condicional.dart --trimestral`,
 sobre `docs/validacao/backtest_trimestral.json` reexecutado com o motor da
-[decisão 102](../decisoes/102-nenhuma-avaliacao-muda-de-via-e-a-firma-avalia-pelo-fluxo-do-acionista-derivado.md)
+decisão 102
 — 10.874 observações em 31 coortes, 3.470 avaliadas. Dados em
 [habilidade_trimestral.json](habilidade_trimestral.json), bloco `icComposto` ao
-lado dos outros. Decisão: [103](../decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md).
+lado dos outros. Decisão: 103.
 
 **Em 36 meses, com as deslistadas** — 2.452 observações, 22 coortes, crítico de
 2,70:

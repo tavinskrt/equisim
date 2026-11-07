@@ -19,7 +19,7 @@ import {
 } from '../../src/core';
 import { day, expectClose } from './helpers';
 
-/** A ordenação transversal que decide o prêmio do retorno esperado (item B1). */
+/** A ordenação transversal que decide o prêmio do retorno esperado. */
 
 const m = <K, V>(entries: [K, V][]): Map<K, V> => new Map(entries);
 

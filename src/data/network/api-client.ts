@@ -130,7 +130,7 @@ export class ApiClient {
    * devolve `true` — sem baixar o resto.
    *
    * Existe para o arquivo de taxas do Tesouro, que tem 14,5 MB e traz o dia
-   * mais recente nas primeiras linhas (item A2.1). A linha que dispara a
+   * mais recente nas primeiras linhas. A linha que dispara a
    * parada **não** entra no resultado. O arquivo vem em Latin-1.
    */
   async readLinesUntil(

@@ -34,8 +34,10 @@ a partir de `ValuationCascade.evaluate`.
 | Insolvência | patrimônio ≤ 0 (ou ausente) no último **e** no penúltimo exercício | `insolvent` | sem patrimônio não há base de capital |
 | Recuperação judicial | lista mantida | [distressed-registry.ts](../../src/data/config/distressed-registry.ts) | o fluxo descontado supõe continuidade |
 
-A recusa por liquidez foi medida contra a ordenação e mantida pelo nível, e não
-pela ordenação (decisão 95).
+A recusa por liquidez foi medida contra a ordenação e fica pelo nível do preço
+justo, e não pela ordenação: os ilíquidos ordenam, mas o preço justo deles fica
+11 p.p. acima do das avaliadas ([recusas_custo.md](../validacao/recusas_custo.md),
+[beta_liquidez.md](../validacao/beta_liquidez.md)).
 
 ---
 
@@ -43,7 +45,7 @@ pela ordenação (decisão 95).
 
 | Regra | Código | Por quê |
 |---|---|---|
-| Setor "serviços financeiros" da fonte, ou setor B3 "financeiro" com subsetor intermediários financeiros, previdência e seguros ou serviços financeiros diversos → **via do acionista** | [financial-sectors.ts](../../src/core/services/valuation/financial-sectors.ts), `FinancialSectors.isFinancial` | captação é insumo, não financiamento (Damodaran, "Valuing financial service firms"); decisão 25 |
+| Setor "serviços financeiros" da fonte, ou setor B3 "financeiro" com subsetor intermediários financeiros, previdência e seguros ou serviços financeiros diversos → **via do acionista** | [financial-sectors.ts](../../src/core/services/valuation/financial-sectors.ts), `FinancialSectors.isFinancial` | captação é insumo, não financiamento (Damodaran, "Valuing financial service firms") |
 
 O aviso da tela explica a razão em uma frase.
 
@@ -53,8 +55,8 @@ O aviso da tela explica a razão em uma frase.
 
 | Regra | Código | Por quê |
 |---|---|---|
-| NOPAT (publicado ou derivado) positivo em pelo menos 60% dos exercícios, com pelo menos 4 → **via da firma**; senão, **via do acionista** | [growth-guards.ts](../../src/core/services/valuation/growth-guards.ts), `GrowthGuards.firmFlowIsSustained` | a via da firma projeta o resultado operacional; com ele negativo na maioria dos anos, não há base a projetar (decisão 64) |
-| A fronteira usa o fluxo, e não a comparação entre retorno e custo de capital do dia | `route` | medir contra a taxa do dia faria a via andar com o ciclo monetário (decisão 34) |
+| NOPAT (publicado ou derivado) positivo em pelo menos 60% dos exercícios, com pelo menos 4 → **via da firma**; senão, **via do acionista** | [growth-guards.ts](../../src/core/services/valuation/growth-guards.ts), `GrowthGuards.firmFlowIsSustained` | a via da firma projeta o resultado operacional; com ele negativo na maioria dos anos, não há base a projetar; nas coortes, os casos da Porta 3 têm o maior poder de ordenação dos três roteamentos ([porta3.md](../validacao/porta3.md)) |
+| A fronteira usa o fluxo, e não a comparação entre retorno e custo de capital do dia | `route` | medir contra a taxa do dia faria a via andar com o ciclo monetário |
 
 ---
 
@@ -62,8 +64,8 @@ O aviso da tela explica a razão em uma frase.
 
 | Regra | Código | Evidência |
 |---|---|---|
-| Se a via escolhida recusa (estrutura de capital, preço justo ≤ 0), o ativo é recusado — não é mandado para a outra via | `evaluateLane` | decisão 102: trocar de modelo porque um recusou faria o preço justo depender de qual conta alcançou um número |
-| As duas vias são modelos distintos, não duas opiniões sobre o mesmo número | — | decisão 39: discordavam além de 1,5× em 55 de 92 ativos |
+| Se a via escolhida recusa (estrutura de capital, preço justo ≤ 0), o ativo é recusado — não é mandado para a outra via | `evaluateLane` | trocar de modelo porque um recusou faria o preço justo depender de qual conta alcançou um número |
+| As duas vias são modelos distintos, não duas opiniões sobre o mesmo número | — | discordavam além de 1,5× em 55 de 92 ativos, e amarrar os insumos fecha só 15,5% da dispersão ([insumos_compartilhados.md](../validacao/insumos_compartilhados.md)) |
 
 Imposições de diagnóstico (`laneOverride`, `growthOverride`, `terminalReturnOverride`
 etc.) existem só para medição e testes; o aplicativo não as usa.
@@ -73,17 +75,11 @@ etc.) existem só para medição e testes; o aplicativo não as usa.
 ## 2.6 As recusas, contadas
 
 Na entrada congelada de 14/09/2026 (gabarito, montagem do aplicativo, motor de
-03/11/2026, com o ano corrente anualizado da decisão 153), de 379 ativos: 195
+03/11/2026, com o ano corrente anualizado), de 379 ativos: 195
 recusados por liquidez, 34 por histórico, 3 por patrimônio não positivo; os
 outros 26, por estrutura de capital na via da firma (13), por fluxo do
 acionista que não sustenta capital próprio positivo (3: ANIM3, CSAN3 e RAPT4),
 por dado que não sustenta via (5) ou sem preparo, sem demonstrativo ou sem
 cotação (5). **121 avaliados**: 101 pela via da firma, 20 pela do acionista (18
-financeiras e duas não financeiras, AZEV4 e HBSA3). Na contagem anterior, com o
-motor de 02/10/2026, eram 376 ativos e 110 avaliados (90 e 20); a diferença vem
-da decisão 153 e da base reconstruída em 02/11/2026. Até 02/10/2026, cinco
-companhias com patrimônio positivo na CVM saíam recusadas como insolventes,
-porque a fonte de mercado devolvia a contagem do exercício zerada (item B47,
-decisão 146). A RENT3, que a contagem anterior recusava por estrutura de
-capital, passa a ser avaliada, e o caso de estudo da recusa passa a ser o da
-RAPT4 ([caso RAPT4](../estudo/casos/rapt4.md)).
+financeiras e duas não financeiras, AZEV4 e HBSA3). O caso de estudo de uma
+recusa é o da RAPT4 ([caso RAPT4](../estudo/casos/rapt4.md)).

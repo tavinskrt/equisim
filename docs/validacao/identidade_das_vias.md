@@ -10,7 +10,7 @@ Construída e medida em 10/09/2026.
 
 ## 0. O que A2 tenta
 
-A [decisão 39](../decisoes/039-as-duas-vias-sao-modelos-independentes.md)
+A decisão 39
 estabeleceu que as duas vias são modelos independentes: os fluxos não derivam
 um do outro, e falta a ponte `FCFE = FCFF − juros(1−τ) + ΔDívida`.
 
@@ -102,7 +102,7 @@ exatamente o que o WACC constante já afirmava.
 **(b) Realavancar o `Ke` ano a ano.** Aceitar que `D/V` varia e reprecificar o
 custo do capital próprio em cada ano pela alavancagem daquele ano. É a saída
 mais fiel, e é **onde o beta desalavancado da
-[decisão 40](../decisoes/040-beta-encolhido-por-precisao.md) se torna
+decisão 40 se torna
 indispensável** — sem `β_U` não há como relavancar. Custa circularidade por
 ano, resolvida por ponto fixo.
 
@@ -289,5 +289,5 @@ percebesse: onde o solucionador **recusava** a estrutura de capital, o motor
 recuava para a interpolação e produzia preço mesmo assim — descontando pela
 taxa que a realavancagem acabara de rejeitar. Os seis ativos em que isso
 acontecia eram exatamente os seis que ainda eram mesclados. A
-[decisão 45](../decisoes/045-estrutura-de-capital-recusada.md) separa recusa de
+decisão 45 separa recusa de
 não convergência e fecha o caminho.

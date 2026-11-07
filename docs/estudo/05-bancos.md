@@ -97,8 +97,7 @@ fluxo_t = LPA_t × (1 − b_t)        com b_t = g_t ÷ ROE_t
 
 Isso tem a forma de um modelo de desconto de dividendos, mas o dividendo **não
 é o dividendo publicado**: é o que o banco *poderia* distribuir mantendo o
-crescimento projetado. O projeto decidiu não ler proventos na avaliação
-(decisões 23 e 89) — o dividendo que um banco de fato paga depende de política,
+crescimento projetado. O projeto decidiu não ler proventos na avaliação — o dividendo que um banco de fato paga depende de política,
 de regulador e de juros sobre capital próprio, e não é o valor econômico do
 lucro.
 
@@ -122,7 +121,7 @@ resultado operacional é negativo em mais de 40% dos anos (Porta 3) também vai
 para ela: o NOPAT não sustenta uma projeção, mas o lucro líquido pode sustentar
 (uma holding com resultado de participações, por exemplo). Diferente do banco,
 ela **tem** dívida de estrutura de capital, e por isso o motor recalcula o Ke
-ano a ano com a alavancagem projetada, como faz na via da firma (decisão 46).
+ano a ano com a alavancagem projetada, como faz na via da firma.
 Na entrada de 14/09/2026, com o motor de 03/11/2026, são dois casos entre os
 121 avaliados (a AZEV4 e a HBSA3); com o motor de 01/10/2026 era só a AZEV4.
 
@@ -141,10 +140,10 @@ Na entrada de 14/09/2026, com o motor de 03/11/2026, são dois casos entre os
   em dez anos sobra 0,02% do excedente. Num banco com ROE abaixo do Ke, a
   vantagem competitiva residual é barrada ("sem excedente") e crescer não cria
   valor.
-- **Com retorno abaixo do custo, mais crescimento vale menos.** Na medição do
-  item B38 (28/09/2026, com o prêmio de 5,5% de então), o cenário "só
+- **Com retorno abaixo do custo, mais crescimento vale menos.** Na medição de
+  28/09/2026, com o prêmio de 5,5% dos livros, o cenário "só
   crescimento +3 pontos" dava um preço justo **menor** em 10 dos 19 bancos e
-  financeiras avaliados. Com o prêmio de 1,21% da decisão 142, o cenário
+  financeiras avaliados. Com o prêmio implícito de 1,21%, o cenário
   otimista combinado não fica abaixo do pessimista em nenhum dos 20 ativos da
   via do acionista.
 

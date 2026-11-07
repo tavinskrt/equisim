@@ -361,7 +361,7 @@ describe('O mês não perde o aporte por um dia que não existe nele', () => {
   });
 });
 
-describe('custo de transação (item C4)', () => {
+describe('custo de transação', () => {
   // Um ativo a R$ 10,00, aporte inicial de R$ 1.000,00, sem mensal: sem
   // custo compraria 100 ações exatas; com a tarifa da B3 (0,030%), cem ações
   // custariam R$ 1.000,30, e a simulação compra 99.
@@ -430,7 +430,7 @@ describe('custo de transação (item C4)', () => {
   });
 });
 
-describe('PortfolioBacktest.runOneShareEach (decisão 161)', () => {
+describe('PortfolioBacktest.runOneShareEach', () => {
   const range = new DateRange(start, day(2024, 12, 31));
 
   it('uma ação de cada no primeiro pregão: o TWR é o da cesta, ponderada pelo preço', () => {

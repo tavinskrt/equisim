@@ -16,7 +16,7 @@ import { Metric, MetricRow } from '../../ui/metric';
  * do plano; taxas anualizadas se comparam entre durações e tamanhos
  * diferentes, patrimônios não.
  *
- * **O realizado é o CAGR** (decisão 161): com uma compra só, no primeiro
+ * **O realizado é o CAGR**: com uma compra só, no primeiro
  * pregão, não há fluxo intermediário, e o retorno ponderado pelo dinheiro
  * coincide com o ponderado pelo tempo — o XIRR repetiria o CAGR.
  */

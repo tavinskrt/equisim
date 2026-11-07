@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   type AuditEvent,
@@ -13,14 +13,20 @@ import {
   ValuationCascade,
   ValuationInputs,
 } from '../../src/core';
+import { APP_VERSION } from '../../src/app/version';
+import { changelog, latestRelease } from '../../src/data/changelog';
 import { emphasized } from '../../src/features/asset/caveats-card';
+import { ProfilePage } from '../../src/features/auth/profile-page';
 import { PriceRuler } from '../../src/features/asset/price-ruler';
 import { PerAssetCard } from '../../src/features/backtest/per-asset-card';
+import { ChangelogSheet, releaseDateLabel } from '../../src/features/changelog/changelog-sheet';
+import { ChangelogActions } from '../../src/features/changelog/changelog-store';
 import { SideBySidePortfolios } from '../../src/features/backtest/portfolio-metrics';
 import { bridgeOf } from '../../src/features/backtest/wealth-bridge';
 import { EventCard, katexSafe } from '../../src/features/logs/event-card';
 import { formatAuditNumber } from '../../src/features/logs/format';
 import { JsonPanel } from '../../src/features/logs/json-tree';
+import { AccountMenu } from '../../src/features/shell/account-menu';
 import { TooltipProvider } from '../../src/ui/tooltip';
 import { day } from '../core/helpers';
 import { curve, outcomeOf } from '../app/fixtures';
@@ -159,15 +165,11 @@ describe('Backtest', () => {
     }
   });
 
-  it('o Essencial mostra cinco métricas; o Completo, todas', () => {
-    const essential = wrap(<SideBySidePortfolios principal={principal} reserve={reserve} essential />);
-    const few = within(essential.container).getAllByRole('row').length;
-    cleanup();
-    const full = wrap(<SideBySidePortfolios principal={principal} reserve={reserve} />);
-    const many = within(full.container).getAllByRole('row').length;
-    // Cinco linhas de métrica mais a do cabeçalho.
-    expect(few).toBe(6);
-    expect(many).toBeGreaterThan(few);
+  it('a tabela lado a lado mostra sempre todas as métricas, sem recorte de modo', () => {
+    const { container } = wrap(<SideBySidePortfolios principal={principal} reserve={reserve} />);
+    // Dez linhas de métrica mais a do cabeçalho: não há mais recorte do modo Essencial.
+    expect(within(container).getAllByRole('row')).toHaveLength(11);
+    for (const label of ['Volatilidade', 'Sharpe', 'Sortino', 'Calmar']) expect(container.textContent).toContain(label);
   });
 
   it('cada ativo tem uma ação, comprada no primeiro pregão, e o cartão não fala de peso', () => {
@@ -177,9 +179,86 @@ describe('Backtest', () => {
     expect(container.textContent).not.toContain('alvo');
   });
 
-  it('sem aporte, a tabela não traz XIRR, alocado nem caixa (decisão 161)', () => {
+  it('sem aporte, a tabela não traz XIRR, alocado nem caixa', () => {
     const { container } = wrap(<SideBySidePortfolios principal={principal} reserve={reserve} />);
     for (const gone of ['XIRR', 'Alocado', 'Em caixa', 'Aportado']) expect(container.textContent).not.toContain(gone);
     expect(container.textContent).toContain('Investido');
+  });
+});
+
+describe('Changelog', () => {
+  beforeEach(() => {
+    testRuntime();
+    ChangelogActions.setOpen(false);
+  });
+
+  /** Abre o menu da conta pelo teclado, como o Radix aceita no jsdom. */
+  function openAccountMenu() {
+    wrap(
+      <>
+        <AccountMenu />
+        <ChangelogSheet />
+      </>,
+    );
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Conta e preferências' }), { key: 'Enter' });
+    return screen.getAllByRole('menuitem');
+  }
+
+  it('o item Changelog fica logo abaixo do tema e acima de Sair, com o divisor antes de Sair', () => {
+    const labels = openAccountMenu().map((item) => item.textContent ?? '');
+    const theme = labels.findIndex((l) => /Modo (claro|escuro)/.test(l));
+    const changelog = labels.findIndex((l) => l.startsWith('Changelog'));
+    const signOut = labels.findIndex((l) => l === 'Sair');
+    expect(theme).toBeGreaterThanOrEqual(0);
+    expect(changelog).toBe(theme + 1);
+    expect(signOut).toBeGreaterThan(changelog);
+    // O divisor continua imediatamente antes de Sair.
+    const menu = screen.getByRole('menu');
+    const signOutItem = screen.getAllByRole('menuitem')[signOut]!;
+    expect(signOutItem.previousElementSibling?.getAttribute('role')).toBe('separator');
+    expect(within(menu).getAllByRole('separator')).toHaveLength(1);
+  });
+
+  it('a versão em uso aparece como pastilha no item Changelog', () => {
+    const item = openAccountMenu().find((i) => i.textContent?.startsWith('Changelog'))!;
+    expect(APP_VERSION).toBe(latestRelease.version);
+    expect(within(item).getByText(`v${APP_VERSION}`)).toBeTruthy();
+  });
+
+  it('o clique abre o histórico, da versão atual para a mais antiga', async () => {
+    const item = openAccountMenu().find((i) => i.textContent?.startsWith('Changelog'))!;
+    fireEvent.click(item);
+    const sheet = await screen.findByRole('dialog', { name: 'Changelog' });
+    const headings = within(sheet)
+      .getAllByRole('heading', { level: 3 })
+      .map((h) => h.textContent);
+    expect(headings).toEqual(changelog.map((r) => `v${r.version}`));
+    // A primeira é a atual, com a tag e a data por extenso.
+    const current = within(sheet).getAllByRole('article')[0]!;
+    expect(within(current).getByText('Atual')).toBeTruthy();
+    expect(within(sheet).getAllByText('Atual')).toHaveLength(1);
+    expect(current.querySelector('time')!.getAttribute('dateTime')).toBe(latestRelease.date);
+    expect(within(current).getByText('7 de novembro de 2026')).toBeTruthy();
+    // As categorias vão escritas, e não só pela cor.
+    for (const label of ['Adicionado', 'Alterado', 'Removido', 'Corrigido']) {
+      expect(within(sheet).getAllByText(label).length).toBeGreaterThan(0);
+    }
+  });
+
+  it('a tela Meu perfil mostra a versão em uso e abre o histórico', async () => {
+    wrap(
+      <>
+        <ProfilePage />
+        <ChangelogSheet />
+      </>,
+    );
+    expect(screen.getByText(`v${APP_VERSION}`)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Ver o changelog' }));
+    expect(await screen.findByRole('dialog', { name: 'Changelog' })).toBeTruthy();
+  });
+
+  it('a data da versão não muda de dia com o fuso do navegador', () => {
+    expect(releaseDateLabel('2026-01-01')).toBe('1 de janeiro de 2026');
+    expect(releaseDateLabel('2026-12-31')).toBe('31 de dezembro de 2026');
   });
 });

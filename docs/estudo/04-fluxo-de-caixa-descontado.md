@@ -36,7 +36,7 @@ caminho.
 | **2 — premissas** | Qual o lucro de partida e quanto ele cresce? | se o dado não sustenta, recusa |
 
 A numeração segue a história do projeto (a Porta 2 veio antes da 3), não a
-ordem da conta. **Uma vez escolhida a via, ela não muda** (decisão 102): se a
+ordem da conta. **Uma vez escolhida a via, ela não muda**: se a
 conta da via escolhida recusar, o ativo é recusado, em vez de ser mandado para a
 outra via até alguma dar número.
 
@@ -95,7 +95,7 @@ acionista**. A diferença é por onde elas chegam lá.
 ## 4.4 Porta 2, primeira saída: o lucro de partida (a base)
 
 O ponto de partida é o lucro do último ponto da série: NOPAT na via da
-firma, lucro líquido por papel na do acionista. Desde a decisão 153, esse ponto
+firma, lucro líquido por papel na do acionista. Esse ponto
 é o **ano corrente anualizado**: o acumulado do último ITR, levado a doze meses
 (o primeiro semestre vezes 2, por exemplo), com o balanço da mesma data. A
 anualização supõe que o resto do ano repete o acumulado, sem correção de
@@ -133,14 +133,14 @@ Duas regras especiais:
 
 - **Commodity tem precedência do ciclo.** Em mineração, petróleo, siderurgia,
   celulose e petroquímica, a alta de um ciclo parece tendência e não é. Ali a
-  reversão ao ciclo vale mesmo com tendência significante (decisão 28).
+  reversão ao ciclo vale mesmo com tendência significante.
 - **Trava de saúde.** Se o lucro ou o EBITDA caiu mais de 50% em três anos, a
   base não é normalizada **para cima**: uma empresa que quebrou o modelo de
   negócio não volta à média do passado. Commodity é isenta, porque ali a queda
-  entre o pico e o vale é o preço do insumo (decisão 30).
+  entre o pico e o vale é o preço do insumo.
 
 E um caso de borda: se o último ano deu **prejuízo** mas o ciclo é lucrativo, a
-base é **reconstruída** como retorno do ciclo × capital de hoje (decisão 53), e
+base é **reconstruída** como retorno do ciclo × capital de hoje, e
 isso vira ressalva na tela.
 
 **Por que normalizar, e para que lado.** Um ano só pode ter sido um pico ou um
@@ -168,7 +168,7 @@ medível. O porquê de cada um, com os números, está em
 
 **Onde ver no aplicativo.** No **painel de logs**, o passo "Base do fluxo" abre
 com um quadro **"Por quê"**, em texto corrido, antes das variáveis e da conta. No
-**Raio-X** do ativo (modo Completo) e na tela **Simular minhas premissas**, o
+**Raio-X** do ativo e na tela **Simular minhas premissas**, o
 cartão do lucro de partida traz a pergunta "Por
 que o motor subiu (ou baixou) o lucro de partida?", com o retorno de cada ano
 do ciclo em barras, o típico marcado, o teste que decidiu e a conta.
@@ -205,7 +205,7 @@ O motor confere se esse número é confiável:
 
 ## 4.6 Os dez anos de projeção
 
-Com base e crescimento, o motor projeta dez anos (decisão 115). Três coisas
+Com base e crescimento, o motor projeta dez anos. Três coisas
 mudam ano a ano, todas em linha reta do ano 1 ao ano 10:
 
 **1. O crescimento cai até o perpétuo.**
@@ -239,8 +239,8 @@ fluxo livre_t = lucro_t × (1 − b_t)
 Uma consequência que vale entender: **crescer mais nem sempre vale mais.** Se o
 retorno sobre o capital está abaixo do custo, cada real reinvestido rende menos
 do que custa, e mais crescimento *reduz* o valor. Isso acontece em mais da
-metade dos 97 ativos avaliados em 14/09/2026 (item B38 do
-[plano](../plano-motor-de-referencia.md)) e explica por que as "premissas mais
+metade dos 97 ativos avaliados em 14/09/2026
+([cenario.md](../validacao/cenario.md)) e explica por que as "premissas mais
 brandas" do cartão de sensibilidade às vezes dão preço menor que as "mais
 duras" (seção 4.11).
 
@@ -280,7 +280,7 @@ VT = lucro do ano 11 × (1 − g∞ ÷ ROIC∞) ÷ (custo∞ − g∞)
 
 Só vale com pelo menos oito exercícios, crescimento orgânico (Φ ≤ 0,60),
 retorno do ciclo acima do custo e persistência estimável; e nunca para
-concessão (decisões 36 e 50). Na WEGE3, `φ` = 0,87 e sobram 24% do excedente
+concessão. Na WEGE3, `φ` = 0,87 e sobram 24% do excedente
 (ver o [caso](casos/wege3.md)).
 
 ### Concessão com prazo
@@ -288,7 +288,7 @@ concessão (decisões 36 e 50). Na WEGE3, `φ` = 0,87 e sobram 24% do excedente
 Uma concessionária (saneamento, energia, rodovia) tem contrato que acaba. O
 excedente sobre o capital existente dura só até o fim do contrato, e depois o
 capital volta (por indenização ou renovação a tarifa de custo). O motor lê o
-prazo das outorgas e usa (decisão 88):
+prazo das outorgas e usa:
 
 ```
 VT = capital no ano 10 + lucro econômico × anuidade dos anos que restam
@@ -334,7 +334,7 @@ todo ano entra dívida nova — que é dinheiro para o acionista.
 é grande, o valor das ações é a diferença entre dois números grandes e
 parecidos, e qualquer erro de 5% no valor da firma vira um erro de 50% ou mais
 no valor por ação. Descontar o fluxo do acionista direto evita essa
-amplificação (decisões 43 e 102). As duas contas dão o mesmo resultado quando as
+amplificação. As duas contas dão o mesmo resultado quando as
 taxas são coerentes — a identidade está travada por teste.
 
 Depois do desconto:
@@ -346,10 +346,11 @@ preço justo = capital próprio ÷ número de papéis
 ```
 
 - **Minoritários**: a demonstração soma 100% das controladas, mas o acionista
-  da controladora não é dono de tudo (decisão 49).
+  da controladora não é dono de tudo.
 - **Capital posterior**: ações emitidas depois do último balanço estão na
-  contagem de papéis, mas o dinheiro delas não está no patrimônio publicado
-  (item B28).
+  contagem de papéis, mas o dinheiro delas não está no patrimônio publicado;
+  o motor soma esse dinheiro quando a emissão está declarada
+  ([capital_investido.md](../validacao/capital_investido.md)).
 
 ---
 
@@ -374,7 +375,7 @@ uma pergunta diferente:
 ## 4.11 Cenários e Monte Carlo: sensibilidade, não probabilidade
 
 **Conjuntos fixos** (padrão). O cartão "Sensibilidade" mostra três conjuntos
-de premissas, nomeados pelo que foi mexido (decisão 148):
+de premissas, nomeados pelo que foi mexido:
 
 | Na tela | Crescimento inicial | Desconto (todos os anos e perpetuidade) |
 |---|---|---|
@@ -393,7 +394,7 @@ percentis 5, 50 e 95 e a fração de sorteios acima do preço de mercado.
 **O que eles não são.** Nas coortes históricas, a faixa entre as premissas
 mais duras e as mais brandas conteve o preço mais os proventos de 12 e 36 meses depois em 11% a 15%
 dos casos, e a faixa de 90% do Monte Carlo em 8% a 9%, contra 90% que um intervalo de
-confiança prometeria (decisão 92; remedido em 03/11/2026). Os cenários dizem
+confiança prometeria (remedido em 03/11/2026). Os cenários dizem
 **quanto o número depende das premissas**, e não onde o preço vai estar.
 
 **Por que erram tanto.** Por dois motivos, medidos. O motor é pessimista: o
@@ -406,14 +407,13 @@ recentrada no preço que de fato veio, a faixa do Monte Carlo passa a conter só
 por isso a incerteza da tela é a faixa calibrada da seção seguinte, que parte do
 preço de hoje.
 
-**Quando as premissas mais brandas valem menos (item B38).** O conjunto mais
+**Quando as premissas mais brandas valem menos.** O conjunto mais
 brando soma crescimento. Quando a empresa rende abaixo do custo de capital,
 crescer destrói valor, e as premissas mais brandas dão preço **menor** que as
 mais duras — aconteceu em 14 dos 90 ativos da via da firma em 14/09/2026. A
 conta está certa. O rótulo antigo, "Otimista", supunha que crescer é sempre
 bom; o novo diz o que foi mexido, a cor de cada valor sai da posição dele
-contra o preço justo, e o cartão avisa quando a ordem se inverte (decisão
-148).
+contra o preço justo, e o cartão avisa quando a ordem se inverte.
 
 ([scenario-engine.ts](../../src/core/services/valuation/scenario-engine.ts).)
 
@@ -423,7 +423,7 @@ contra o preço justo, e o cartão avisa quando a ordem se inverte (decisão
 
 A faixa calibrada é a resposta honesta a "quão errado este número costuma
 estar?". Ela não sai das premissas: sai do que aconteceu com avaliações
-passadas (decisões 92, 100 e 124).
+passadas.
 
 ```
 faixa = preço de hoje × exp(a + b × ln(justo ÷ preço) + σ × z)
@@ -456,8 +456,7 @@ preço pelo EV/EBITDA = (mediana do EV/EBITDA × EBITDA − dívida líquida) ÷
 
 Exige pelo menos cinco pares do mesmo subsetor, e EV/EBITDA é recusado para
 financeiras. A mediana das leituras é a "leitura por pares". Se ela divergir do
-preço justo em mais de 50%, a tela avisa — **mas o preço justo não muda**
-(decisão 118). A segunda leitura é teste de sanidade, e não um segundo modelo.
+preço justo em mais de 50%, a tela avisa — **mas o preço justo não muda**. A segunda leitura é teste de sanidade, e não um segundo modelo.
 
 ([peer-multiples.ts](../../src/core/services/valuation/peer-multiples.ts).)
 
@@ -491,13 +490,12 @@ para ter em mente:
    de 14/09/2026 e o motor de 03/11/2026, o upside mediano dos 121 avaliados é
    −36,2%, e só 28 têm upside positivo; metade fica entre −61% e 0%. Com o
    prêmio de mercado tirado do
-   próprio preço da bolsa (1,21%, decisão 142) o desacordo diminuiu — com os 5,5%
+   próprio preço da bolsa (1,21%) o desacordo diminuiu — com os 5,5%
    de antes eram −45% —, mas não acabou: ele é com o conjunto das premissas —
    juros de 14% na curva inteira, retorno convergindo ao custo em dez anos —, e
    não com um parâmetro isolado.
 2. **A ordenação não está comprovada.** Comprar os de maior upside não bateu os
-   de menor upside de forma estatisticamente clara nas coortes de 2018 a 2023
-   (decisão 140). O motor serve para **entender** uma empresa, e não para
+   de menor upside de forma estatisticamente clara nas coortes de 2018 a 2023. O motor serve para **entender** uma empresa, e não para
    decidir sozinho.
 3. **A incerteza é grande e está medida**: é a faixa calibrada.
 
@@ -505,8 +503,7 @@ para ter em mente:
 
 Tudo o que este capítulo descreveu — o lucro de partida, o crescimento, a taxa,
 a perpetuidade — é decidido pelo motor sozinho. O botão **Simular minhas
-premissas**, no Raio-X do ativo, abre a mesma conta para você discordar dela
-(decisão 147).
+premissas**, no Raio-X do ativo, abre a mesma conta para você discordar dela.
 
 **Como funciona.** A tela abre com um cartão para cada número que o motor
 escolheu, já preenchido com o valor dele. Você digita outro número (ou usa os
@@ -554,7 +551,7 @@ infinita. O resto é opinião sua, e a tela aceita.
 **Dois cuidados.** Primeiro: na via da firma, a taxa que você digita é a que
 desconta o dinheiro do acionista; o custo médio do capital, que guia quanto a
 empresa reinveste, fica o do motor. Se mudasse junto, subir a taxa **subiria** o
-preço em parte dos ativos dessa via — em 12 dos 90 na medição da decisão 147 —,
+preço em parte dos ativos dessa via — em 12 dos 90 na medição de outubro de 2026 —,
 o contrário do que se espera. Quem
 discorda do retorno da empresa tem um campo próprio para isso. Segundo: **o
 preço que você calcula não é validado.** A faixa calibrada (4.12) e o teste de

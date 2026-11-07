@@ -3,7 +3,7 @@ import type { Money } from '../value-objects/money';
 
 /**
  * Uma emissão de ações **por valor**, como o Formulário de Referência da CVM a
- * declara (item B28).
+ * declara.
  *
  * Subscrição pública ou particular, incorporação, conversão de título,
  * exercício de opção ou de bônus de subscrição: tudo o que põe ações novas em

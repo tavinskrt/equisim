@@ -3,7 +3,7 @@
 //
 // **A pergunta.** [`vias.md`](../docs/validacao/vias.md) mediu que as duas vias
 // discordam além de 1,5× em 55 de 92 ativos. A
-// [decisão 38](../docs/decisoes/038-transicao-continua-entre-as-vias.md) removeu
+// decisão 38 removeu
 // o degrau que essa discordância produzia, e **não** a discordância. Antes de
 // decidir se conciliá-las exige reconstruir a Porta 2, é preciso saber de onde
 // ela vem.

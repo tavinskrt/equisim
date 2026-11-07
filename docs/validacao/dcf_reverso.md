@@ -171,7 +171,7 @@ O suspeito com mais superfície é o **freio de reinvestimento**: o fluxo
 explícito é `NOPAT × (1 − g/ROIC)`, e com `g` convergindo para a âncora e
 `ROIC` do fluxo-base, a retenção consome metade ou mais do lucro operacional
 em boa parte do universo. O terminal não paga esse pedágio — `VT = NOPAT/WACC`
-é o lucro inteiro. A [decisão 31](../decisoes/031-escala-do-preco-tributo-e-invariancia-das-guardas.md)
+é o lucro inteiro. A decisão 31
 já havia medido 17% de diferença na AZZA3 por casar `g` de uma série com
 `ROIC` de outra. **Isto é hipótese, não medição:** nenhuma instrumentação
 atual isola o nível do fluxo explícito, e construí-la é trabalho novo.
@@ -184,7 +184,7 @@ atual isola o nível do fluxo explícito, e construí-la é trabalho novo.
 | Prêmio | 40 de 122 |
 | Nível da curva | **46 de 122** |
 
-A [decisão 34](../decisoes/034-fronteira-das-vias-medida-na-taxa-estrutural.md)
+A decisão 34
 removeu a travessia de via induzida pelo ciclo monetário medindo a
 participação na taxa **estrutural**. Ela resolveu o caso que motivou a
 decisão — mover só a taxa corrente —, e **não** o caso geral: deslocar as duas

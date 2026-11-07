@@ -1,6 +1,6 @@
 // D7 — o efeito da ponte completa, isolado do dado novo.
 //
-// **O confundidor.** A [decisão 49](../docs/decisoes/049-a-ponte-devolve-o-que-nao-e-do-controlador.md)
+// **O confundidor.** A decisão 49
 // acrescentou dois campos ao cache, e a migração invalidou a chave de
 // fundamentos — de modo que a rodada seguinte trouxe **todos** os campos
 // frescos da fonte, não só os dois. Comparar contra o relatório anterior

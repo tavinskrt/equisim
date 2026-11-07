@@ -4,12 +4,12 @@
 //
 // - **as emissões por valor** do Formulário de Referência conhecidas na data de
 //   referência, desde 2023 — a cascata soma ao patrimônio da ponte as que caem
-//   depois do balanço usado (item B28);
+//   depois do balanço usado;
 // - **os eventos de ações** — desdobramento, grupamento e bonificação — desde
 //   2019, que cobrem a janela de cinco anos do beta: do quadro do FRE,
 //   localizados no preço bruto, do registro da B3 e do `DISMES` do COTAHIST. O
 //   preparo completa com eles o ajuste que a fonte de preços deixou de fazer
-//   (item B29), e só onde a série dela ainda mostra o salto.
+//, e só onde a série dela ainda mostra o salto.
 //
 // **A data do pacote é declarada, e não lida do relógio**, como nos outros
 // pacotes versionados: o mesmo formulário tem de dar o mesmo arquivo.

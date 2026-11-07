@@ -11,8 +11,7 @@
 
 ## 7.1 Dois objetivos que não são o mesmo
 
-O projeto persegue dois objetivos, definidos no
-[plano do motor de referência](../plano-motor-de-referencia.md):
+O projeto persegue dois objetivos:
 
 - **Valuation exemplar**: o preço justo de **um** ativo é defensável linha a
   linha — cada número tem fonte, cada premissa é observada ou declarada, e o
@@ -29,29 +28,25 @@ inteiro. São perguntas diferentes, medidas de formas diferentes.
 
 | | Condição | Pergunta em português | Onde está |
 |---|---|---|---|
-| **R1** | Nenhum defeito conhecido | Há alguma conta errada que já sabemos? | nenhum item de defeito aberto no plano |
+| **R1** | Nenhum defeito conhecido | Há alguma conta errada que já sabemos? | nenhum defeito de correção aberto; o resto declarado nas [limitações](../validacao/limitacoes.md) |
 | **R2** | Incerteza calibrada | A faixa de "8 em 10" acerta 8 em 10? | faixa calibrada, medida fora da amostra |
 | **R3** | Habilidade testada, com o poder declarado | O motor ordena melhor que o acaso? E o teste enxergaria se ordenasse? | teste pré-registrado, com o poder medido |
 
 ### R1 — nenhum defeito conhecido
 
-Todo defeito achado vira item no plano (letra B, numerado), com o critério de
-"pronto". A condição é que nenhum defeito conhecido esteja aberto.
+Todo defeito achado é corrigido antes de qualquer outra coisa, com um teste que
+o trava; o que o motor ainda não resolve não é defeito, é limitação, e fica
+declarado nas [limitações](../validacao/limitacoes.md), com o que o projeto faz
+a respeito. A condição é que nenhum defeito conhecido esteja aberto.
 
 **Como os defeitos são caçados:** a auditoria automática a cada envio
 (`npm run qa:gemini`), as sete lentes do conselheiro (capítulo 8 da
 [documentação do motor](../motor/README.md)), o gabarito da cascata (a saída
 completa de 376 ativos congelada, conferida ao bit a cada mudança), e as
-leituras humanas — como a desta documentação.
-
-**Um exemplo honesto:** ao reescrever esta documentação conferindo cada linha
-de código, foram achados cinco defeitos (itens B35 a B39): o rastro do painel
-de logs descrevia uma conta diferente da feita na via da firma; o cenário de
-desconto não alcançava todos os anos em um caso; a taxa dos bancos não seguia a
-curva ano a ano; e dois textos (um aviso e um rastro) diziam que uma regra
-retirada ainda valia. Quatro foram corrigidos na mesma rodada; o B38 (o nome
-"Otimista" num cenário que pode valer menos) fechou em 14/10/2026, com os
-conjuntos nomeados pelas premissas e a inversão declarada (decisão 148).
+leituras humanas — como conferir cada linha do código contra o que esta
+documentação afirma. Essa conferência é a que pega o defeito mais traiçoeiro: o
+texto que descreve uma conta diferente da que o código faz, como um rastro que
+diz descontar a uma taxa e desconta a outra.
 
 ### R2 — incerteza calibrada
 
@@ -66,7 +61,7 @@ coortes que não foram usadas para ajustá-la):
 
 A faixa sai da volatilidade do papel e do preço de hoje, e o preço justo entra
 com o peso pequeno que a evidência deu (capítulo 4, seção 4.12). **R2 está
-atingido** (decisões 100 e 124).
+atingido**.
 
 ### R3 — habilidade testada, com o poder declarado
 
@@ -74,13 +69,13 @@ A pergunta: **as ações com maior upside no motor renderam mais nos 36 meses
 seguintes?**, controlando pelo book-to-market (a razão patrimônio ÷ valor de
 mercado, um fator de valor conhecido na literatura — Fama e French, 1992).
 
-O teste foi **fixado antes de medir** (decisão 96): regressão em cada coorte
+O teste foi **fixado antes de medir**: regressão em cada coorte
 trimestral de 2018 a 2023, média das inclinações (Fama-MacBeth), `t` corrigido
 pela sobreposição das janelas, contra um limiar de 2,70, e Newey-West acima de
 2. Fixar antes impede o erro mais comum de validação: testar vários critérios e
 relatar o que passou.
 
-**Resultado (remedição de 03/11/2026, com o motor da decisão 153 e as versões
+**Resultado (remedição de 03/11/2026, com o último ponto anualizado e as versões
 antigas dos balanços reapresentados):** inclinação de 0,034, com `t` corrigido de
 0,25 contra 2,70, em 22 coortes e 2.332 observações. **Não passou.** (Em
 01/10/2026, com o motor anterior, era 0,010, com `t` de 0,05; com o prêmio de
@@ -89,7 +84,7 @@ antigas dos balanços reapresentados):** inclinação de 0,034, com `t` corrigid
 **Nem o book-to-market sozinho passou**: na mesma remedição, o IC dele em 36
 meses é 0,19, com `t` corrigido de 2,15 contra 2,70 (era 2,40 em 01/10 e 2,03
 em 28/09). Pela
-regra fixada antes de medir (decisão 103), sem ordenação que passe, o retorno
+regra fixada antes de medir, sem ordenação que passe, o retorno
 esperado da tela de metas fica só no custo do capital próprio.
 
 **E o poder:** com a série brasileira disponível, o menor efeito que o teste
@@ -99,19 +94,19 @@ teria esse poder no efeito dele com 58 coortes, em 2035. Ou seja, o teste
 **não teria como** confirmar uma habilidade do tamanho que a literatura costuma
 achar.
 
-Diante disso, o usuário decidiu (decisão 140) que o critério é **"habilidade
+Diante disso, o critério é **"habilidade
 testada, com o poder declarado"**: o teste foi feito como combinado, o resultado
 está registrado, e o registro diz até onde o teste enxerga. **R3 está
 atingido nessa definição.** "Habilidade comprovada" **não** está.
 
 ---
 
-## 7.3 A réplica selada (C7)
+## 7.3 A réplica selada
 
 O único caminho para "comprovada" é evidência que ninguém podia ter ajustado:
 previsões feitas **antes** do resultado existir. O projeto sela, a cada
 trimestre, as previsões do motor daquele dia, com o código de então e o hash do
-git de cada arquivo (decisões 133 e 138). As três primeiras coortes seladas são
+git de cada arquivo. As três primeiras coortes seladas são
 de 31/12/2025, 31/03/2026 e 30/06/2026. A leitura só é permitida quando os 36
 meses passarem — a ferramenta `tool/c7-reading.ts` recusa ler antes. As
 leituras previstas são em 2029 e 2031.
@@ -141,7 +136,7 @@ leituras previstas são em 2029 e 2031.
   14/09/2026, medido em 03/11/2026), e isso está declarado nas
   [limitações](../validacao/limitacoes.md).
 
-A frase da decisão 140 resume a posição do projeto: o motor "não atinge nossos
+A frase que fixou o critério resume a posição do projeto: o motor "não atinge nossos
 critérios de poder tomar a decisão por si só" e "serve para uso pessoal na
 maioria dos casos". É uma ferramenta de **análise**, e não um oráculo.
 

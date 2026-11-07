@@ -24,7 +24,7 @@
 | Preço de mercado | R$ 42,35 |
 | Exercícios | 17 (2010–2026) |
 
-**O último ponto é 2026 anualizado** (decisão 153): o lucro acumulado do
+**O último ponto é 2026 anualizado**: o lucro acumulado do
 primeiro semestre, no ITR de 30/06/2026, vezes 2, com o balanço da mesma data. A
 anualização supõe que o segundo semestre repete o primeiro, sem correção de
 sazonalidade, e multiplica junto o que for não recorrente; a tela declara isso
@@ -60,8 +60,8 @@ O beta (1,00) sai de cinco anos de retornos diários com 81 proventos
 reinvestidos, encolhido para o setor. **Não se desalavanca**: a alavancagem de
 um banco é permanente e regulada, e o beta medido já a contém. Por isso também
 não há ponto fixo: a taxa de cada ano é o forward daquele ano mais β × prêmio
-(item B37, corrigido em 28/09/2026 — antes, sem a resolução, a taxa ia em linha
-reta do CDI de hoje até a perpetuidade):
+(a taxa segue a curva ano a ano, e não uma reta do CDI de hoje até a
+perpetuidade):
 
 | Ano | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | ∞ |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -70,7 +70,7 @@ reta do CDI de hoje até a perpetuidade):
 
 Conferindo o ano 1: `13,67% + 1,0020 × 1,21% = 13,67% + 1,21% = 14,89%` (com o
 forward sem arredondar, 13,672%). O prêmio de 1,21% é a média de dez anos do
-prêmio implícito no preço da bolsa (decisão 142; capítulo 3, seção 3.7).
+prêmio implícito no preço da bolsa (capítulo 3, seção 3.7).
 
 ---
 
@@ -189,7 +189,7 @@ O terminal é 48,8% do preço justo.
 **O que o retorno neutro não diz:** ele vale para o capital **novo**. O capital
 que o banco já tem continua rendendo o que rende — o terminal implica 17,3% sobre
 ele —, acima dos 15,6% de custo, e esse excedente do instalado já está dentro dos
-R$ 13,92 (item B12).
+R$ 13,92.
 
 ---
 
@@ -210,8 +210,7 @@ acionista da controladora.
 **Sensibilidade:** premissas mais duras R$ 23,51; as do motor R$ 28,53; premissas
 mais brandas R$ 37,72. No Itaú as mais brandas saem acima das mais duras,
 porque o retorno passa o custo e crescer cria valor. No banco cujo retorno fica
-abaixo do custo, o crescimento +3 p.p. **baixaria** o preço justo (item B38;
-capítulo 5, seção 5.7).
+abaixo do custo, o crescimento +3 p.p. **baixaria** o preço justo (capítulo 5, seção 5.7).
 
 **Monte Carlo:** P5 = R$ 25,06; mediana = R$ 28,51; P95 = R$ 33,37.
 
@@ -228,9 +227,7 @@ volatilidade do Itaú no último ano (24,6%).
 | EV/EBITDA | — | **recusado**: instituição financeira | — |
 | **Consolidada** | | | **R$ 25,14** |
 
-Divergência de −11,9% em relação ao preço justo: dentro do limite de 50%. (Até
-28/09/2026 a mediana contava cada classe de ação como um "par" e incluía o
-próprio Itaú: eram 31; item B41.)
+Divergência de −11,9% em relação ao preço justo: dentro do limite de 50%.
 
 **Ressalvas:** nenhuma.
 

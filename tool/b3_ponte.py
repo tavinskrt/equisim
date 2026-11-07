@@ -1,6 +1,6 @@
 """Liga as companhias da CVM fora do universo de hoje aos papéis do COTAHIST.
 
-**Por que existe (item A3.2).** A amostra sem viés de sobrevivência (C1b) precisa
+**Por que existe.** A amostra sem viés de sobrevivência (C1b) precisa
 das duas pontas de cada companhia que deixou de existir: a demonstração, que a
 ingestão da CVM já tem, e o preço, que está no COTAHIST. As duas não se
 conhecem — a CVM identifica por CNPJ, o COTAHIST por ticker e ISIN.
@@ -206,7 +206,7 @@ def main() -> int:
     with_exchange = [cnpj for cnpj in outside if cnpj in listed or companies[cnpj]["tickers"] or codes.get(cnpj)]
     by_lane = collections.Counter(p["via"] for p in output.values())
 
-    # O registro de quem ficou sem ponte, companhia a companhia (item C1d).
+    # O registro de quem ficou sem ponte, companhia a companhia.
     record = []
     cotahist_tickers = set(securities)
     for cnpj in with_exchange:

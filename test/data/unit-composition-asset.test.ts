@@ -6,7 +6,7 @@ import { UnitCompositionRepository } from '../../src/data/repositories/unit-comp
 import { isServed, readPublic, readPublicJson } from './public-assets';
 
 /**
- * A composição declarada das units versionada com o build (item B16).
+ * A composição declarada das units versionada com o build.
  *
  * **Sem ela a razão volta a ser inferida do valor de mercado**, que só acerta
  * quando ordinária e preferencial valem o mesmo. No aplicativo isso vira

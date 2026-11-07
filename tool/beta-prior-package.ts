@@ -88,7 +88,7 @@ export async function main(args: string[]): Promise<void> {
     // **A mesma camada de dados do aplicativo**, e não a de mercado crua: o
     // prior encolhe o beta contra a alavancagem e a mediana setorial, e as duas
     // saem dos fundamentos. A CVM mesclada e o setor da B3 por emissor são o
-    // que o aplicativo monta (decisões 80 e 87); resolver o prior sobre outra
+    // que o aplicativo monta; resolver o prior sobre outra
     // camada daria um prior de outro motor.
     const registry = B3RegistryCodec.decodePackage(readJson<JsonObject>('public/assets/b3/emissores.json'));
     const fundamentals = new OfficialSectorFundamentalsRepository({

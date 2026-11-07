@@ -11,7 +11,7 @@
 > divergências**. As outras oito são, por construção, outra montagem — é o
 > próprio objeto da medição.
 >
-> **Remedido depois da [decisão 119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md)**,
+> **Remedido depois da decisão 119**,
 > que estendeu à rota derivada a separação do caixa que a decisão 113 fez no
 > WACC. O preço justo caiu em 73 dos 97 e dois ativos saíram; os números abaixo
 > são os de depois.
@@ -106,7 +106,7 @@ fraca, e que ela pode ser testada sem custo quando as coortes voltarem.
 
 ## 5. O que se decidiu
 
-[Decisão 115](../decisoes/115-o-horizonte-fica-em-dez-anos-por-medicao.md):
+Decisão 115:
 **dez anos ficam**, agora por medição em vez de convenção.
 
 - **Não é escolha de nível**: nenhum horizonte de 5 a 20 move a mediana mais que

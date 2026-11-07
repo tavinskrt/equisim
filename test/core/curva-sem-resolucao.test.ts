@@ -1,5 +1,5 @@
 // A taxa de cada ano segue a curva também sem o custo de capital resolvido
-// (item B37), e o rastro descreve a conta que foi feita (item B35).
+//, e o rastro descreve a conta que foi feita.
 //
 // Sem o ponto fixo — o banco, que não realavanca, e o recuo de quem não tem
 // beta desalavancado — o desconto interpolava em linha reta do CDI de hoje até

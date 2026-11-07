@@ -186,7 +186,7 @@ export class PerformanceMetrics {
 }
 
 /**
- * Custo de transação das compras da simulação (item C4).
+ * Custo de transação das compras da simulação.
  *
  * **Tudo em inteiro.** A tarifa é proporcional ao valor negociado e vem em
  * partes por milhão — 300 é 0,030% —, para que `valor × tarifa` seja conta de
@@ -276,7 +276,7 @@ export class BacktestOutcome {
   readonly totalAllocated: Money;
 
   /**
-   * Tarifa e corretagem pagas nas compras (item C4).
+   * Tarifa e corretagem pagas nas compras.
    *
    * Sai do caixa de cada ativo antes da compra, e por isso a identidade
    * `aportado = alocado + custos + caixa` fecha ao centavo.
@@ -377,7 +377,7 @@ function affordable(available: number, priceCents: number, c: TransactionCosts):
 /**
  * O maior número de ações inteiras a [priceCents] que, com a tarifa e a
  * corretagem de [costs], cabe em [availableCents]. A mesma conta das compras
- * do backtest, para o acompanhamento da Meta (decisão 159) não ter outra.
+ * do backtest, para o acompanhamento da Meta não ter outra.
  */
 export function affordableShares(availableCents: number, priceCents: number, costs: TransactionCosts): number {
   return affordable(availableCents, priceCents, costs);
@@ -442,7 +442,7 @@ function splitCents(totalCents: number, weights: readonly number[]): number[] {
  *
  * A fatia de cada ativo entra no **caixa dele**, e a compra consome desse
  * caixa o maior número de ações cujo valor **mais o custo da ordem** caiba
- * nele (item C4). O que sobra fica lá e participa do aporte seguinte —
+ * nele. O que sobra fica lá e participa do aporte seguinte —
  * inclusive a fatia inteira de um ativo sem cotação no dia, que assim não se
  * perde. É essa acumulação que faz `Σ AssetPerformance.invested` reconstituir
  * o aportado sem perda.
@@ -685,10 +685,10 @@ function consolidate(args: {
  * as mesmas métricas:
  *
  * - [PortfolioBacktest.run]: o plano de aportes, inicial e mensais, dividido
- *   pelos pesos estipulados (decisão 9). É a forma das ferramentas de
+ *   pelos pesos estipulados. É a forma das ferramentas de
  *   validação e da paridade com o núcleo Dart.
  * - [PortfolioBacktest.runOneShareEach]: **uma ação de cada ativo**, comprada
- *   no primeiro pregão da janela, e nada mais (decisão 161). É a forma da tela
+ *   no primeiro pregão da janela, e nada mais. É a forma da tela
  *   de Backtest.
  *
  * **Não há rebalanceamento de espécie alguma.** A partir da compra, cada
@@ -818,7 +818,7 @@ export const PortfolioBacktest = {
 
   /**
    * **Uma ação de cada ativo**, comprada no primeiro pregão da janela, e mais
-   * nada até o fim (decisão 161).
+   * nada até o fim.
    *
    * É a compra do **mercado fracionário** da B3, onde se negocia de uma a 99
    * ações: lote de uma, e não o lote padrão de cem. Cada ordem paga a tarifa

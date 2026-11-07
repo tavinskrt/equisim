@@ -1,6 +1,6 @@
 /**
  * Proventos em dinheiro declarados pela B3, e o retorno total que eles formam
- * (item A4, decisão 89).
+ *.
  *
  * **De onde vem.** O `GetListedCashDividends` do portal de empresas listadas
  * devolve, por emissor, o histórico inteiro de proventos em dinheiro — desde
@@ -122,7 +122,7 @@ export class CashDividend {
 
   /**
    * Como [netAmount], com a retenção vigente na **data-com**: 15% até 2025 e
-   * 17,5% desde 01/01/2026 (decisão 159). É o que o acompanhamento da
+   * 17,5% desde 01/01/2026. É o que o acompanhamento da
    * carteira credita.
    *
    * [netAmount] fica com os 15% de sempre porque alimenta as coortes de
@@ -331,7 +331,7 @@ export interface TotalReturnIndexResult {
   readonly withoutPrice: number;
 }
 
-/** Índice de retorno total sobre uma série de fechamentos (item A4). */
+/** Índice de retorno total sobre uma série de fechamentos. */
 export const TotalReturnIndex = {
   /**
    * O índice, posição a posição com [closes], começando em 1.
@@ -404,7 +404,7 @@ function codecDate(v: unknown): DateTime | null {
 }
 
 /**
- * Formato do pacote de proventos, para empacotar no aplicativo (item A4).
+ * Formato do pacote de proventos, para empacotar no aplicativo.
  *
  * Mora no núcleo pela mesma razão do `B3RegistryCodec`: a ferramenta que grava
  * e o repositório que lê precisam concordar sobre o formato.

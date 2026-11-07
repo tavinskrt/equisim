@@ -7,7 +7,7 @@
 //              série não explica na data de recebimento (`ShareCountHistory`)
 //   eventos    desdobramento, grupamento e bonificação declarados no FRE, com
 //              a data ex localizada no preço (`CorporateEvents.locate`); e,
-//              onde o FRE não declara, os inferidos pelo preço (decisão 75)
+//              onde o FRE não declara, os inferidos pelo preço
 //   série      fechamento do COTAHIST ajustado pelos dois
 //
 // **A escala é conferida de três jeitos**, porque companhia deslistada não tem
@@ -186,7 +186,7 @@ export function main(_args: string[]): void {
   }
   for (const [cnpj, codes] of listedCodes) listedCodes.set(cnpj, companyCodes(codes));
 
-  // Proventos das deslistadas, pelo nome de pregão (item A4): a consulta da B3
+  // Proventos das deslistadas, pelo nome de pregão: a consulta da B3
   // responde para companhia que saiu da bolsa. Um nome de pregão pode ser de
   // outra companhia; o preço com direito contra o COTAHIST do papel é o que
   // confere que é a mesma.
@@ -230,7 +230,7 @@ export function main(_args: string[]): void {
     }
   }
 
-  // ---- 1b. A contagem por data das listadas, para as coortes (item C3) ----
+  // ---- 1b. A contagem por data das listadas, para as coortes ----
   const listedOutput: Record<string, unknown> = {};
   let listedWithCount = 0;
   let listedEvents = 0;
@@ -391,7 +391,7 @@ export function main(_args: string[]): void {
       formChecks++;
       const ratio = point.total / x.shares;
       // A composição do capital vem na escala do declarante — mil ações, em
-      // quem publica em milhares (decisão 70). Mil exatas é a mesma contagem.
+      // quem publica em milhares. Mil exatas é a mesma contagem.
       const matches = Math.abs(ratio - 1) <= formsMargin || Math.abs(ratio / 1000 - 1) <= formsMargin;
       if (matches) formMatches++;
       checks.push({ data: day(x.date), razao: ratio, bate: matches });

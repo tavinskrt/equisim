@@ -1942,7 +1942,7 @@ describe('Escudo fiscal e custo da dívida', () => {
 describe('Fronteira das vias e monotonia na taxa', () => {
   // A pós-condição da ponte de equity era um degrau entre dois estimadores
   // diferentes, e medi-la na taxa do dia fazia o degrau andar com o ciclo
-  // monetário (decisão 34); a rampa da decisão 38 trocou o degrau por uma
+  // monetário; a rampa da decisão 38 trocou o degrau por uma
   // mistura, e a mistura continuava subindo com a taxa. **Desde a decisão
   // 102 não há fronteira**: a via da firma é a via da firma em toda taxa, e o
   // capital próprio fino é ressalva, e não troca de modelo. Este fixture é
@@ -2184,7 +2184,7 @@ describe('Fronteira das vias e monotonia na taxa', () => {
   it('com ou sem o caminho resolvido, o capital próprio não passa pela ponte, e nada é mesclado', () => {
     // O fixture é alavancado de propósito: sob a ponte ele atravessava a
     // pós-condição dos 20% e recebia a mescla da decisão 38. Com o caminho
-    // resolvido já não havia ponte (decisão 43); sem ele, desde a decisão 102,
+    // resolvido já não havia ponte; sem ele, desde a decisão 102,
     // também não.
     const evaluate = (o: { betaU?: number | null; rf: number }): ValuationResult | null =>
       evaluateWith(o.rf, { unleveredBeta: o.betaU ?? null });
@@ -2935,7 +2935,7 @@ describe('O rastro descreve a conta que foi feita', () => {
     const end = formulas(CashTiming.endOfYear).join(' ');
     expect(mid.length, 'o rastro precisa ter sido capturado').toBeGreaterThan(0);
     // O fluxo desta via é o do acionista derivado, descontado ao `Ke` de
-    // cada ano — `k_t` na fórmula (item B35).
+    // cada ano — `k_t` na fórmula.
     expect(mid).toContain(String.raw`\sqrt{1 + k_t}`);
     expect(end).not.toContain(String.raw`\sqrt{1 + k_t}`);
   });
@@ -3108,8 +3108,8 @@ describe('Estrutura de capital recusada pela realavancagem', () => {
 
   it('a recusa da realavancagem não vira preço de outra via', () => {
     // Decisão 102. A estrutura recusada migrava para a via do acionista
-    // (decisão 45), e sem beta desalavancado a ponte fina era mesclada com
-    // ela (decisão 38). Nenhuma das duas acontece mais: com ou sem caminho
+    //, e sem beta desalavancado a ponte fina era mesclada com
+    // ela. Nenhuma das duas acontece mais: com ou sem caminho
     // resolvido, o ativo é avaliado pela via da firma ou recusado.
     let refusedByStructure = 0;
     let evaluated = 0;
@@ -3659,7 +3659,7 @@ describe('A composição declarada da unit decide, e a medida confere', () => {
     return out;
   };
 
-  // A contagem oficial da B3 arbitra o divisor (decisão 83), e é sobre ela
+  // A contagem oficial da B3 arbitra o divisor, e é sobre ela
   // que a razão de unidade age: `divisor = contagem ÷ u`. É o caminho do
   // aplicativo, e por isso é o que o teste exercita.
   const evaluate = (o: { declared?: number | null; price?: number } = {}): ValuationResult | null => {
@@ -3892,7 +3892,7 @@ describe('A dívida do WACC é a mesma do resto do modelo', () => {
     );
     expect(withoutDebt.warnings.some((w) => w.includes('não tem dívida contratada'))).toBe(true);
     // O que remunera o peso negativo é caixa, e caixa rende a taxa livre de
-    // risco: sem dívida não há prêmio de crédito a cobrar (decisão 58).
+    // risco: sem dívida não há prêmio de crédito a cobrar.
     const weight =
       1 -
       (withoutDebt.discountRate - capm.costOfEquity) /
@@ -4114,7 +4114,7 @@ describe('O minoritário no peso do WACC estático é declarado', () => {
     const withInput = evaluate({ minority: 900 });
     const without = evaluate({ minority: 30 });
     // A mesma companhia, com o minoritário apenas mudando de tamanho, muda
-    // de preço pela ponte (decisão 49) — o que o teste cobra é que o aviso
+    // de preço pela ponte — o que o teste cobra é que o aviso
     // em si não entre na conta: ele é narrativa.
     expect(withInput).not.toBeNull();
     expect(without).not.toBeNull();

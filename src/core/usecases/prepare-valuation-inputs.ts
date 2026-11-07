@@ -50,7 +50,7 @@ function failureOf(ticker: Ticker, asOf: DateTime, source: string, failure: Fail
   return err(failure);
 }
 
-/** A ressalva do ajuste de eventos de ações que a fonte deixou de fazer (item B29). */
+/** A ressalva do ajuste de eventos de ações que a fonte deixou de fazer. */
 function adjustmentNote(applied: readonly ShareEvent[]): string {
   const day = (d: DateTime) =>
     `${String(d.day).padStart(2, '0')}/` + `${String(d.month).padStart(2, '0')}/${d.year}`;
@@ -70,7 +70,7 @@ function adjustmentNote(applied: readonly ShareEvent[]): string {
 
 /**
  * Estima o beta contra o Ibovespa na janela, com **retorno total dos dois
- * lados** quando há proventos (decisão 89). Recua para β = 1, declarado como
+ * lados** quando há proventos. Recua para β = 1, declarado como
  * manual, quando o índice falha ou a série é curta.
  */
 async function estimateBeta(args: {
@@ -110,7 +110,7 @@ async function estimateBeta(args: {
 
   const estimate = BetaCalculator.estimate({ returns: aligned });
   const reinvested = total?.applied ?? 0;
-  // **A janela que a série de fato cobriu** (item B17).
+  // **A janela que a série de fato cobriu**.
   const effectiveWindow =
     dates.length < 2 ? 0.0 : dates[dates.length - 1]!.difference(dates[0]!).inDays / 365.25;
 
@@ -183,7 +183,7 @@ export const PrepareValuationInputs = {
       return failureOf(ticker, today, 'cotações', priceResult.failureOrNull!);
     }
 
-    // **O ajuste que a fonte deixou de fazer** (item B29).
+    // **O ajuste que a fonte deixou de fazer**.
     const adjustment = CorporateEvents.completeAdjustment(priceResult.unwrap(), args.shareEvents ?? []);
     const series = adjustment.series;
     if (series.isEmpty) {
@@ -212,12 +212,12 @@ export const PrepareValuationInputs = {
         standardError: beta.standardError,
         prior: betaPrior,
         sectorKey,
-        // **A alavancagem da janela do beta, e não a de hoje** (decisão 55).
+        // **A alavancagem da janela do beta, e não a de hoje**.
         debtToEquity:
           MarketLeverage.overWindow({ snapshots: published, prices: series.points, window }) ??
           last.debtToMarketEquity(marketEquity) ??
           0.0,
-        // **A estatutária, e é a mesma que a realavancagem usa** (decisão 55).
+        // **A estatutária, e é a mesma que a realavancagem usa**.
         taxRate: ValuationParameters.statutoryTaxRate,
       });
       betaFinal = shrunk.beta;
@@ -258,9 +258,9 @@ export const PrepareValuationInputs = {
         creditReferenceRiskFree: riskFreeRate,
         // A composição declarada da unit, quando a companhia a publica (B16).
         declaredSharesPerUnit: args.declaredSharesPerUnit ?? null,
-        // A segunda leitura, por múltiplos de pares (item B5). Só viaja.
+        // A segunda leitura, por múltiplos de pares. Só viaja.
         peerMultiples: args.peerMultiples ?? null,
-        // A janela que a série de fato cobriu (item B17).
+        // A janela que a série de fato cobriu.
         betaWindowYears: beta.windowInYears,
         // As emissões por valor: a cascata soma as posteriores ao balanço (B28).
         shareIssues: args.shareIssues ?? [],

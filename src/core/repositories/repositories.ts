@@ -14,7 +14,7 @@ import type { Ticker } from '../value-objects/ticker';
 
 /**
  * Frequência de uma série de taxas, e quantos períodos dela cabem num ano.
- * **Existe para que a base não viaje por parâmetro** (decisão 59).
+ * **Existe para que a base não viaje por parâmetro**.
  */
 export class TimeBasis extends DartEnum {
   /** Dias úteis, base em que o BCB publica o CDI. */
@@ -40,7 +40,7 @@ export class TimeBasis extends DartEnum {
 
 /**
  * Um ponto de uma série de taxas: a data e a taxa daquele período. **Existe
- * para que a data e a taxa não possam se separar** (decisão 59).
+ * para que a data e a taxa não possam se separar**.
  */
 export class RatePoint {
   /** Data do período. */

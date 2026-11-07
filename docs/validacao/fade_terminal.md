@@ -11,7 +11,7 @@ dart run tool/fade_terminal.dart   # grava fade_terminal.json
 
 ## 0. Por que esta medição
 
-A [decisão 35](../decisoes/035-dcf-reverso-e-regressao-condicional.md) tirou do
+A decisão 35 tirou do
 decaimento contínuo de `RONIC` o argumento que ele tinha: o terminal **não** é
 a causa do viés de nível, e trocá-lo não conserta o nível. A mesma decisão diz
 que quem propuser a troca depois dela precisa de outro argumento.
@@ -22,7 +22,7 @@ nas cinco condições recebe `r_∞ + 0,30·(ROIC_ciclo − r_∞)`; quem falha 
 recebe `r_∞`, e nada entre os dois.
 
 É defeito da mesma família do que a
-[decisão 34](../decisoes/034-fronteira-das-vias-medida-na-taxa-estrutural.md)
+decisão 34
 corrigiu na fronteira das vias: preço justo descontínuo numa grandeza contínua.
 
 ---
@@ -160,7 +160,7 @@ Um `λ` contínuo torna as duas últimas redundantes por construção: excedente
 pequeno produz `λ·e₀` pequeno sem precisar de limiar, e deterioração aparece na
 própria série que estima `φ`.
 
-**Resolvido em 09/09/2026 pela [decisão 36](../decisoes/036-decaimento-medido-do-excedente-na-perpetuidade.md),
+**Resolvido em 09/09/2026 pela decisão 36,
 e custou menos do que parecia.** A trava de saúde tem **dois** usos, e só o do
 *moat* saiu: na Porta 2a ela continua inteira, proibindo normalizar a base para
 cima — que é onde a QUAL3 era de fato resolvida. A isenção cíclica da decisão 30
@@ -171,7 +171,7 @@ inerte a consulta secundária que o *moat* fazia, e não a trava.
 
 ## 6. O que a implementação produziu
 
-Implementado pela [decisão 36](../decisoes/036-decaimento-medido-do-excedente-na-perpetuidade.md)
+Implementado pela decisão 36
 e medido contra o mesmo universo, na mesma data e com as mesmas âncoras.
 
 ### 6.1 A cobertura quase triplica e a magnitude despenca
@@ -286,7 +286,7 @@ fator diferente de 1, e era o que `tool/fluxo_explicito.dart` fazia.
 
 ## 8. D12 — a volta entre o veredito e a taxa (10/09/2026)
 
-A [decisão 44](../decisoes/044-moat-contra-a-taxa-resolvida.md) fechou **um**
+A decisão 44 fechou **um**
 passe de uma volta circular:
 
 ```

@@ -15,7 +15,7 @@
 //      nível, cobertura e ordenação.
 //
 // A medição **não** é de retorno realizado: isso é coorte, e depende da base
-// bruta (item C5). É sobre o que o motor de hoje já cobra, e sobre o que um
+// bruta. É sobre o que o motor de hoje já cobra, e sobre o que um
 // ajuste mudaria.
 //
 //   npm run tool -- cascade-golden   # congela a entrada
@@ -66,7 +66,7 @@ export async function main(_args: string[]): Promise<void> {
       if (r.isErr) continue;
       const v = r.unwrap();
       // O valor de mercado da fonte, que é o que existe na data congelada. Ele
-      // erra em alguns tickers (decisão 83) e por isso **não entra em conta de
+      // erra em alguns tickers e por isso **não entra em conta de
       // dinheiro** aqui: entra só na **ordenação** por tamanho, onde um erro de
       // escala não troca tercil.
       const marketValue = inputs.fundamentals.length === 0 ? null : inputs.fundamentals[inputs.fundamentals.length - 1]!.marketCap;

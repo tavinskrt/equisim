@@ -13,7 +13,7 @@
 
 ## 0. A pergunta
 
-A [decisão 95](../decisoes/095-a-recusa-por-liquidez-fica-pelo-nivel-e-nao-pela-ordenacao.md)
+A decisão 95
 deixou a recusa por liquidez de pé por **uma** razão. Soltos do corte, os
 recusados ordenam o retorno; o que não presta é o **nível** — o preço justo deles
 sai 27 p.p. acima do das avaliadas. A explicação proposta foi o beta: papel com
@@ -65,7 +65,7 @@ teoria, com o sinal previsto, no grupo previsto.
 ## 3. E não chega perto
 
 O que chega ao preço é o beta **encolhido** em direção ao prior transversal
-([decisão 40](../decisoes/040-beta-encolhido-por-precisao.md)) — comparar o
+(decisão 40) — comparar o
 encolhido de produção com um Dimson cru premiaria o estimador mais ruidoso. Com
 o mesmo encolhimento nos dois, e o erro-padrão de cada um:
 
@@ -100,7 +100,7 @@ o grupo que sofre o viés medido ao lado do que não sofre.
 
 ## 5. O que se decidiu
 
-[Decisão 108](../decisoes/108-a-recusa-por-liquidez-fica-e-o-beta-corrigido-fecha-um-terco-da-distancia.md):
+Decisão 108:
 **a recusa por liquidez fica, e o motor não muda.** Agora por duas razões
 medidas em vez de uma suposta — a distância de nível não é o beta, e corrigir o
 beta de todo mundo custa precisão onde não há viés.

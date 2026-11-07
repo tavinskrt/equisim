@@ -220,7 +220,7 @@ describe('Identidade FCFF/WACC ≡ FCFE/Ke sob alavancagem constante', () => {
   });
 });
 
-describe('o juro e o rendimento do caixa seguem a curva (item B24)', () => {
+describe('o juro e o rendimento do caixa seguem a curva', () => {
   const a = new DcfAssumptions({
     projectionYears: 5,
     growthRate: 0.03,

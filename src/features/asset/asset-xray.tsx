@@ -5,9 +5,7 @@ import { Link } from 'react-router';
 import type { Failure, Ticker, ValuationResult } from '../../core';
 import { BandCopy, FailureCopy, Fmt, VerdictCopy } from '../../copy';
 import { useCalibratedBands, useProfile, useValuation } from '../../app/hooks';
-import { usePreferences } from '../../app/state/preferences-store';
 import { userValuationOf, useSavedValuations } from '../../app/state/saved-valuations-store';
-import { Banner } from '../../ui/banner';
 import { Button } from '../../ui/button';
 import { Card, Panel } from '../../ui/card';
 import { Disclosure } from '../../ui/disclosure';
@@ -33,7 +31,7 @@ import { SensitivityCard } from './sensitivity-card';
 
 /**
  * **O corpo do Raio-X**: a avaliação inteira de um ativo, com as premissas à
- * vista. Mora na página própria do ativo (`/ativo/:ticker`, decisão 155), que
+ * vista. Mora na página própria do ativo (`/ativo/:ticker`), que
  * põe o cabeçalho e o Voltar em volta dele.
  */
 export function XRayBody({ ticker }: { ticker: Ticker }) {
@@ -96,14 +94,11 @@ function XRaySkeleton() {
 }
 
 function XRayResult({ result }: { result: ValuationResult }) {
-  const mode = usePreferences((s) => s.mode);
-  const analyst = mode === 'analyst';
   const verdict = VerdictCopy.of(result);
   const records = useSavedValuations((s) => s.records);
   const mine = userValuationOf(records, result.ticker);
   const tables = useCalibratedBands();
   const bands = tables.status === 'success' ? BandCopy.readings(result, tables.data) : [];
-  const caveatCount = (result.diagnostics?.caveats.length ?? 0) + result.warnings.length;
   const manual = result.manual;
   const engineProjection = manual === null ? null : manual.evaluate(manual.enginePremises);
 
@@ -155,17 +150,13 @@ function XRayResult({ result }: { result: ValuationResult }) {
     { id: 'secao-regua', label: 'Régua de preço' },
     { id: 'secao-simular', label: 'Simular' },
     { id: 'secao-salvos', label: 'Seus valuations' },
-    ...(analyst
-      ? [
-          { id: 'secao-faixa', label: 'Faixa calibrada' },
-          { id: 'secao-modelo', label: 'Modelo e taxa' },
-          { id: 'secao-lucro', label: 'Lucro de partida' },
-          { id: 'secao-sensibilidade', label: 'Sensibilidade' },
-          { id: 'secao-pares', label: 'Múltiplos de pares' },
-          { id: 'secao-projecao', label: 'Projeção de 10 anos' },
-          { id: 'secao-ressalvas', label: 'Ressalvas' },
-        ]
-      : [{ id: 'secao-ressalvas', label: 'Ressalvas' }]),
+    { id: 'secao-faixa', label: 'Faixa calibrada' },
+    { id: 'secao-modelo', label: 'Modelo e taxa' },
+    { id: 'secao-lucro', label: 'Lucro de partida' },
+    { id: 'secao-sensibilidade', label: 'Sensibilidade' },
+    { id: 'secao-pares', label: 'Múltiplos de pares' },
+    { id: 'secao-projecao', label: 'Projeção de 10 anos' },
+    { id: 'secao-ressalvas', label: 'Ressalvas' },
   ];
   // O invólucro de um cartão que não tem o que mostrar fica vazio, e some.
   const slot = 'scroll-mt-20 empty:hidden';
@@ -249,59 +240,35 @@ function XRayResult({ result }: { result: ValuationResult }) {
           <SavedForAsset result={result} />
         </StaggerItem>
 
-        {analyst ? (
-          <>
-            <StaggerItem id="secao-faixa" className={slot}>
-              <CalibratedBandCard result={result} />
-            </StaggerItem>
-            <StaggerItem id="secao-modelo" className={slot}>
-              <ModelCard result={result} />
-            </StaggerItem>
-            <StaggerItem id="secao-lucro" className={slot}>
-              {result.diagnostics?.baseNormalization != null && (
-                <Panel title="Lucro de partida" subtitle="O último exercício ou o ano corrente anualizado, ou corrigido pelo ciclo">
-                  <NormalizationPanel normalization={result.diagnostics.baseNormalization} />
-                </Panel>
-              )}
-            </StaggerItem>
-            <StaggerItem id="secao-sensibilidade" className={slot}>
-              <SensitivityCard result={result} />
-            </StaggerItem>
-            <StaggerItem id="secao-pares" className={slot}>
-              <PeerCard result={result} />
-            </StaggerItem>
-            <StaggerItem id="secao-projecao" className={slot}>
-              {manual !== null && engineProjection !== null && engineProjection.isOk && (
-                <Disclosure title="Projeção de 10 anos" summary="A conta do motor, ano a ano, em milhões de reais">
-                  <ProjectionTable m={manual} p={manual.enginePremises} output={engineProjection.unwrap()} />
-                </Disclosure>
-              )}
-            </StaggerItem>
-            <StaggerItem id="secao-ressalvas" className={slot}>
-              <CaveatsCard result={result} />
-            </StaggerItem>
-          </>
-        ) : (
-          <>
-            <StaggerItem id="secao-ressalvas" className={slot}>
-              {caveatCount > 0 && (
-                <Disclosure
-                  title={`Ressalvas (${caveatCount})`}
-                  summary="O que pede cautela ao ler este número"
-                  defaultOpen={verdict.outlier}
-                >
-                  <CaveatsCard result={result} />
-                </Disclosure>
-              )}
-            </StaggerItem>
-            <StaggerItem>
-              <Banner>
-                O modo <strong>Completo</strong> mostra o modelo, a taxa de desconto, a normalização do lucro, a sensibilidade, os
-                múltiplos de pares e a projeção de dez anos. Os números são os mesmos nos dois modos.
-              </Banner>
-            </StaggerItem>
-          </>
-        )}
+        <StaggerItem id="secao-faixa" className={slot}>
+          <CalibratedBandCard result={result} />
+        </StaggerItem>
+        <StaggerItem id="secao-modelo" className={slot}>
+          <ModelCard result={result} />
+        </StaggerItem>
+        <StaggerItem id="secao-lucro" className={slot}>
+          {result.diagnostics?.baseNormalization != null && (
+            <Panel title="Lucro de partida" subtitle="O último exercício ou o ano corrente anualizado, ou corrigido pelo ciclo">
+              <NormalizationPanel normalization={result.diagnostics.baseNormalization} />
+            </Panel>
+          )}
+        </StaggerItem>
+        <StaggerItem id="secao-sensibilidade" className={slot}>
+          <SensitivityCard result={result} />
+        </StaggerItem>
+        <StaggerItem id="secao-pares" className={slot}>
+          <PeerCard result={result} />
+        </StaggerItem>
+        <StaggerItem id="secao-projecao" className={slot}>
+          {manual !== null && engineProjection !== null && engineProjection.isOk && (
+            <Disclosure title="Projeção de 10 anos" summary="A conta do motor, ano a ano, em milhões de reais">
+              <ProjectionTable m={manual} p={manual.enginePremises} output={engineProjection.unwrap()} />
+            </Disclosure>
+          )}
+        </StaggerItem>
+        <StaggerItem id="secao-ressalvas" className={slot}>
+          <CaveatsCard result={result} />
+        </StaggerItem>
       </Stagger>
 
       {/* O índice fica ao lado no computador; no celular a página é uma coluna só e ele não cabe. */}

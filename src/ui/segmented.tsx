@@ -19,7 +19,7 @@ interface Plate {
 /**
  * Controle segmentado: escolha única entre poucas opções, todas visíveis.
  *
- * A placa da opção escolhida **desliza** até a nova escolha (decisão 155, a
+ * A placa da opção escolhida **desliza** até a nova escolha (a
  * ideia do Smooth Tab da Kokonut UI), em vez de sumir de uma e acender na
  * outra: o olho acompanha o que mudou. Enquanto a placa não foi medida — na
  * primeira pintura, ou num ambiente sem layout —, a opção escolhida pinta o

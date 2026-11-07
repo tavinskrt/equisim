@@ -167,7 +167,7 @@ saem com `u = 1` e sem divergência.
 
 **Portanto:**
 
-1. A correção da [decisão 61](../decisoes/061-a-tolerancia-da-razao-de-unidade-e-relativa.md)
+1. A correção da decisão 61
    não tem — nem podia ter — evidência fora da amostra. O que a sustenta é a
    conferência entre unit e classe da §3, que é evidência de consistência
    interna, não de poder preditivo.

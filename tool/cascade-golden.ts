@@ -9,10 +9,10 @@
 // exercitado com dado real:
 //
 //   doisPontos   fonte de mercado, taxa livre de risco de dois pontos
-//   curva        mais a curva do Tesouro (decisão 74)
+//   curva        mais a curva do Tesouro
 //   aplicativo   contagem oficial, curva, CVM, setor da B3, prazo das outorgas
 //                e beta de retorno total — a montagem do aplicativo
-//   ancorada     a do aplicativo, com a série de doze meses (decisão 73)
+//   ancorada     a do aplicativo, com a série de doze meses
 //   prior        a do aplicativo mais o prior do beta: é a única que liga o
 //                ponto fixo das taxas, a rota derivada, os passes do veredito e
 //                a estrutura recusada — o aplicativo não resolve o prior (B11),
@@ -39,7 +39,7 @@
 // **Um gabarito gravado pela versão em Dart não confere contra esta.** O
 // rastro é impresso pela serialização JSON da linguagem, e o JavaScript
 // escreve `1` onde o Dart escrevia `1.0` — a impressão muda sem que número
-// algum mude. Depois da migração (decisão 152), grave de novo antes de
+// algum mude. Depois da migração, grave de novo antes de
 // conferir.
 //
 // Uso:
@@ -258,7 +258,7 @@ function serialize(r: Result<ValuationResult>): Serialized {
 /**
  * Os mesmos insumos com as imposições de diagnóstico.
  *
- * **Pela cópia do núcleo** (item B27). A versão à mão perdia a composição
+ * **Pela cópia do núcleo**. A versão à mão perdia a composição
  * declarada da unit, a taxa de referência do crédito, a janela do beta e os
  * múltiplos de pares, e as montagens de diagnóstico rodavam outro divisor nas
  * units.
@@ -311,7 +311,7 @@ export async function main(args: string[]): Promise<void> {
   const packagePrior = existsSync('public/assets/mercado/beta_prior.json')
     ? BetaPriorCodec.decode(readJson<JsonObject>('public/assets/mercado/beta_prior.json'))
     : null;
-  // O prêmio de mercado do pacote (decisão 142): a média de dez anos do
+  // O prêmio de mercado do pacote: a média de dez anos do
   // prêmio implícito na data do gabarito, que é o que o aplicativo lê. As
   // montagens `doisPontos` e `curva` ficam com os 5,5% parametrizados — são o
   // registro das montagens antigas, e não o aplicativo.
@@ -332,7 +332,7 @@ export async function main(args: string[]): Promise<void> {
   const units = existsSync('public/assets/cvm/units.json')
     ? UnitCompositionCodec.decodePackage(readJson<JsonObject>('public/assets/cvm/units.json'))
     : new Map<string, UnitComposition[]>();
-  // O controle acionário (item B46): a montagem do aplicativo leva a ressalva.
+  // O controle acionário: a montagem do aplicativo leva a ressalva.
   const control = existsSync('public/assets/cvm/controle.json')
     ? (ShareholderControlHistory.decode(readJson<JsonObject>('public/assets/cvm/controle.json'))?.byIssuer ??
       new Map<string, ShareholderControlPeriod[]>())
@@ -604,7 +604,7 @@ export async function main(args: string[]): Promise<void> {
 const grid = Array.from({ length: 25 }, (_, k) => (k - 12) * 0.0025);
 
 /**
- * A varredura do nível da curva (item B10): em cada ativo e montagem, o preço
+ * A varredura do nível da curva: em cada ativo e montagem, o preço
  * justo ao longo da grade, e se ele sobe quando o capital encarece.
  *
  * **Tolerância de 0,1% do preço de mercado**, a mesma do `reverse-dcf`:

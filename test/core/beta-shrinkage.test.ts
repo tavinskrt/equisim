@@ -286,7 +286,7 @@ describe('Encolhimento por precisão', () => {
     // É ele que liga `Ke` a `WACC`, e é por isso que sai junto em vez de
     // ficar dentro da conta.
     //
-    // **Sai do encolhido e não do cru** (decisão 54): o ponto fixo
+    // **Sai do encolhido e não do cru**: o ponto fixo
     // realavanca `unlevered` e nunca toca em `beta`, de modo que derivá-lo
     // do cru descartava o encolhimento inteiro para quem usa o caminho
     // resolvido — a maioria do universo. A decisão 40 troca precisão por

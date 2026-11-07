@@ -20,7 +20,7 @@ service cloud.firestore {
                           && resource.data.userId == request.auth.uid;
     }
 
-    // Valuations confirmados na edição: premissas e resultado (decisão 150).
+    // Valuations confirmados na edição: premissas e resultado.
     // O documento é nomeado pelo identificador do registro, então a mesma
     // confirmação regravada sobrescreve em vez de duplicar — e sobrescrever
     // exige que o documento já seja de quem grava.
@@ -36,7 +36,7 @@ service cloud.firestore {
                           && resource.data.userId == request.auth.uid;
     }
 
-    // Acompanhamentos da carteira na Meta (decisão 159): o plano congelado no
+    // Acompanhamentos da carteira na Meta: o plano congelado no
     // dia em que começou. Não se altera: regravar o mesmo documento (a nova
     // tentativa depois de uma falha de rede) passa, e qualquer mudança é
     // recusada. Mudou o plano, começa-se outro acompanhamento.

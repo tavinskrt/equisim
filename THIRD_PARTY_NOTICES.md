@@ -8,7 +8,7 @@ cada uma traz a própria licença em `node_modules/`.
 
 - Origem: https://github.com/kokonut-labs/kokonutui
 - Usado em: [src/ui/engine-loading.tsx](src/ui/engine-loading.tsx), adaptado
-  do componente AI Text Loading (decisão 155).
+  do componente AI Text Loading.
 
 ```
 MIT License
@@ -39,7 +39,7 @@ SOFTWARE.
 - Origem: https://github.com/bklit/bklit-ui (`packages/ui`, os gráficos; o
   Bklit Studio, que é proprietário, não entra)
 - Usado em: [src/ui/charts/bklit/](src/ui/charts/bklit/), o gráfico de linha
-  e as peças que ele usa (decisão 156). As mudanças estão no `README.md` da
+  e as peças que ele usa. As mudanças estão no `README.md` da
   pasta.
 
 ```

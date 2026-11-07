@@ -41,7 +41,7 @@ export class CapitalPoint {
   readonly profit: number | null;
 
   /**
-   * `true` no ano corrente anualizado (decisão 153): o lucro é de um ano, mas
+   * `true` no ano corrente anualizado: o lucro é de um ano, mas
    * a base é a da data do ITR, e a variação dela até aqui não é anual.
    */
   readonly partial: boolean;
@@ -224,7 +224,7 @@ export class CapitalSeries {
    * É contra ela que o retorno do ciclo é aplicado quando o exercício
    * corrente vem no prejuízo: `fluxo-base = retorno do ciclo × capital de
    * hoje` é a mesma conta que o fator de normalização faz, escrita de um
-   * jeito que sobrevive a um denominador não positivo (decisão 53).
+   * jeito que sobrevive a um denominador não positivo.
    */
   get latestBase(): number | null {
     return this.points.length === 0 ? null : this.points[this.points.length - 1]!.base;
@@ -236,7 +236,7 @@ export class CapitalSeries {
    * Buraco na série interrompe o par: comparar 2019 com 2021 como se fosse um
    * ano mediria dois anos de crescimento. Pelo mesmo motivo o ano corrente
    * anualizado fica de fora: a base dele está a meses da anterior, e não a um
-   * ano (decisão 153).
+   * ano.
    */
   get annualVariations(): number[] {
     const v: number[] = [];

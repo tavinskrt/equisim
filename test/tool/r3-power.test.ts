@@ -1,4 +1,4 @@
-// O poder do teste do R3 (item C6): a simulação tem de estar calibrada antes de
+// O poder do teste do R3: a simulação tem de estar calibrada antes de
 // dizer qualquer coisa sobre o motor.
 import { describe, expect, it } from 'vitest';
 

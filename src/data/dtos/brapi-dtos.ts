@@ -119,7 +119,7 @@ export class BrapiPriceDto {
    * **Não usar em cálculo** — o domínio calcula sobre `close`.
    */
   readonly adjustedClose: number | null;
-  /** Volume negociado, em quantidade de papéis. Alimenta a Porta 0 (decisão 25). */
+  /** Volume negociado, em quantidade de papéis. Alimenta a Porta 0. */
   readonly volume: number | null;
 
   constructor(args: { date: DateTime; close: number; adjustedClose?: number | null; volume?: number | null }) {
@@ -213,7 +213,7 @@ export class BrapiFundamentalsDto {
       sharesOutstandingAsOf: n('sharesOutstandingAsOf'),
       marketCap: n('marketCap'),
       enterpriseToEbitda: n('enterpriseToEbitda'),
-      // Os dois termos da ponte (decisão 49). `minorityInterest` é a
+      // Os dois termos da ponte. `minorityInterest` é a
       // participação dos não controladores **dentro** do patrimônio
       // consolidado; `equityIncomeResult` é a equivalência patrimonial, que
       // na DRE brasileira entra **acima** do EBIT.

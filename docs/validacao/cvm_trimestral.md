@@ -14,7 +14,7 @@ dart run tool/cvm_ligar.dart 2024-09-04   # grava cvm_ligacao_2024-09-04.*
 ## 1. O que a conferência do ITR revelou antes de construir
 
 Três defeitos das rodadas anteriores, nenhum visível nos totais publicados
-([decisão 72](../decisoes/072-a-ingestao-le-o-periodo-e-o-tipo-do-documento.md)).
+(decisão 72).
 
 ### 1.1 A DRE do ITR traz trimestre e acumulado
 
@@ -120,7 +120,7 @@ guardas leram os dois anos como um. Em 04/09/2026:
 | MOVI3 | −52,7% → +424,4% |
 
 A série agora **recua inteira para a âncora de DFP** quando há buraco
-([decisão 73](../decisoes/073-os-doze-meses-ancoram-a-serie-e-nao-entram-por-padrao.md)).
+(decisão 73).
 Com o ITR de 2025 ausente, isso acontece hoje em todo o universo.
 
 ### 3.3 O efeito, onde a fonte é contígua
@@ -140,7 +140,7 @@ Os que mais se moveram: CSNA3 +136% → −47%, CAML3 +194% → +16%, RANI3 +132
 −21%, LREN3 −58% → +66%.
 
 > **Esta tabela foi medida com dois defeitos da montagem**, corrigidos pela
-> [decisão 78](../decisoes/078-a-mescla-nao-empresta-fluxo-de-outra-janela.md).
+> decisão 78.
 > Os números corrigidos estão na §3.5, e a conclusão desta seção sai mais
 > forte com eles.
 
@@ -210,7 +210,7 @@ execução, onde isso não entra.
   com as deslistadas, a ancorada ordena mais que a anual — IC de 0,124 contra
   0,088 em 36 meses —, e a diferença não passa no critério das janelas
   sobrepostas (`t` corrigido de 0,70 contra o crítico de 2,70). Ver a
-  [decisão 98](../decisoes/098-a-serie-ancorada-ordena-mais-sem-provar-e-fica-fora-do-padrao.md)
+  decisão 98
   e [habilidade_trimestral.md](habilidade_trimestral.md) §4.
 - **As séries que recuaram em 2024** não foram investigadas uma a uma.
 - **A base de patrimônio do ponto de junho é a de dezembro** (decisão 78). Ler

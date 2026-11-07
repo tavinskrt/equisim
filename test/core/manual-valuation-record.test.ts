@@ -1,5 +1,5 @@
 // O valuation confirmado guarda as premissas e o resultado juntos, e vai ao
-// armazenamento e ao painel de auditoria pelo mesmo retrato (decisão 150).
+// armazenamento e ao painel de auditoria pelo mesmo retrato.
 //
 // O que estes testes travam: o registro guarda **o que a conta deu**, sem
 // refazê-la; relê-lo devolve os mesmos números, bit a bit; um documento

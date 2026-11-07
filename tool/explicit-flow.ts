@@ -2,7 +2,7 @@
 //
 // **A pergunta.** O preço justo mediano fica 36% abaixo do de mercado. Isso não
 // é defeito por si: o motor não existe para reproduzir o mercado, e a
-// [decisão 35](../docs/decisoes/035-dcf-reverso-e-regressao-condicional.md)
+// decisão 35
 // veda ajustá-lo até que reproduza. O que é defeito é a parte do resíduo que
 // vem de o motor usar um número que não é o da empresa, ou uma convenção que
 // não é a correta.
@@ -207,7 +207,7 @@ export async function main(args: string[]): Promise<void> {
         descontoTerminal: d.terminalDiscountRate,
         aliquotaEstrutural: d.firmTaxRate,
         // Quantos passes o veredito da perpetuidade consumiu até parar de
-        // mudar (decisão 51). Sai do aviso porque é propriedade da conta, e
+        // mudar. Sai do aviso porque é propriedade da conta, e
         // não do resultado.
         passesDoVeredito: passesOf(v.warnings),
         vereditoInstavel: v.warnings.some((w) => w.includes('não se estabilizaram em')),
@@ -282,7 +282,7 @@ function printReport(l: readonly Row[]): void {
   row('sem convergência do ROIC', 'mSemConvergencia', 'fechaSemConvergencia');
   row('freio sem o teto de 95%', 'mSemTeto', 'fechaSemTeto');
 
-  // Quantos passes a volta veredito-taxa consumiu (decisão 51).
+  // Quantos passes a volta veredito-taxa consumiu.
   const passes = new Map<number, number>();
   let unstable = 0;
   for (const e of l) {

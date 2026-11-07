@@ -79,7 +79,7 @@ describe('Cada múltiplo devolve o preço que ele implica', () => {
     // **A conferência que impede a comparação de medir outra coisa.** A
     // contagem da fonte é 1.000; se a ponte arbitrou 1.500, o múltiplo tem
     // de dividir por 1.500 — ou a divergência contra o DCF mediria a ponte
-    // (decisão 83).
+    //.
     const a = PeerValuation.readings({ latest: fiscalYear(), shares: 1000, peers: pairs({ pl: 9.0 }) })[0]!;
     const b = PeerValuation.readings({ latest: fiscalYear(), shares: 1500, peers: pairs({ pl: 9.0 }) })[0]!;
     expectClose(b.fairValuePerShare! / a.fairValuePerShare!, 1000 / 1500, 1e-12);
@@ -125,7 +125,7 @@ describe('Cada recusa diz por que o múltiplo não se aplica', () => {
 
   it('instituição financeira não usa EV/EBITDA', () => {
     // Depósito e captação são insumo do negócio, e não financiamento
-    // (decisão 102): a ponte de dívida líquida não descreve banco.
+    //: a ponte de dívida líquida não descreve banco.
     const r = of(
       PeerValuation.readings({
         latest: fiscalYear(),
@@ -140,7 +140,7 @@ describe('Cada recusa diz por que o múltiplo não se aplica', () => {
 
     // E o setor econômico sozinho **não** basta: na taxonomia oficial da B3
     // ele reúne banco, seguradora e administradora, e quem separa é o
-    // subsetor (decisão 87). Sem ele, o múltiplo entra.
+    // subsetor. Sem ele, o múltiplo entra.
     const withoutSubsector = of(
       PeerValuation.readings({ latest: fiscalYear(), shares: 1000, peers: pairs({ evEbitda: 6.0 }), sectorKey: 'financeiro' }),
       MultipleKind.evToEbitda,

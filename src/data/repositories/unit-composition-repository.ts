@@ -2,7 +2,7 @@ import { DateTime, type Ticker, type UnitComposition, UnitCompositionCodec } fro
 import { memoizedPackage, type PackageLoader } from './package-loader';
 
 /**
- * Composição declarada das units, empacotada com o aplicativo (item B16).
+ * Composição declarada das units, empacotada com o aplicativo.
  *
  * A razão de unidade era **inferida** do valor de mercado, e só acerta quando
  * ordinária e preferencial valem o mesmo: nas coortes ela erra 79 de 220

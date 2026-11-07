@@ -23,7 +23,7 @@ export class BetaObservation {
   /** Chave do setor, ou `null`. */
   readonly sectorKey: string | null;
 
-  /** Dívida **líquida** sobre valor de mercado do capital próprio (decisões 54 e 104). */
+  /** Dívida **líquida** sobre valor de mercado do capital próprio. */
   readonly debtToEquity: number;
 
   /** Alíquota estrutural do ativo. */
@@ -153,7 +153,7 @@ export const ResolveBetaPrior = {
             MarketLeverage.overWindow({ snapshots: pub, prices: points, window }) ??
             last.debtToMarketEquity(equity) ??
             0.0,
-          // A estatutária: o `(1 − τ)` de Hamada é escudo fiscal do juro (decisão 55).
+          // A estatutária: o `(1 − τ)` de Hamada é escudo fiscal do juro.
           taxRate: ValuationParameters.statutoryTaxRate,
         }),
       );

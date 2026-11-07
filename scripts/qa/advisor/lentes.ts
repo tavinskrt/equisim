@@ -22,7 +22,7 @@ import type { LensId } from './schema.ts';
  * Descritor de material.
  *
  * `optional` existe porque diretorio que ainda nao foi criado e estado normal
- * durante a migracao do registro -- e nao motivo para abortar a execucao.
+ * -- e nao motivo para abortar a execucao.
  */
 export type Material =
   | { kind: 'arquivo'; filePath: string; optional?: boolean }
@@ -34,9 +34,10 @@ export type Material =
       exclude?: string[];
       optional?: boolean;
       /**
-       * Do mais recente ao mais antigo, pela ordem inversa do nome. Serve ao
-       * registro de decisoes, numerado em sequencia: quando o payload bate no
-       * teto, o corte leva as antigas, e nao as que acabaram de ser escritas.
+       * Do mais recente ao mais antigo, pela ordem inversa do nome. Serve a
+       * pastas de arquivos datados ou numerados em sequencia: quando o payload
+       * bate no teto, o corte leva os antigos, e nao os que acabaram de ser
+       * escritos.
        */
       newestFirst?: boolean;
     }
@@ -111,8 +112,8 @@ const METHOD_FIRST = [
  *
  * **A ordem e a do corte**, como em [METHOD_FIRST]. Ate 11/10/2026 a lente
  * lia o nucleo (entao `packages/equisim_core/lib`, em Dart) em ordem
- * alfabetica, e o corte caia antes de `services/valuation/`: a conta congelada do calculo do usuario (decisao 147)
- * nunca chegava a ela, que respondia "nenhuma tensao" sem a ter lido. E a
+ * alfabetica, e o corte caia antes de `services/valuation/`: a conta congelada
+ * do calculo do usuario (Simular minhas premissas) nunca chegava a ela, que respondia "nenhuma tensao" sem a ter lido. E a
  * pergunta dela -- que regra de negocio vazou para a apresentacao -- nao tinha
  * como ser respondida sem a tela: a do valuation e a que mais monta numero a
  * partir do dominio.
@@ -129,134 +130,74 @@ export const LENSES: Record<LensId, Lens> = {
   // -------------------------------------------------------------------------
   registro: {
     id: 'registro',
-    title: 'Integridade do registro',
+    title: 'Documentacao contra repositorio',
     question: [
-      'Onde o REGISTRO do projeto diverge da REALIDADE do repositorio?',
+      'Onde a DOCUMENTACAO do projeto -- README, CLAUDE.md, CHANGELOG.md e os',
+      'capitulos de docs/motor/ e docs/estudo/ -- diverge da REALIDADE do',
+      'repositorio?',
       '',
       'Classifique cada divergencia em uma destas cinco classes, e diga qual',
       'no campo `observation`:',
       '',
-      '  DECISAO CONTRARIADA -- o codigo contradiz uma decisao registrada como',
-      '    aceita, e nenhuma decisao posterior a substituiu. A mais grave: e o',
-      '    caso em que o projeto mudou de rumo sem ninguem ter decidido.',
-      '  PROMESSA NAO CUMPRIDA -- o parecer preve algo, o repositorio nao tem,',
-      '    e nada revogou a previsao.',
-      '  ESTRUTURA SEM REGISTRO -- mudanca arquitetural relevante presente no',
-      '    codigo ou no historico, sem decisao que a explique.',
+      '  REGRA DIVERGENTE -- o documento descreve uma regra de calculo, um',
+      '    limiar ou um comportamento de tela que o repositorio nao tem mais, ou',
+      '    nunca teve. A mais grave: quem le a documentacao aprende o errado.',
+      '  CHANGELOG SEM LASTRO -- o changelog anuncia como entregue algo que o',
+      '    repositorio nao mostra, ou a versao do package.json nao e a mais',
+      '    recente do changelog.',
+      '  MUDANCA SEM REGISTRO -- mudanca de funcionalidade, de calculo ou de',
+      '    tela visivel no historico do git sem entrada no changelog, ou sem o',
+      '    capitulo de docs/motor/ que a descreve.',
       '  MEDICAO VENCIDA -- numero medido cuja data ja nao sustenta a conclusao',
       '    que dele se tirou.',
-      '  DECISAO SEM DEFINICAO -- numero citado como autoridade em algum ponto',
-      '    do texto, sem lugar canonico onde esteja definido.',
-      '',
-      'Alem disso, INVENTARIE toda decisao numerada DECLARADA EM TEXTO, esteja',
-      'ela na tabela consolidada ou solta na prosa. Para cada uma, o campo',
-      '`evidence` deve trazer o trecho LITERAL onde ela e declarada, incluindo',
-      'qualquer citacao entre aspas -- e dela que sai a proveniencia, e',
-      'proveniencia perdida nao se recupera.',
-      '',
-      'DECLARADA EM TEXTO e a condicao inteira. Uma decisao existe quando algum',
-      'documento DIZ que ela foi tomada. Comportamento observado no codigo NAO',
-      'e decisao: e implementacao. Se o codigo faz X e nenhum texto declara que',
-      'se decidiu X, entao nao ha decisao a inventariar -- ha, no maximo, uma',
-      'ESTRUTURA SEM REGISTRO a reportar como tensao.',
+      '  REFERENCIA QUEBRADA -- documento que cita arquivo, funcao ou secao que',
+      '    nao existe na arvore.',
     ].join('\n'),
     discipline: [
       'Esta lente e DIFERENCA DE CONJUNTOS, nao opiniao. Toda divergencia',
-      '  nomeia os DOIS lados: o que o registro diz e o que o repositorio tem.',
-      'Apontamento com secao "## Destino" que diz o que ele virou -- decisao,',
-      '  item do plano ou descarte -- esta TRATADO, e fica na pasta de',
-      '  proposito: e a proveniencia das decisoes (README de docs/apontamentos).',
-      '  So reporte apontamento SEM destino, ou com destino que cite decisao ou',
-      '  item inexistente. Em 02/10/2026 esta lente pediu para apagar os',
-      '  apontamentos ja convertidos, o que quebraria a citacao das decisoes.',
-      'PROIBIDO INFERIR DECISAO A PARTIR DE CODIGO. Raciocinar de tras para',
-      '  frente -- da implementacao para a decisao que "deve ter" existido --',
-      '  FABRICA registro, e registro fabricado e pior que registro ausente,',
-      '  porque parece confiavel. Codigo que faz X sem texto que declare X e',
-      '  ESTRUTURA SEM REGISTRO, nunca uma decisao a inventariar.',
-      'Numero CITADO mas nao DEFINIDO nao entra no inventario. Ele vira tensao',
-      '  da classe DECISAO SEM DEFINICAO, e o `evidence` traz o trecho onde o',
-      '  numero e citado -- nao uma reconstrucao do que ele diria. Reconstituir',
-      '  cabe a quem participou da decisao, nao a quem le o repositorio.',
-      'Se voce nao consegue copiar do material a frase que DECLARA a decisao,',
-      '  a decisao nao esta declarada. Nao a inventarie.',
-      'DECISAO SEM DEFINICAO NAO SE AFIRMA SOBRE REGISTRO CORTADO. As decisoes',
-      '  vem das recentes para as antigas, e o material para no teto: as',
-      '  antigas ficam na lista de omitidas do fim. Dizer que um numero nao tem',
-      '  lugar canonico e afirmar sobre TODAS as decisoes, inclusive as que voce',
-      '  nao leu. Em 29/09/2026 esta lente deu como "sem decisao" o corte de',
-      '  liquidez de R$ 2 milhoes e os oito anos de balanco do README; eles',
-      '  estao nas decisoes 25, 91 e 95, e a 25 era das omitidas. Com material',
-      '  cortado, a classe so vale para numero que o proprio texto atribui a uma',
-      '  decisao cujo arquivo nao existe na arvore.',
-      'NAO proponha reescrever o parecer. Ele e documento historico datado; o',
-      '  que se propoe e extrair dele o que precisa virar registro enderecavel.',
-      'NAO reporte ausencia de documentacao em geral. A pergunta e sobre',
-      '  divergencia entre registro e realidade, nao sobre volume de texto.',
-      'A secao `## Contexto` de uma decisao descreve o estado NO DIA EM QUE ELA',
-      '  FOI ESCRITA. Decisao e imutavel e o contexto dela envelhece de',
-      '  proposito: citar um Contexto como estado atual FABRICA divergencia.',
-      'ARQUIVO NAO LIDO NAO SE ACUSA. Voce recebe o conteudo das decisoes e dos',
-      '  pareceres, e de `docs/validacao/` recebe apenas a ARVORE -- os nomes.',
-      '  Dizer que um documento de validacao "continua descrevendo" algo e',
-      '  afirmar sobre conteudo que voce nao viu, e ja produziu o mesmo falso',
-      '  positivo duas rodadas seguidas: uma decisao antiga anuncia que tal',
-      '  documento vai ficar defasado, o documento ganhou tarja de superado, e a',
-      '  lente reporta a defasagem lendo o anuncio. Sobre arquivo cujo conteudo',
-      '  nao veio, o maximo e INVENTARIAR que ele existe e que uma decisao',
-      '  previu defasagem nele -- nunca afirmar que a defasagem persiste.',
-      'CODIGO NAO RECEBIDO NAO SE ACUSA, E O CONGELADO NAO E O ATUAL. Esta lente',
-      '  nao recebe o codigo-fonte: afirmar que um simbolo, arquivo ou linha',
-      '  "persiste" no repositorio e afirmar o que voce nao viu. O',
-      '  `PLANO_ARQUITETURA.md` e CONGELADO -- descreve o repositorio de agosto,',
-      '  e as observacoes citadas dentro dele sao retrato daquela data. Em',
-      '  22/09/2026 esta lente acusou `_stockUnitsWhitelist` em',
-      '  `stock_service.dart:344` a partir de uma observacao do documento',
-      '  congelado; o simbolo nao existe mais. Promessa do congelado so e',
-      '  reportavel com evidencia de NAO entrega vinda de material atual.',
+      '  nomeia os DOIS lados: o que o documento diz e o que o repositorio tem.',
+      'A documentacao descreve o sistema COMO ELE E HOJE, sem historico. Nao',
+      '  proponha devolver a ela narrativa de mudanca ("antes era X"): o',
+      '  historico mora no CHANGELOG.md, e so la.',
+      'O changelog fala com quem USA o produto. Nao reporte que uma entrada',
+      '  "nao cita o arquivo" ou "nao nomeia a funcao": e escolha deliberada.',
+      'PROIBIDO INFERIR REGRA A PARTIR DE CODIGO QUE VOCE NAO RECEBEU. Esta',
+      '  lente recebe a documentacao, a arvore e o log, e nao o codigo-fonte:',
+      '  afirmar que um simbolo, arquivo ou linha "persiste" ou "nao faz o que o',
+      '  documento diz" e afirmar o que voce nao viu. REGRA DIVERGENTE exige',
+      '  evidencia no material: o log que mostra a mudanca, ou dois documentos',
+      '  que se contradizem.',
+      'ARQUIVO NAO LIDO NAO SE ACUSA. De `docs/validacao/` voce recebe apenas a',
+      '  ARVORE -- os nomes. Os relatorios de la sao medicoes DATADAS, e citar',
+      '  um deles como estado atual FABRICA divergencia. Sobre arquivo cujo',
+      '  conteudo nao veio, o maximo e INVENTARIAR que ele existe.',
       'ARQUIVO CITADO NAO E ARQUIVO AUSENTE. Antes de dizer que um documento',
       '  falta, PROCURE o marcador "===== ARQUIVO: <caminho> =====" no material',
-      '  e o caminho na arvore do repositorio, que vem junto. Em 10/09/2026',
-      '  esta lente reportou como inexistentes as decisoes 031 e 032, e as duas',
-      '  estavam no payload, integrais, com marcador proprio. Se o caminho',
+      '  e o caminho na arvore do repositorio, que vem junto. Se o caminho',
       '  aparece em qualquer um dos dois lugares, o arquivo EXISTE e a tensao',
       '  nao existe.',
+      'NAO reporte ausencia de documentacao em geral. A pergunta e sobre',
+      '  divergencia entre documento e realidade, nao sobre volume de texto.',
     ],
-    // **A ordem e a do corte.** Com 134 decisoes, o registro sozinho passa do
-    // teto do payload, e o que vem depois dele nao chegava ao modelo: em
-    // 24/09/2026 esta lente rodou sem o `estado.md`, sem a arvore e sem o log,
-    // e inventariou so ate a decisao 32. O pequeno e indispensavel vem antes;
-    // as decisoes vem por ultimo, das recentes para as antigas.
+    // **A ordem e a do corte.** O pequeno e indispensavel vem antes -- o
+    // changelog, o estado gerado, a arvore e o log --, e os capitulos longos
+    // da documentacao por ultimo, para que o corte do teto leve o guia de
+    // estudo antes de levar o que diz o que o repositorio tem.
     materials: [
       { kind: 'arquivo', filePath: 'README.md' },
       { kind: 'arquivo', filePath: 'CLAUDE.md' },
-      // **A tabela de substituicoes, ja resolvida.** O campo `substitui` mora
-      // em quem substitui, e refazer o grafo lendo 100 decisoes e trabalho que
-      // o modelo faz mal: em 21/09/2026 ele reportou a decisao 23 como viva
-      // duas vezes, embora a 101 a substitua parcialmente e diga isso no campo.
-      // O estado gerado traz o veredito de cada uma numa linha.
+      { kind: 'arquivo', filePath: 'CHANGELOG.md' },
+      { kind: 'arquivo', filePath: 'package.json' },
       { kind: 'arquivo', filePath: 'docs/estado.md', optional: true },
-      // ARVORE COMPLETA, nao um subconjunto. Esta lente pergunta se o registro
-      // bate com a realidade; mandar arvore parcial faz o modelo ver ausencia
-      // onde ha apenas material nao enviado, e ele reporta "promessa nao
-      // cumprida" com toda a razao, sobre um repositorio que nunca viu inteiro.
-      // Aconteceu: `tool/` e `functions/` ficaram de fora de uma lista de
-      // raizes e viraram duas tensoes ESTRUTURAL falsas.
-      //
-      // Os diretorios de plataforma do Flutter (`android/`, `ios/`...), que
-      // ficavam de fora por nao carregar decisao alguma, sairam do repositorio
-      // com a decisao 152: a arvore agora vai sem excecao.
+      // ARVORE COMPLETA, nao um subconjunto. Esta lente pergunta se a
+      // documentacao bate com a realidade; mandar arvore parcial faz o modelo
+      // ver ausencia onde ha apenas material nao enviado. Aconteceu: `tool/` e
+      // `functions/` ficaram de fora de uma lista de raizes e viraram duas
+      // tensoes ESTRUTURAL falsas.
       { kind: 'arvore-completa' },
       { kind: 'git-log', count: 40 },
-      { kind: 'diretorio', filePath: 'docs/apontamentos', extensions: ['.md'], optional: true },
-      { kind: 'arquivo', filePath: 'PLANO_ARQUITETURA.md' },
-      {
-        kind: 'diretorio',
-        filePath: 'docs/decisoes',
-        extensions: ['.md'],
-        optional: true,
-        newestFirst: true,
-      },
+      { kind: 'diretorio', filePath: 'docs/motor', extensions: ['.md'] },
+      { kind: 'diretorio', filePath: 'docs/estudo', extensions: ['.md'], optional: true },
     ],
   },
 
@@ -273,7 +214,7 @@ export const LENSES: Record<LensId, Lens> = {
       'PROIBIDO sugerir pacote de terceiros dentro de `src/core`. A pureza',
       '  e travada pelo teste `test/core/purity.test.ts` e nao esta em negociacao.',
       '`src/core/lang/` e o runtime que reproduz a semantica do Dart (`DateTime`,',
-      '  `round`, `mod`, `Random`) para o porte 1:1 da decisao 152. Ele e',
+      '  `round`, `mod`, `Random`) para o porte 1:1 do nucleo Dart original. Ele e',
       '  infraestrutura do porte, e nao entidade: nao proponha trocar o',
       '  `DateTime` dele por `Date` sem mostrar um numero que mude.',
       'Toda proposta cita arquivo e tipo que EXISTEM no material.',
@@ -284,17 +225,17 @@ export const LENSES: Record<LensId, Lens> = {
       '  valor e convertido "em memoria", confira se a conversao esta no',
       '  construtor ou so no `toJson`. So o primeiro altera o dado que o',
       '  calculo le.',
-      'JA INVENTARIADO NO PLANO, e voce nao recebe o plano: o tipo de data de',
+      'JA AVALIADO E DEIXADO DE FORA DE PROPOSITO: o tipo de data de',
       '  calendario no lugar do `DateTime` truncado, as listas paralelas de',
       '  `TotalReturnIndex.build` e as do diagnostico (`growthPath` e',
       '  `retentionPath`), e o `FundamentalsSnapshot` que carrega o valor de',
-      '  mercado e a contagem de hoje ao lado do exercicio. Estao na secao',
-      '  "Fora dos dois objetivos" desde 14/09/2026, e voltaram em 21, 25 e',
-      '  27/09/2026 sem fato novo. So reaponte mostrando um numero que um deles',
-      '  erra.',
+      '  mercado e a contagem de hoje ao lado do exercicio. Ficaram fora do',
+      '  escopo em 14/09/2026, e voltaram em 21, 25 e 27/09/2026 sem fato novo.',
+      '  So reaponte mostrando um numero que um deles erra.',
       'A `unit` de `CalculationTrace` (`R$`, `%`) e texto do rastro de',
-      '  auditoria, em portugues por construcao, e nao rotulo de tela: a decisao',
-      '  122 governa o que a apresentacao monta, e o rastro nao e tela.',
+      '  auditoria, em portugues por construcao, e nao rotulo de tela: a regra',
+      '  "o nucleo diz a regra e a grandeza, a tela escreve o numero" governa o',
+      '  que a apresentacao monta, e o rastro nao e tela.',
       '  Recusado em 27/09/2026.',
       'Contagem de acoes em `double` no `FundamentalsSnapshot` e no divisor',
       '  NAO e defeito de tipo: parte das contagens do motor e ESTIMATIVA',
@@ -321,7 +262,7 @@ export const LENSES: Record<LensId, Lens> = {
         extensions: TS,
         exclude: [...GENERATED, ...CORE_FIRST],
       },
-      { kind: 'diretorio', filePath: 'docs/decisoes', extensions: ['.md'], optional: true },
+      { kind: 'arquivo', filePath: 'docs/motor/README.md', optional: true },
     ],
   },
 
@@ -332,16 +273,16 @@ export const LENSES: Record<LensId, Lens> = {
     question: [
       'O que acontece quando a API de mercado cai, estoura cota ou devolve',
       'serie incompleta? O cache, o retry e a degradacao entregam a contingencia',
-      'que foi decidida -- ou apenas a que foi escrita?',
+      'que esta documentada -- ou apenas a que foi escrita?',
     ].join('\n'),
     discipline: [
-      'Toda tensao e confrontada com uma DECISAO registrada. Divergencia entre',
-      '  decisao e codigo e achado; ausencia de recurso que ninguem decidiu,',
-      '  nao e.',
+      'Toda tensao e confrontada com o comportamento DOCUMENTADO em',
+      '  docs/motor/01-insumos-e-dados.md. Divergencia entre documento e codigo',
+      '  e achado; ausencia de recurso que ninguem documentou, nao e.',
       'NAO proponha trocar de cliente de rede ou de banco local. O cliente',
       '  proprio sobre `fetch` (`src/data/network/`), o cache em IndexedDB',
-      '  (`idb-keyval`) e o Firestore sao decisao registrada: a 152 os pos no',
-      '  lugar do Dio e do Drift, com os mesmos interceptores.',
+      '  (`idb-keyval`) e o Firestore sao a arquitetura da versao web: entraram',
+      '  no lugar do Dio e do Drift, com os mesmos interceptores.',
       'NAO especule sobre comportamento da API que o material nao demonstre.',
       'O RetryInterceptor reemite pelo mesmo cliente e passa de novo pelo',
       '  ThrottleInterceptor, e isso NAO e deadlock: o onError dos',
@@ -370,7 +311,7 @@ export const LENSES: Record<LensId, Lens> = {
       { kind: 'arquivo', filePath: 'functions/index.js' },
       { kind: 'arquivo', filePath: 'test/data/network-and-quality.test.ts' },
       { kind: 'arquivo', filePath: 'firestore.rules', optional: true },
-      { kind: 'diretorio', filePath: 'docs/decisoes', extensions: ['.md'], optional: true },
+      { kind: 'arquivo', filePath: 'docs/motor/01-insumos-e-dados.md', optional: true },
     ],
   },
 
@@ -394,30 +335,31 @@ export const LENSES: Record<LensId, Lens> = {
       '  de entrada. Metodo que exige serie que o projeto nao tem e proposta',
       '  vazia.',
       'PREMISSA JA MEDIDA NAO SE REABRE SEM EVIDENCIA NOVA. Quando o comentario',
-      '  no codigo cita uma decisao que MEDIU a premissa (efeito, conjunto',
-      '  exposto, alternativa comparada), reporta-la de novo so procede se voce',
-      '  apontar o que a medicao NAO cobriu -- outro caminho de codigo, outro',
-      '  subconjunto, outra condicao. Repetir a objecao que a decisao ja',
-      '  respondeu e ruido: em 21 e 22/09/2026 esta lente reabriu tres',
+      '  no codigo ou o capitulo de docs/motor/ cita a medicao da premissa',
+      '  (efeito, conjunto exposto, alternativa comparada), reporta-la de novo so',
+      '  procede se voce apontar o que a medicao NAO cobriu -- outro caminho de',
+      '  codigo, outro subconjunto, outra condicao. Repetir a objecao que a',
+      '  medicao ja respondeu e ruido: em 21 e 22/09/2026 esta lente reabriu tres',
       '  premissas medidas (Blume +0,1%, traducao do cenario, minoritario com',
       '  efeito 0,00%). Limitacao declarada SEM medicao continua reportavel.',
-      'A traducao do cenario (`ScenarioTranslation`, decisao 121) foi reaberta',
-      '  pela TERCEIRA vez em 24/09/2026, sem evidencia nova. Os cenarios sao',
-      '  sensibilidade, e nao a incerteza (decisao 92): o que a tela mostra como',
-      '  incerteza e a faixa calibrada. So reaponte com medicao que a decisao',
-      '  121 nao fez.',
+      'A traducao do cenario (`ScenarioTranslation`: o deslocamento vai ao Ke',
+      '  um a um, e as outras duas leituras estao medidas em',
+      '  docs/validacao/cenario.md) foi reaberta pela TERCEIRA vez em',
+      '  24/09/2026, sem evidencia nova. Os cenarios sao sensibilidade, e nao a',
+      '  incerteza: o que a tela mostra como incerteza e a faixa calibrada. So',
+      '  reaponte com medicao que aquele relatorio nao fez.',
       'ESTRUTURAL exige conjunto exposto que pese. A via do acionista de',
       '  companhia NAO financeira atende 1 dos 97 avaliados do aplicativo',
       '  (24/09/2026), e as financeiras nao realavancam. Tensao sobre esse',
       '  caminho e no maximo LOCAL, a menos que voce mostre um conjunto maior.',
-      'O escudo fiscal do WACC na aliquota estatutaria e a decisao 37: a',
+      'O escudo fiscal do WACC na aliquota estatutaria e deliberado: a',
       '  deducao do juro vale na margem, e a margem de quem esta no Lucro Real',
       '  e a aliquota cheia. O Lucro Presumido tem teto de receita que quase',
       '  nenhuma listada respeita. Recusado em 25/09/2026; so reaponte com uma',
       '  companhia avaliada que esteja no Presumido.',
       'PONTO FLUTUANTE NO DCF NAO E PREMISSA A REABRIR. Cotacao, contagem de',
       '  papeis e valores do fluxo descontado em ponto flutuante (`number`;',
-      '  `double` no Dart de antes da decisao 152), convertidos para',
+      '  `double` no Dart de antes da versao web), convertidos para',
       '  `Money` uma vez, na fronteira, e o arranjo aceito pela regra R1 do',
       '  auditor ("NAO ACUSE -- caminho de calculo de fluxo descontado"): dez',
       '  iteracoes acumulam erro de 1e-14, e normalizar em centavos no meio',
@@ -430,14 +372,14 @@ export const LENSES: Record<LensId, Lens> = {
     // inteiro, do fim para o comeco. Ate 01/10/2026 esta lente lia
     // `usecases/` e `services/` em ordem alfabetica, e o corte caia antes de
     // `services/valuation/` -- o custo de capital, a realavancagem, o DCF e o
-    // premio de mercado da decisao 142 nunca chegavam a ela, que respondia
+    // premio de mercado implicito nunca chegavam a ela, que respondia
     // "nenhuma tensao" sobre o metodo sem te-lo lido. Primeiro o que define o
     // preco justo; dados da CVM, backtest e meta ficam de fora, porque nao sao
     // metodo de DCF nem de CAPM.
     //
     // **O que a rodada mexeu no metodo vem antes** (11/10/2026): o teto ja
-    // estava cheio com a lista acima, e o calculo do usuario (decisao 147),
-    // novo em `services/valuation/`, ficava fora -- a lente nao tinha como
+    // estava cheio com a lista acima, e o calculo do usuario (Simular minhas
+    // premissas), novo em `services/valuation/`, ficava fora -- a lente nao tinha como
     // julgar a metodologia dele. O alterado entra uma vez so, na primeira
     // posicao em que aparece.
     materials: [
@@ -491,16 +433,16 @@ export const LENSES: Record<LensId, Lens> = {
       '  pela `Isolate.run`; nao repita o pedido sobre o worker sem mostrar o',
       '  caminho que fica sem resposta.',
       'A tolerancia da fonte a JSON de forma errada numa rota -- as outras rotas',
-      '  continuam entregando os exercicios -- e escolha registrada no plano',
-      '  (item D6 e historico de 25/09/2026), e o cache nao grava nulo por cima',
-      '  de valor bom. Reporta-la de novo contra a decisao 68 so com evidencia',
+      '  continuam entregando os exercicios -- e escolha deliberada desde',
+      '  25/09/2026, e o cache nao grava nulo por cima',
+      '  de valor bom. Reporta-la de novo contra a regra da falha so com evidencia',
       '  NOVA: um caminho em que a serie sem a demonstracao chega a um preco',
       '  justo, e nao so ao cache.',
     ],
     // **O que a rodada mexeu vem primeiro** (11/10/2026). A lente lia os dois
     // diretorios de teste em ordem alfabetica, e o corte do teto caia antes do
     // teste e do codigo novos: ela respondia "nenhum caminho sem teste" sobre o
-    // calculo do usuario (decisao 147) sem ter lido nem um nem outro.
+    // calculo do usuario (Simular minhas premissas) sem ter lido nem um nem outro.
     materials: [
       {
         kind: 'arvore',
@@ -537,61 +479,40 @@ export const LENSES: Record<LensId, Lens> = {
     id: 'rumo',
     title: 'Rumo do projeto',
     question: [
-      'O que foi decidido e nao foi entregue? O que e divida assumida e o que',
-      'e esquecimento? Qual o proximo passo com maior retorno para o objeto',
-      'deste trabalho -- que e o ESTUDO, nao o aplicativo?',
+      'O que a documentacao declara como limitacao ou pendencia e continua',
+      'aberto? O que e divida assumida e o que e esquecimento? Qual o proximo',
+      'passo com maior retorno para o objeto deste trabalho -- que e o ESTUDO,',
+      'nao o aplicativo?',
     ].join('\n'),
     discipline: [
       'Esta e a lente mais propensa a produzir backlog generico, entao a',
-      '  disciplina e a mais dura: TODA proposta cita uma DECISAO NUMERADA e um',
+      '  disciplina e a mais dura: TODA proposta cita um TRECHO da documentacao',
+      '  (limitacao declarada, capitulo do motor ou entrada do changelog) e um',
       '  ARQUIVO do repositorio. Faltando qualquer um dos dois, descarte.',
       'NAO proponha recurso novo de produto. A pergunta e sobre divida entre o',
-      '  decidido e o entregue, nao sobre o que mais o aplicativo poderia fazer.',
+      '  declarado e o entregue, nao sobre o que mais o aplicativo poderia fazer.',
       'NAO repita o que outra lente ja cobre melhor. Modelagem e da `nucleo`,',
       '  cobertura e da `risco`, integridade documental e da `registro`.',
-      'A secao `## Contexto` de uma decisao descreve o estado NO DIA EM QUE ELA',
-      '  FOI ESCRITA, e nao hoje: decisao e imutavel, e o contexto dela envelhece',
-      '  de proposito. Citar um Contexto como se fosse o estado atual FABRICA',
-      '  divergencia. Antes de reportar qualquer coisa que saia de um Contexto,',
-      '  CONFIRA o veredito na tabela da secao 6 do plano do motor de',
-      '  referencia: item marcado como feito ali esta feito, e decisao posterior',
-      '  que trate do mesmo assunto manda sobre a anterior.',
-      'Limitacao JA DECLARADA no proprio comentario do codigo ou no registro nao',
-      '  e tensao. Se o trecho que voce citaria como evidencia ja diz "fica',
-      '  registrado como limitacao, nao corrigido aqui", ele esta cumprindo o',
-      '  que a lente pede -- e reporta-lo e cobrar duas vezes a mesma coisa.',
-      'PENDENCIA ANUNCIADA NUMA DECISAO ANTIGA NAO E PENDENCIA VIVA. Decisao e',
-      '  imutavel, e o texto dela diz o que faltava NA DATA. Antes de reportar',
-      '  que algo "continua" pendente, confira: (1) se a decisao foi',
-      '  SUBSTITUIDA -- o `docs/estado.md` mostra "substituida pela N", e a',
-      '  substituida nao tem pendencia alguma; (2) se uma decisao posterior ou o',
-      '  plano (§6 e §7) marca o assunto como fechado. Em 22/09/2026 esta lente',
-      '  reportou tres pendencias ja fechadas: a divergencia das vias (decisao',
-      '  39, substituida pela 102), a nao monotonia na curva (decisao 35,',
-      '  fechada pela 105 com 0 de 102) e o perfil de BRAP4/FESA4/UNIP6 (decisao',
-      '  30, resolvido pelo setor da B3 pela raiz do emissor). Sem evidencia de',
-      '  que persiste em material ATUAL, o maximo e inventariar.',
+      'Limitacao JA DECLARADA no proprio comentario do codigo ou na documentacao',
+      '  nao e tensao por existir. Se o trecho que voce citaria como evidencia ja',
+      '  diz "fica registrado como limitacao", ele esta cumprindo o que a lente',
+      '  pede -- e reporta-lo e cobrar duas vezes a mesma coisa. So vira tensao',
+      '  quando ha caminho concreto, com o arquivo, para fecha-la.',
+      'O changelog diz o que FOI entregue, versao a versao. Uma entrada antiga',
+      '  nao e pendencia: o que uma versao posterior alterou ou removeu manda',
+      '  sobre a anterior. Antes de reportar que algo "continua" pendente,',
+      '  confira as versoes mais recentes.',
     ],
-    // **A ordem e a do corte**, como na `registro`: em 24/09/2026 as decisoes
-    // vinham primeiro, em ordem crescente, e o teto do payload cortava na 50 --
-    // o `estado.md` e o plano, que a disciplina acima exige, nunca chegavam.
+    // **A ordem e a do corte**, como na `registro`: o estado, o changelog e as
+    // limitacoes declaradas antes da arvore e do log.
     materials: [
       { kind: 'arquivo', filePath: 'docs/estado.md', optional: true },
-      // **O veredito de cada item mora aqui**, e sem ele a lente le o
-      // `## Contexto` das decisoes como se fosse o estado de hoje -- foi o que
-      // produziu, em duas rodadas seguidas, o mesmo falso positivo sobre os
-      // bancos sem setor que a decisao 87 resolveu.
-      { kind: 'arquivo', filePath: 'docs/plano-motor-de-referencia.md', optional: true },
+      { kind: 'arquivo', filePath: 'CHANGELOG.md' },
+      { kind: 'arquivo', filePath: 'docs/validacao/limitacoes.md', optional: true },
+      { kind: 'arquivo', filePath: 'docs/motor/08-verificacao-e-validacao.md', optional: true },
       { kind: 'arquivo', filePath: 'README.md' },
       { kind: 'arvore', roots: ['src', 'tool', 'test'] },
       { kind: 'git-log', count: 40 },
-      {
-        kind: 'diretorio',
-        filePath: 'docs/decisoes',
-        extensions: ['.md'],
-        optional: true,
-        newestFirst: true,
-      },
     ],
   },
 

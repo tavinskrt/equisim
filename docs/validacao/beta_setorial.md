@@ -10,7 +10,7 @@ dart run tool/beta_setorial.dart   # grava beta_setorial.json
 
 ## 0. Por que
 
-O teste A1 ([decisão 39](../decisoes/039-as-duas-vias-sao-modelos-independentes.md))
+O teste A1 (decisão 39)
 mostrou que `Ke` e `WACC` não estão ligados pela alavancagem: o beta é
 regressão crua contra o Ibovespa, sem versão desalavancada. Sem essa ligação a
 identidade `FCFF/WACC ≡ FCFE/Ke` não fecha por construção.

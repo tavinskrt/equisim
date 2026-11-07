@@ -13,7 +13,7 @@ const rates = [
   { key: 'aportes', label: 'Só os aportes', annual: 0, color: 'var(--fg-3)', dashed: true },
 ];
 
-describe('Curva de acumulação no gráfico da Bklit (decisão 156)', () => {
+describe('Curva de acumulação no gráfico da Bklit', () => {
   it('desenha sem quebrar, com a legenda e a meta', () => {
     const { container } = render(
       <MotionProvider>

@@ -6,7 +6,7 @@ import { useStudy } from '../../app/state/study-store';
 
 /**
  * A comparação Principal × Reserva, uma ação de cada ativo no início da janela
- * (decisão 161). A chave carrega tudo de que o resultado depende — as duas
+ *. A chave carrega tudo de que o resultado depende — as duas
  * composições e a janela —, então mudar um ativo refaz a simulação e voltar à
  * composição anterior reaproveita a que já rodou. A meta não entra: o plano de
  * aportes não compra nada aqui.

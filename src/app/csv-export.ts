@@ -45,7 +45,7 @@ export const CsvExport = {
     };
     const p = result.principal?.metrics;
     const r = result.reserve?.metrics;
-    // Sem o XIRR (decisão 161): com uma compra só, no primeiro pregão, ele
+    // Sem o XIRR: com uma compra só, no primeiro pregão, ele
     // coincide com o TWR, e uma coluna repetida convida a procurar diferença.
     row('retorno_ponderado_tempo_twr', p?.timeWeightedReturn, r?.timeWeightedReturn);
     row('cagr', p?.cagr, r?.cagr);

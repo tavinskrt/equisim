@@ -34,7 +34,7 @@ const announcements: Announcements = {
  * Principal e Reserva; como o recálculo da carteira custa microssegundos,
  * tudo responde no mesmo quadro do gesto.
  *
- * Sem resumo de métricas nem aviso de concentração no alto (decisão 160): a
+ * Sem resumo de métricas nem aviso de concentração no alto: a
  * contagem já está em cada coluna, a rosca mostra os setores, e o retorno
  * esperado ponderado saiu com o peso.
  */

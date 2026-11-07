@@ -5,7 +5,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { cn } from './cn';
 
 /**
- * O movimento da interface (decisão 155), pelo Motion
+ * O movimento da interface, pelo Motion
  * (https://motion.dev). Quatro regras valem para tudo o que mora aqui:
  *
  * 1. **`LazyMotion` estrito**: só o componente `m` e o pacote `domAnimation`.

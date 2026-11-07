@@ -1,6 +1,6 @@
 # Por que τ = 0,5 na normalização do fluxo-base
 
-> **⚠ Superado pela [decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md).**
+> **⚠ Superado pela decisão 25.**
 > A winsorização descrita aqui **não existe mais**: `base_flow.dart` foi removido em
 > 07/09/2026 e a banda `τ` não é mais aplicada. O que a substituiu é a convergência de
 > retorno — o fluxo-base deixa de ser aparado contra uma mediana e passa a ser derivado do

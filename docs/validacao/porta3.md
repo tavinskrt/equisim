@@ -21,7 +21,7 @@ A lente `metodo` apontou, como achado **estrutural**:
 O argumento é que a via do acionista seria "leniente", e rotear para ela uma
 empresa cujo lucro operacional não se sustenta lava um ativo ruim numa
 avaliação. A proposta reverteria a
-[decisão 38](../decisoes/038-transicao-continua-entre-as-vias.md).
+decisão 38.
 
 **Nenhuma medição acompanhava o achado.** Esta é ela.
 

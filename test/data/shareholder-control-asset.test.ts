@@ -12,7 +12,7 @@ import { ShareholderControlRepository } from '../../src/data/repositories/shareh
 import { isServed, readPublicJson } from './public-assets';
 
 /**
- * O controle acionário versionado é o que o build leva (item B46).
+ * O controle acionário versionado é o que o build leva.
  *
  * Ele só acrescenta a ressalva de controle estatal, e por isso a ausência não
  * muda preço; mas um build sem ele deixaria de declarar o que a medição

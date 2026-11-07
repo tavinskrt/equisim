@@ -71,7 +71,7 @@ from collections import defaultdict
 from pathlib import Path
 
 # A amostra trimestral na base da data, com as deslistadas da ponte ampliada
-# (itens C1c, C1d e C3, decisão 97), é a que gera o pacote.
+# (C1d e C3), é a que gera o pacote.
 INPUT = Path("docs/validacao/backtest_trimestral.json")
 OUTPUT = Path("docs/validacao/cobertura_banda_trimestral.json")
 PACKAGE = Path("public/assets/validacao/banda_calibrada.json")
@@ -485,7 +485,7 @@ def main() -> None:
 
         # --- 3. Recalibragem fora da amostra --------------------------------
         # Toda avaliação com preço justo entra, e não só as que têm cenários:
-        # a combinação das duas vias (decisão 38) tira a banda de cenários,
+        # a combinação das duas vias tira a banda de cenários,
         # mas o preço justo continua sendo o que a tela mostra.
         recal = {}
         all_rows = [l for l in lines

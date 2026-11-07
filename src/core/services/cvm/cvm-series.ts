@@ -22,7 +22,7 @@ export class CvmSeriesResult {
   /** `true` quando a série terminou ancorada em trimestre. */
   readonly anchoredOnQuarter: boolean;
 
-  /** `true` quando o último ponto é o ano corrente anualizado (decisão 153). */
+  /** `true` quando o último ponto é o ano corrente anualizado. */
   readonly endsAnnualized: boolean;
 
   /** Quantos campos vieram de cada fonte, somados sobre a série. */
@@ -51,14 +51,14 @@ export const CvmSeries = {
   marginDays: 4,
 
   /**
-   * A série anual termina no ano corrente anualizado (decisão 153). O
+   * A série anual termina no ano corrente anualizado. O
    * aplicativo e o backtest leem daqui, para que a regra seja uma só.
    */
   yearToDateByDefault: true,
 
   /**
    * A versão vigente de cada documento: das já publicadas, a de recebimento
-   * mais recente, por tipo e data de referência (item B8).
+   * mais recente, por tipo e data de referência.
    *
    * A CVM republica o documento reapresentado com outra versão, e cada versão
    * tem a sua data de recebimento. Com todas elas na lista, a pergunta da
@@ -100,7 +100,7 @@ export const CvmSeries = {
    * - [published]: a regra de publicidade da cascata — `PointInTimeView.
    *   isPublished` — para que ela seja uma só.
    * - [yearToDate]: na série anual, acrescenta o ano corrente anualizado do
-   *   último ITR depois da última DFP (decisão 153). Sem efeito na ancorada,
+   *   último ITR depois da última DFP. Sem efeito na ancorada,
    *   que já termina no trimestre.
    *
    * **A mescla nunca olha para a frente.** Um ponto terminado em junho é
@@ -129,9 +129,9 @@ export const CvmSeries = {
     // ano, publicado de fato, era descartado, e a cascata depois removia o
     // ponto mesclado por ser do futuro — o ano sumia. USIM3 em 04/09/2024:
     // DFP de 2023 reapresentada, com a versão ingerida recebida em 16/01/2025,
-    // e avaliação feita sobre 2022 (decisão 78).
+    // e avaliação feita sobre 2022.
     //
-    // **E só a versão vigente de cada um** (item B8): com as versões antigas
+    // **E só a versão vigente de cada um**: com as versões antigas
     // na lista, a coorte lê o número que era público na data, e não o
     // reapresentado depois.
     const inForce = CvmSeries.inForceAt(documents, published);

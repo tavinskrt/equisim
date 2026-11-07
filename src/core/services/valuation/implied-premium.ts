@@ -1,6 +1,6 @@
 /**
  * O prêmio de risco de mercado implícito no preço da bolsa, e a média de dez
- * anos dele, que é o prêmio do CAPM do motor (decisão 142).
+ * anos dele, que é o prêmio do CAPM do motor.
  *
  * **De onde vem.** Em cada fim de trimestre, o valor de mercado somado das
  * companhias listadas é igualado ao dinheiro que elas distribuem — dividendos e

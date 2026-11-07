@@ -2,7 +2,7 @@ import { type ConcessionTerm, ConcessionTermsCodec, type DateTime, type Ticker }
 import { memoizedPackage, type PackageLoader } from './package-loader';
 
 /**
- * Prazo das outorgas empacotado com o aplicativo (item A6, decisão 88).
+ * Prazo das outorgas empacotado com o aplicativo.
  *
  * Gerado por `tool/fre-grants.ts` a partir do Formulário de Referência da
  * CVM. **Sem pacote, o repositório é transparente**: sem prazo, a concessão

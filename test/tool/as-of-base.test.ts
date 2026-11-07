@@ -1,4 +1,4 @@
-// A ponte por papel na data da coorte (item C3).
+// A ponte por papel na data da coorte.
 //
 // O que se confere aqui é o que a montagem antiga errava por construção: o
 // preço na base de ações de hoje contra a contagem na base do exercício, e a
@@ -204,7 +204,7 @@ describe('CapitalClasses', () => {
   });
 });
 
-// A leitura do texto passou ao núcleo em 20/09/2026 (item B16): ela deixou de
+// A leitura do texto passou ao núcleo em 20/09/2026: ela deixou de
 // ser conferência de ferramenta e virou o que o motor usa, e por isso é
 // testada também em `unit-composition.test.ts`. Este caso fica porque é o que
 // confere a lista inteira contra a FCA de 2024.

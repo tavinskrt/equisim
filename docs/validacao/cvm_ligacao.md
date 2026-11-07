@@ -15,7 +15,7 @@ dart run tool/cvm_ligar.dart          # grava cvm_ligacao.json
 ## 1. Como ficou ligado
 
 O exercício chega ao motor **mesclado campo a campo**, e cada campo carrega de
-onde veio ([decisão 69](../decisoes/069-a-mescla-carrega-a-procedencia.md)).
+onde veio (decisão 69).
 
 | a CVM fornece | o mercado fornece |
 |---|---|
@@ -89,7 +89,7 @@ contra a contagem da fonte de mercado:
 A ABEV3 aparece com 15.757.657 contra 15.761.638.000 papéis; a MILS3, com
 234.178 contra 234.178.210.
 
-A correção é a [decisão 70](../decisoes/070-a-contagem-de-acoes-da-cvm-nao-tem-escala.md):
+A correção é a decisão 70:
 **só a fração `tesouraria ÷ integralizadas` entra**, porque as duas saem do
 mesmo registro e erram juntas. A base continua sendo a do agregador, cuja
 qualidade a §1.7 já mediu.

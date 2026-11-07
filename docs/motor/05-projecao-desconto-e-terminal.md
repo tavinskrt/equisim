@@ -13,8 +13,8 @@ Código: [dcf.ts](../../src/core/services/valuation/dcf.ts)
 
 ## 5.1 As premissas de cada ano
 
-`N = 10` anos (decisão 115, por medição: o nível não depende do horizonte, e o
-peso do terminal sim). `t` vai de 1 a N.
+`N = 10` anos, por medição: o nível do preço justo não depende do horizonte, e o
+peso do terminal sim ([horizonte.md](../validacao/horizonte.md)). `t` vai de 1 a N.
 
 | Grandeza | Fórmula | Função | Fundamento |
 |---|---|---|---|
@@ -22,12 +22,13 @@ peso do terminal sim). `t` vai de 1 a N.
 | Taxa | caminho ano a ano (resolvido, ou da curva), ou `r − (r − r∞)·(t − 1)/(N − 1)` sem caminho | `discountRateAt` | capítulo 4, seção 4.5 |
 | Retorno sobre o capital | `ROIC_t = ROIC_base − (ROIC_base − r_t)·(t − 1)/(N − 1)` | `returnOnCapitalAt` | concorrência leva o retorno ao custo; o ano N encontra o estado estacionário `b_N = g∞/r∞` |
 | Retenção | `b_t = g_t / ROIC_t`, em [0; 0,95]; zero se `g_t ≤ 0` ou `ROIC_t ≤ 0` | `retentionAt` | `g = b × ROIC` (McKinsey) |
-| Meio de ano | `√(1 + r_t)` sobre cada fluxo; `√(1 + r∞)` sobre o terminal | `lift`, `midYearLift` | o caixa chega ao longo do ano (decisão 48) |
+| Meio de ano | `√(1 + r_t)` sobre cada fluxo; `√(1 + r∞)` sobre o terminal | `lift`, `midYearLift` | o caixa chega ao longo do ano |
 
 `ROIC_base` é o retorno do último exercício × fator de normalização (ou o do
 ciclo, quando a base é reconstruída).
 
-**Duas costuras das premissas não são da produção** (decisão 147): o caminho
+**Duas costuras das premissas não são da produção** (servem ao cálculo do
+usuário, Simular minhas premissas, capítulo 7): o caminho
 de crescimento explícito (`growthPath`, um `g_t` por ano no lugar do
 decaimento) e a parcela fixa de reinvestimento (`ReinvestmentPolicy.parcelaFixa`:
 `b_t = b` em todo ano, o crescimento sem o limite de `0,95·ROIC_t`, e o terminal
@@ -57,8 +58,8 @@ O fator **acumula** as taxas de cada ano; não eleva uma taxa só a `t`
 | Forma | Quando | Fórmula | Função | Evidência |
 |---|---|---|---|---|
 | **Retorno neutro** (padrão) | sem vantagem residual | `VT = lucro_{N+1} ÷ r∞` — o crescimento sai da conta (RONIC = r∞) | `terminalValue` | McKinsey, "value driver formula" com RONIC = WACC |
-| **Vantagem residual** | veredito concedido | `ROIC∞ = r∞ + φ^N·(ROIC_ciclo − r∞)`; `VT = lucro_{N+1}·(1 − g∞/ROIC∞) ÷ (r∞ − g∞)`, com `r∞ − g∞ ≥ 0,5 p.p.` | `terminalValue`, [growth-guards.ts, `residualMoat`](../../src/core/services/valuation/growth-guards.ts) | decisão 36; Mauboussin e Johnson (1997) |
-| **Concessão com prazo lido** | retorno neutro, contrato que acaba M anos depois do horizonte | `VT = capital_N + EVA_{N+1}·(1 − (1 + r∞)^−M) ÷ r∞`, `EVA_{N+1} = lucro_{N+1} − r∞·capital_N` | `terminalValue` | decisões 50 e 88 |
+| **Vantagem residual** | veredito concedido | `ROIC∞ = r∞ + φ^N·(ROIC_ciclo − r∞)`; `VT = lucro_{N+1}·(1 − g∞/ROIC∞) ÷ (r∞ − g∞)`, com `r∞ − g∞ ≥ 0,5 p.p.` | `terminalValue`, [growth-guards.ts, `residualMoat`](../../src/core/services/valuation/growth-guards.ts) | [fade_terminal.md](../validacao/fade_terminal.md); Mauboussin e Johnson (1997) |
+| **Concessão com prazo lido** | retorno neutro, contrato que acaba M anos depois do horizonte | `VT = capital_N + EVA_{N+1}·(1 − (1 + r∞)^−M) ÷ r∞`, `EVA_{N+1} = lucro_{N+1} − r∞·capital_N` | `terminalValue` | [concessao.md](../validacao/concessao.md), [outorgas.md](../validacao/outorgas.md) |
 
 **O veredito da vantagem residual** barra quando: há contrato com prazo
 determinado; falta retorno do ciclo ou custo; o histórico tem menos de 8
@@ -66,11 +67,12 @@ exercícios; Φ não foi medido ou passa de 0,60; a persistência não é estim�
 (menos de 4 pares de anos); ou o retorno do ciclo não supera o custo de
 equilíbrio. `φ` é o coeficiente de um AR(1) do excedente (retorno − custo de
 equilíbrio) em anos adjacentes, limitado a [0; 0,90], sem correção de viés de
-amostra pequena (medida e descartada na decisão 36). O custo contra o qual o
+amostra pequena (medida e descartada em
+[fade_terminal.md](../validacao/fade_terminal.md)). O custo contra o qual o
 excedente se mede é o de **equilíbrio**, e o resolvido quando há ponto fixo
-(decisões 44 e 51).
+(capítulo 4, seção 4.6).
 
-**O que o retorno neutro não diz** (item B12, decisão 107): ele fixa o retorno do
+**O que o retorno neutro não diz** ([terminal_excedente.md](../validacao/terminal_excedente.md)): ele fixa o retorno do
 capital **novo**. O instalado continua rendendo `lucro_{N+1} ÷ capital_N` para
 sempre; a parcela `EVA_{N+1}/r∞` a valor presente é reportada no rastro, e vira
 aviso quando passa de 20% do capital próprio (`neutralTerminalExcess`).
@@ -82,14 +84,13 @@ aviso quando passa de 20% do capital próprio (`neutralTerminalExcess`).
 `DcfCalculator.shareholder`: a projeção de 5.2 sobre o **lucro por papel**,
 descontada ao caminho de Ke; o preço justo é `Σ VP_t + VP(VT)` e já é por papel.
 Não há ponte de dívida (a captação já está no lucro). O cenário de desconto
-desloca o caminho inteiro de Ke (item B36, corrigido em 28/09/2026: com o Ke
-resolvido ano a ano, só a perpetuidade se movia).
+desloca o caminho inteiro de Ke, e não só a perpetuidade.
 
 ---
 
 ## 5.5 Via da firma: o fluxo do acionista derivado
 
-Desde a decisão 102, o capital próprio da via da firma **não** é `EV − dívida`:
+O capital próprio da via da firma **não** é `EV − dívida`:
 é o fluxo do acionista derivado do da firma, descontado ao Ke
 (`DcfCalculator.equityFromFirm`).
 
@@ -111,23 +112,20 @@ preço justo     = capital próprio ÷ papéis da ponte
 
 - `D^b` = dívida bruta, `C` = caixa, `D = D^b − C`; os três crescem a `g_t`.
 - Com o caminho resolvido, `Kd_t = Rf_t + prêmio` e o caixa rende `Rf_t`
-  (decisão 127); **sem** resolução e com curva, idem (item B37).
-- Minoritários não negativos são subtraídos (decisão 49).
+  ano a ano; **sem** resolução e com curva, idem, sobre o forward de cada ano.
+- Minoritários não negativos são subtraídos ([ponte.md](../validacao/ponte.md)).
 - **Por que não `EV − D`:** com capital próprio fino, a diferença de dois
-  números grandes amplifica o erro por `1 ÷ participação` — 138 vezes na RENT3,
-  na contagem em que ela era recusada
-  (decisões 43 e 102).
+  números grandes amplifica o erro por `1 ÷ participação` — 138 vezes na RENT3
+  ([identidade_das_vias.md](../validacao/identidade_das_vias.md)).
 - **A identidade:** com alavancagem constante e pesos do próprio modelo,
   `FCFE_{N+1} = E·(Ke − g)`, e o terminal do acionista é o terminal da firma
   menos a dívida; as duas rotas coincidem dentro de 10⁻⁶ com as taxas
-  resolvidas (decisão 43, teste em `levered-rates.test.ts`).
+  resolvidas (teste em `levered-rates.test.ts`).
 
-**O rastro desta conta** (painel de logs) tem, desde 28/09/2026 (item B35), três
-passos: a projeção do fluxo da firma (onde o WACC é só o alvo do retorno), o
-fluxo do acionista com o desconto ao Ke de cada ano, e o terminal convertido.
-Antes, o rastro montava o fator com o WACC e mostrava ao lado o valor presente
-descontado ao Ke — "fluxo ÷ fator" não dava o valor escrito, e a soma mostrada
-não era a soma das parcelas.
+**O rastro desta conta** (painel de logs) tem três passos: a projeção do fluxo da
+firma (onde o WACC é só o alvo do retorno), o fluxo do acionista com o desconto
+ao Ke de cada ano, e o terminal convertido. Em cada passo, "fluxo ÷ fator" dá o
+valor escrito, e a soma mostrada é a soma das parcelas.
 
 ---
 
@@ -136,7 +134,7 @@ não era a soma das parcelas.
 | Grandeza | Conta | Função |
 |---|---|---|
 | Preço justo | capital próprio ÷ papéis (via da firma) ou soma por papel (acionista) | `DcfOutcome.fairValuePerShare`, convertido para `Money` uma vez |
-| Participação do terminal | `VP(VT) ÷ capital próprio` (pode passar de 100%) | `terminalShare` (decisão 51) |
+| Participação do terminal | `VP(VT) ÷ capital próprio` (pode passar de 100%) | `terminalShare` |
 | Participação do capital próprio | `E ÷ EV` | `equityShare` |
 | Upside | `(justo − preço) ÷ preço` | `ValuationResult.upside` |
 | Preço com margem | `justo × (1 − margem)`; margem zero por padrão no aplicativo | `ValuationResult` |
@@ -148,4 +146,4 @@ não era a soma das parcelas.
 - Convergência linear do retorno e do crescimento, em dez anos, para todas as
   empresas.
 - Na perpetuidade neutra, o capital instalado mantém o retorno da projeção para
-  sempre (declarado e medido, item B12).
+  sempre (declarado e medido em [terminal_excedente.md](../validacao/terminal_excedente.md)).

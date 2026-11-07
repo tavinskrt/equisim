@@ -1,6 +1,6 @@
 // D2b — o destino da via do acionista sobre LPA.
 //
-// **A pergunta.** A [decisão 45](../docs/decisoes/045-estrutura-de-capital-recusada.md)
+// **A pergunta.** A decisão 45
 // tirou da via do acionista o papel de segundo estimador: nos 90 ativos em que
 // as duas vias são calculáveis, nenhum resultado mescla e nenhum migra. Ela
 // continua, porém, sendo **a única via** para instituição financeira (Porta 1),

@@ -10,7 +10,7 @@ import { FailureCopy } from './failure-copy';
 import { Fmt } from './fmt';
 
 /**
- * O texto da edição do valuation (decisão 147).
+ * O texto da edição do valuation.
  *
  * **O núcleo diz o que aconteceu; a tela diz como se lê** — a separação das
  * decisões 122 e 125. Os avisos chegam como `ManualNoticeKind` com os anos, e

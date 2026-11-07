@@ -1,4 +1,4 @@
-// A leitura da réplica fora da amostra (item C7, decisões 129 e 133).
+// A leitura da réplica fora da amostra.
 //
 // **Antes da data fixada, só a situação**: quantas coortes estão seladas e
 // quantas já têm o retorno do horizonte — nenhuma estatística. **Na data**, o
@@ -44,7 +44,7 @@ export async function main(args: string[]): Promise<void> {
     );
     outln(`  previsões refeitas que divergem do selo: ${result['previsoesRefeitasQueDivergem']}`);
     // A leitura é a do pré-registrado; a de cada motor posterior vem ao lado,
-    // sem decidir nada (decisão 129).
+    // sem decidir nada.
     for (const [engine, value] of Object.entries(result['motoresDaData'] as Json)) {
       const m = ((value as Json)['famaMacBeth'] as Json)['potencialDadoBm'] as Json | null;
       outln(`  motor da data ${engine.slice(0, 8)}: ${m?.['media'] ?? null}  t corrigido ${m?.['tSobreposicao'] ?? null}  (referência, não a leitura)`);

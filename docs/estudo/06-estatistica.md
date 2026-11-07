@@ -169,7 +169,7 @@ quase nada: 0,23¹⁰ é menos de um milionésimo.
 (capítulo 4, seção 4.7). O motor limita `φ` a 0,90 e exige pelo menos quatro
 pares de anos. Ele **não** corrige o viés de amostra pequena (o AR(1) tende a
 subestimar `φ`), porque a correção, com tão poucos pares, dominava o próprio
-dado — escolha conservadora e declarada (decisão 36).
+dado — escolha conservadora e declarada.
 
 ---
 
@@ -187,7 +187,7 @@ precisão = 1 ÷ erro²
 É uma média ponderada pela confiança, com fundamento na estatística bayesiana.
 O motor faz isso com o beta (referência: o beta do setor; capítulo 3, seção
 3.4). O projeto também usou a mesma fórmula para testar o prêmio de mercado
-histórico, e ela devolveu 5,49% (decisão 116).
+histórico, e ela devolveu 5,49%.
 
 ---
 
@@ -250,15 +250,14 @@ controlando pelo book-to-market) e depois olha a **média** das inclinações ao
 longo das coortes, com o seu erro (Fama e MacBeth, 1973). Coortes trimestrais
 medidas em 36 meses **se sobrepõem** (compartilham até 33 meses), e o `t` comum
 sai inflado; o projeto corrige pelo tamanho da sobreposição e compara com um
-limiar próprio, obtido por simulação (2,70 para 22 coortes; decisão 96).
+limiar próprio, obtido por simulação (2,70 para 22 coortes).
 
 ### Poder do teste: não achar não é provar que não existe
 
 O **poder** é a chance de um teste detectar um efeito que existe. Com poucas
 coortes, o poder é baixo: um efeito real pode passar despercebido. O Equisim
 mediu isso: com a série brasileira disponível, o menor efeito que o teste
-enxerga com 80% de chance é 0,48, e o efeito medido foi 0,034 (decisão 140;
-remedição de 03/11/2026).
+enxerga com 80% de chance é 0,48, e o efeito medido foi 0,034 (remedição de 03/11/2026).
 Leitura correta:
 
 > "O teste não encontrou habilidade de ordenação, **e** não teria poder para

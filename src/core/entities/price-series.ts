@@ -9,7 +9,7 @@ import type { Ticker } from '../value-objects/ticker';
  * proventos (convenção Yahoo, verificada em BBAS3 15/04/2024 e WEGE3
  * 27/04/2021 — nenhuma descontinuidade nas datas-ex de split).
  *
- * **Nem por toda bonificação** (item B29, decisão 136): das mudanças de
+ * **Nem por toda bonificação**: das mudanças de
  * contagem com salto no preço bruto, a fonte deixou 133 sem ajuste. Quem lê a
  * série para beta, volatilidade ou retorno a completa antes, com os eventos
  * declarados (`CorporateEvents.completeAdjustment` e `applyToSeries`).
@@ -26,7 +26,7 @@ export class PricePoint {
 
   /**
    * Volume negociado no pregão, em quantidade de papéis. `null` quando a fonte
-   * não informa. Serve à Porta 0 (decisão 25). **Não entra em cálculo de retorno.**
+   * não informa. Serve à Porta 0. **Não entra em cálculo de retorno.**
    */
   readonly volume: number | null;
 

@@ -18,7 +18,7 @@ const row = (d: number, principal?: number, reserve?: number): Row => ({
   ...(reserve !== undefined ? { reserve } : {}),
 });
 
-describe('Pontos da evolução no gráfico da Bklit (decisão 158)', () => {
+describe('Pontos da evolução no gráfico da Bklit', () => {
   it('o pregão que falta no meio de uma curva é interpolado no tempo, e o tooltip continua vendo o ausente', () => {
     // Dia 3 falta à Reserva: entre 100 (dia 1) e 110 (dia 5), no dia 3, a reta passa em 105.
     const rows = [row(1, 100, 100), row(3, 102), row(5, 104, 110)];
@@ -55,7 +55,7 @@ describe('Pontos da evolução no gráfico da Bklit (decisão 158)', () => {
       </MotionProvider>,
     );
     expect(container.querySelector('.bklit-chart')).not.toBeNull();
-    // Uma vista só, em reais: com uma compra só, a base 100 era a mesma curva em outra escala (decisão 161).
+    // Uma vista só, em reais: com uma compra só, a base 100 era a mesma curva em outra escala.
     expect(screen.queryByRole('radio', { name: 'Base 100' })).toBeNull();
     expect(container.textContent).toContain('Patrimônio em reais');
     fireEvent.click(screen.getByRole('radio', { name: 'Tabela' }));

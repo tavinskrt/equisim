@@ -8,7 +8,7 @@ import { asObject, isServed, readPublicJson, readRepoJson } from './public-asset
 
 /**
  * A leitura da habilidade é o que a tela de metas cita na ressalva do prêmio
- * (item B1.0). Pacote ausente ou divergente da medição reprova a suíte: no
+ *. Pacote ausente ou divergente da medição reprova a suíte: no
  * aplicativo a ausência vira a ressalva de "não medida", e o descuido que
  * importa pegar é o pacote dizer outra coisa que a medição.
  */
@@ -40,7 +40,7 @@ it('os números, o veredito e o prêmio são os da medição trimestral com desl
   // dois têm de concordar.
   expect(reading.demonstrated).toBe(datum['passaR3']);
 
-  // As três ordenações lado a lado (item B1), cada uma contra a medição.
+  // As três ordenações lado a lado, cada uma contra a medição.
   const pairs: readonly (readonly [TransversalOrdering, string])[] = [
     [TransversalOrdering.composite, 'icComposto'],
     [TransversalOrdering.bookToMarket, 'icBookToMarket'],

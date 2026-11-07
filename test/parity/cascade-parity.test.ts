@@ -3,7 +3,7 @@
  *
  * O gabarito em `test/parity/golden/` foi gravado pelo núcleo Dart compilado
  * para JavaScript (o harness `test/parity/dart/harness.dart`, no commit `7480c5a`) antes da remoção do
- * Dart (decisão 152). Esta suíte refaz a mesma bateria com o núcleo
+ * Dart. Esta suíte refaz a mesma bateria com o núcleo
  * TypeScript e exige **igualdade exata**: número com número por `Object.is`,
  * texto com texto, e o rastro de auditoria de cada avaliação pela impressão
  * SHA-256 do JSON que o Dart produziria.

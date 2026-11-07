@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+/** A versão do `package.json`, injetada pelo `define` do Vite (ver `src/app/version.ts`). */
+declare const __EQUISIM_VERSION__: string;
+
 /**
  * As variáveis de ambiente que o aplicativo lê.
  *

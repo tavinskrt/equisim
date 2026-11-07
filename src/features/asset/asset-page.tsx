@@ -12,7 +12,7 @@ import { StudyMembership } from '../study/study-membership';
 import { XRayBody } from './asset-xray';
 
 /**
- * **A página do ativo** (decisão 155): o Raio-X em `/ativo/:ticker`, com a
+ * **A página do ativo**: o Raio-X em `/ativo/:ticker`, com a
  * largura da tela inteira, no lugar do painel lateral que abria por cima da
  * área corrente.
  */

@@ -231,7 +231,7 @@ fator de meio de ano = √(1 + taxa do ano)
 Com taxa de 13%, √1,13 = 1,063: o valor sobe 6,3%. Parece detalhe, mas incide
 sobre a avaliação inteira.
 
-**Onde isso aparece no Equisim:** decisão 48, em
+**Onde isso aparece no Equisim:** em
 [dcf.ts, `midYearLift`](../../src/core/services/valuation/dcf.ts).
 
 ---

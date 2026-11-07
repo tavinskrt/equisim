@@ -1,4 +1,4 @@
-// A ponte por papel na data da coorte (item C3).
+// A ponte por papel na data da coorte.
 //
 // **Dois defeitos da montagem das coortes, e um é a causa do outro.**
 //

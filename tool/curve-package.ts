@@ -1,6 +1,6 @@
 // A2.1 — empacota as cotações recentes do Tesouro para o aplicativo.
 //
-// **Na web o pacote é a única fonte** da curva (decisão 86): rode os dois
+// **Na web o pacote é a única fonte** da curva: rode os dois
 // comandos abaixo antes de cada `npm run build`. Com mais de
 // `TreasuryCurve.fallbackDays` dias, o pacote não serve, e a avaliação recua
 // para os dois pontos, declarando por quê.

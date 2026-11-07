@@ -72,9 +72,9 @@ export class GoalAlignment {
   /**
    * Retorno anual esperado da carteira, pelo **estimador transversal**:
    * `Ke_i + z · prêmio`, ponderado pelos pesos. **A âncora é o custo de
-   * capital próprio de cada ativo, e não o CDI** (decisão 58), e só entra
-   * prêmio da ordenação que a validação comprovou (decisão 103). **É retorno
-   * total**: o `Ke` do CAPM inclui o provento (decisão 62), e a meta é um
+   * capital próprio de cada ativo, e não o CDI**, e só entra
+   * prêmio da ordenação que a validação comprovou. **É retorno
+   * total**: o `Ke` do CAPM inclui o provento, e a meta é um
    * plano de patrimônio que o reinveste.
    */
   readonly expectedReturn: number;
@@ -111,8 +111,8 @@ export const EvaluateGoalAlignment = {
   /**
    * - [crossSection]: potenciais que definem mediana e escala do escore;
    *   omitido, a seção é a própria carteira (limitação declarada).
-   * - [ordering] e [signals]: a ordenação medida que decide o prêmio (item B1).
-   * - [riskPremium]: o prêmio de mercado do escore (decisão 142).
+   * - [ordering] e [signals]: a ordenação medida que decide o prêmio.
+   * - [riskPremium]: o prêmio de mercado do escore.
    */
   call(args: {
     portfolio: Portfolio;
@@ -166,7 +166,7 @@ const DEFAULT_WINDOW_YEARS = 10;
  */
 const CURRENT_RATE_WINDOW_DAYS = 63;
 
-/** Pregões de cada ponta que formam a média do CAGR do índice (decisão 60). */
+/** Pregões de cada ponta que formam a média do CAGR do índice. */
 const INDEX_END_WINDOW_DAYS = 63;
 
 function currentRateOf(series: RateSeries): number {
@@ -176,7 +176,7 @@ function currentRateOf(series: RateSeries): number {
 
 /**
  * CAGR do índice entre as **médias das duas pontas**, medido de centro a
- * centro (decisão 60). Fallback quando a série é curta, tem preço não positivo
+ * centro. Fallback quando a série é curta, tem preço não positivo
  * ou colapsa num único dia.
  */
 function cagrOf(series: PriceSeries): number {

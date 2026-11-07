@@ -200,7 +200,7 @@ KLBN3 e KLBN11 sobem 266%, e a razão não é o tamanho de nada:
 
 **Sem os termos, o ponto fixo recusa** — "a taxa de equilíbrio não supera o
 crescimento perpétuo" — e a avaliação migra para a via do acionista, pela
-[decisão 45](../decisoes/045-estrutura-de-capital-recusada.md). Com eles, a
+decisão 45. Com eles, a
 equivalência patrimonial deixa de ser tributada, o NOPAT sobe entre 0,2% e 3,5%
 conforme o exercício, e isso basta para o WACC de equilíbrio cruzar a margem
 mínima.

@@ -1,14 +1,19 @@
-import { LogIn, LogOut, Moon, ScrollText, Sun, User } from 'lucide-react';
+import { History, LogIn, LogOut, Moon, ScrollText, Sun, User } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { PreferencesActions, usePreferences } from '../../app/state/preferences-store';
 import { signOutSession, useSession } from '../../app/state/session-store';
 import { getRuntime } from '../../app/runtime';
+import { APP_VERSION_LABEL } from '../../app/version';
 import { auditEnabled } from '../../audit/audit-bus';
 import { AuditRoutes } from '../../audit/audit-routes';
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../../ui/menu';
+import { ChangelogActions } from '../changelog/changelog-store';
 
-/** O menu da conta: perfil, tema, painel de logs e sair — o mesmo do aplicativo Flutter. */
+/**
+ * O menu da conta: perfil, tema, o histórico de versões (com a versão em uso
+ * à direita), painel de logs e sair.
+ */
 export function AccountMenu() {
   const user = useSession((s) => s.user);
   const local = useSession((s) => s.local);
@@ -44,6 +49,13 @@ export function AccountMenu() {
           onSelect={() => PreferencesActions.setTheme(theme === 'dark' ? 'light' : 'dark')}
         >
           {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+        </MenuItem>
+        <MenuItem
+          icon={<History />}
+          hint={<span className="num rounded-full border border-line px-1.5 py-px">{APP_VERSION_LABEL}</span>}
+          onSelect={() => ChangelogActions.open()}
+        >
+          Changelog
         </MenuItem>
         {auditEnabled() && (
           <MenuItem icon={<ScrollText />} onSelect={() => AuditRoutes.openInNewWindow()}>

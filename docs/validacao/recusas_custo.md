@@ -4,7 +4,7 @@ Medido em 14/09/2026 por `tool/recusas_custo.py`, sobre
 `docs/validacao/backtest_aplicativo.json` — a montagem do aplicativo na data de
 cada coorte, descrita em [cobertura_banda.md](cobertura_banda.md) §1. Dados em
 [recusas_custo.json](recusas_custo.json). Decisão:
-[91](../decisoes/091-as-recusas-ficam-e-a-liquidez-e-remedida-com-as-deslistadas.md).
+91.
 
 > **Remedido em 21/09/2026, sobre o motor da Fase 3.** O item C5 restaurou a
 > base bruta — CVM ingerida, COTAHIST, Tesouro, FRE, registro e complemento da
@@ -115,7 +115,7 @@ docs/validacao/backtest_aplicativo_deslistadas.json --grupo todas` (e
 data com as deslistadas da ponte, na mesma execução. Dados em
 [recusas_custo_deslistadas.json](recusas_custo_deslistadas.json) e
 [recusas_custo_so_deslistadas.json](recusas_custo_so_deslistadas.json). Decisão:
-[95](../decisoes/095-a-recusa-por-liquidez-fica-pelo-nivel-e-nao-pela-ordenacao.md).
+95.
 
 **O `t` de 36 meses passa a sair também com Newey-West**, e vale o menor dos dois
 (decisão 93). Em 12 meses as coortes não se sobrepõem, e os dois coincidem.
@@ -158,7 +158,7 @@ docs/validacao/recusas_custo_trimestral_todas.json` (e `--grupo listadas`,
 coortes trimestrais com as deslistadas da ponte ampliada (C1d), na base de ações
 da data (C3). Os `t` saem de três jeitos, e o que decide é o corrigido pela
 sobreposição contra o crítico dela, com o Newey-West acima de 2
-([decisão 96](../decisoes/096-o-t-da-habilidade-e-corrigido-pela-sobreposicao-contra-o-critico-dela.md)).
+(decisão 96).
 
 **Por que remedir.** As §§1 a 6 foram medidas com o preço da coorte na base de
 ações de hoje, que inflava o valor de mercado de quem desdobrou depois e o
@@ -179,7 +179,7 @@ ordena além do B/M?
 avaliadas, positivo nos dois horizontes e nas duas amostras, e sobrevive ao mês
 pulado. Com o `t` comum — o da §6 —, passaria de 2 com folga. Com o que as coortes
 sobrepostas permitem dizer, não passa em nenhum horizonte. **A leitura da
-[decisão 95](../decisoes/095-a-recusa-por-liquidez-fica-pelo-nivel-e-nao-pela-ordenacao.md)
+decisão 95
 de que "a ordenação sobreviveu" fica como direção, e não como prova.**
 
 **O nível continua fora**: o potencial mediano dos soltos é de −25,4%, contra
@@ -229,7 +229,7 @@ família nova, 0,234 com 1,38.
 ## 9. Com a cópia dos insumos corrigida — remedido em 24/09/2026
 
 **O contrafactual sem o corte de liquidez passava por uma cópia dos insumos
-que perdia campos** (item B27, [decisão 132](../decisoes/132-a-copia-dos-insumos-passa-por-um-lugar-so.md)):
+que perdia campos** (item B27, decisão 132):
 a composição declarada da unit, a taxa de referência do crédito e a janela do
 beta. Nas units e nas espécies da mesma companhia, o potencial solto saía com
 outro divisor. A ALUP4 de 31/12/2021, por exemplo, saía com −24,9% e sai com

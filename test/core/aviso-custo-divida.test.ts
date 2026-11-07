@@ -1,4 +1,4 @@
-// O aviso do custo da dívida descreve a regra que a conta aplica (item B32).
+// O aviso do custo da dívida descreve a regra que a conta aplica.
 //
 // Até 27/09/2026 ele dizia a regra de antes das decisões 31 e 130: o observado
 // «fora da faixa defensável» e o adotado «por alavancagem», mesmo com o

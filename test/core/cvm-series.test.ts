@@ -141,7 +141,7 @@ it('a procedência soma as duas fontes', () => {
   expect(r.provenance.get(FieldSource.market)).toBeGreaterThan(0);
 });
 
-describe('versões do mesmo documento (item B8)', () => {
+describe('versões do mesmo documento', () => {
   // A DFP de 2021 saiu com lucro 10 em 01/03/2022 e foi reapresentada com
   // lucro 4 em 15/06/2023. Quem avaliava em 2022 só tinha a original.
   const version = (profit: number, rec: DateTime): CvmPeriodDocument =>

@@ -26,7 +26,7 @@ import type { KeyValueStore } from '../cache/key-value-store';
 import { firebaseMessage } from './portfolio-store';
 
 /**
- * Onde moram os valuations que o usuário confirmou (decisão 150).
+ * Onde moram os valuations que o usuário confirmou.
  *
  * **Contrato, e não classe concreta**, porque a tela e o painel de logs são
  * testados sem Firebase: o teste monta a mesma lógica sobre um armazenamento

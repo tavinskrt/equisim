@@ -124,7 +124,7 @@ export interface UpsideCohort {
 }
 
 /**
- * Formato do pacote `assets/validacao/upside_coortes.json` (decisão 159).
+ * Formato do pacote `assets/validacao/upside_coortes.json`.
  *
  * Mora no núcleo pelo mesmo motivo do `CashDividendsCodec`: a ferramenta que
  * grava e o repositório que lê têm de concordar sobre o formato. Cada ativo é
@@ -178,7 +178,7 @@ export const UpsideCohortsCodec = {
 
 /**
  * **As coortes trimestrais ponto no tempo**, a fonte do preço justo das
- * compras com data passada (decisão 159).
+ * compras com data passada.
  *
  * Cada coorte avaliou o universo só com os balanços já entregues à CVM na
  * data dela (`PointInTimeView`), e por isso a compra de um mês passado usa a
@@ -279,7 +279,7 @@ export interface PurchaseDecision {
 
 /**
  * **A regra do aporte**: o ativo de maior potencial **entre os que estão
- * abaixo do teto de peso** (decisão 159).
+ * abaixo do teto de peso**.
  *
  * O maior potencial puro concentra: o preço justo só muda a cada balanço, e
  * nas coortes de 2021 a 2025 o líder de potencial de uma carteira de dez
@@ -426,7 +426,7 @@ export class TrackingPlan {
 
 /**
  * **Um aporte e a compra que ele fez** — o registro que vai ao Firestore e não
- * muda mais (decisão 159).
+ * muda mais.
  *
  * A compra gravada é a prova de que não houve olhar o futuro: ela leva o
  * preço, o preço justo, a origem dele e a data em que foi decidida. Reabrir o
@@ -797,7 +797,7 @@ function schedule(plan: TrackingPlan, dates: readonly DateTime[]): ScheduledEven
 }
 
 /**
- * **O acompanhamento da carteira** (decisão 159): o patrimônio que o plano da
+ * **O acompanhamento da carteira**: o patrimônio que o plano da
  * meta produz quando cada aporte compra o ativo de maior potencial do dia.
  *
  * - Cada aporte cai no **caixa da carteira**, e o caixa compra ações
@@ -1176,7 +1176,7 @@ export const PortfolioTracker = {
 // ------------------------------------------------- Benchmarks realizados --
 
 /**
- * **Os mesmos aportes, nas mesmas datas, noutro destino** (decisão 159).
+ * **Os mesmos aportes, nas mesmas datas, noutro destino**.
  *
  * A Meta comparava o plano com o CAGR decenal do CDI e do Ibovespa. O
  * acompanhamento compara com o que o CDI e o Ibovespa **realmente** renderam

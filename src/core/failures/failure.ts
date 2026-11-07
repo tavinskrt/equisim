@@ -56,7 +56,7 @@ export class InsufficientData extends Failure {
 /**
  * Unidade da grandeza que uma regra de domínio comparou.
  *
- * **Existe para a apresentação saber escrever o número** (item B21, decisão
+ * **Existe para a apresentação saber escrever o número** (decisão
  * 122). Sem ela, a tela teria de deduzir o formato pelo nome do campo — o que
  * é acoplamento por convenção de string, e quebra calado quando alguém
  * renomeia o campo.
@@ -80,12 +80,12 @@ export class InvalidInput extends Failure {
   /**
    * Valor medido que produziu a recusa, quando há um número a citar.
    *
-   * O domínio diz **quanto**; a apresentação decide como escrever (decisão 59).
+   * O domínio diz **quanto**; a apresentação decide como escrever.
    */
   readonly actual: number | null;
 
   /**
-   * O limite que a regra impõe, na mesma unidade de [actual] (item B21,
+   * O limite que a regra impõe, na mesma unidade de [actual] (
    * decisão 122).
    */
   readonly limit: number | null;

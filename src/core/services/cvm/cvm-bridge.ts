@@ -12,7 +12,7 @@
  *
  * 0. **O registro oficial da B3**, quando há: o emissor de quatro letras traz
  *    o código CVM, e o código CVM leva ao CNPJ pelos metadados das
- *    demonstrações (decisão 82). É declarado, e não inferido — e é o único que
+ *    demonstrações. É declarado, e não inferido — e é o único que
  *    acompanha fusão: em 14/09/2026 ele corrigiu `MBRF3`, que as regras abaixo
  *    ligavam à BRF por causa do nome "BRF S.A." na fonte de preços, quando a
  *    MBRF é a Marfrig; e `AUAU3`, ligado à Petz pelo nome "Pet Center" em vez

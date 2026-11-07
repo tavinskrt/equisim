@@ -1,4 +1,4 @@
-// Conferência do cálculo do usuário sobre o universo inteiro (decisão 147).
+// Conferência do cálculo do usuário sobre o universo inteiro.
 //
 // **A promessa.** O botão "Editar valuation" abre a conta do motor congelada, e
 // o usuário a refaz com os números dele. Duas coisas precisam ser verdade em

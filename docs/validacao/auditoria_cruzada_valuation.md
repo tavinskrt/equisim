@@ -7,7 +7,7 @@ independente produzido por outro modelo a pedido do orientando.
 O que este documento faz é **separar o que se confirmou do que não se
 confirmou**, com o número que decide cada caso, e registrar o que nenhum dos
 dois lados tinha visto. As correções que saíram daqui estão na
-[decisão 31](../decisoes/031-escala-do-preco-tributo-e-invariancia-das-guardas.md).
+decisão 31.
 
 ## 0. Método
 
@@ -55,7 +55,7 @@ valor de mercado (2,645x), e a B3SA3 por 7,50 bilhões em vez de 5,05 (1,486x).
    de volume mediano por pregão — a um potencial de mais de 240.000%.
 
 **O que ficou estabelecido, e o relatório não tinha.** O árbitro que a
-[decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md) homologou —
+decisão 25 homologou —
 `N = lucro ÷ LPA` — é **tautológico para esta pergunta**: os dois campos vêm das
 mesmas demonstrações, então ele só pode confirmar a contagem do exercício. E
 confirma, em todos os 30 divergentes. Ele responde bem à pergunta contábil, que
@@ -89,8 +89,8 @@ divisor: com a contagem certa, a B3SA3 sai de −81,2% para −74,7%.
 ### Erro 3 — o extermínio das empresas excelentes · **NÃO PROCEDE como defeito; duas das quatro alegações são falsas**
 
 O nível conservador da distribuição é **consequência declarada e homologada** das
-decisões [25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md) e
-[27](../decisoes/027-recalibragem-apos-a-primeira-validacao.md): estrutura a
+decisões 25 e
+27: estrutura a
 termo do desconto mais terminal neutro. A decisão 27 registra a mediana de
 −39,4% e a aceita explicitamente. Chamar isso de defeito é discordar de uma
 decisão, o que é legítimo — mas exige decisão nova, não correção de código.
@@ -376,7 +376,7 @@ pesada empurrava o desconto para baixo do soberano.
    isso subestima a cobertura de quem tem IFRS 16 relevante.
 
 4. **17 dos 120 avaliados não têm setor no perfil**, o que a
-   [decisão 30](../decisoes/030-isencao-ciclica-da-trava-de-saude.md) já
+   decisão 30 já
    registrou. Com a Porta 1 roteando por setor, o efeito cresceu: ITSA4, SANB4,
    BRSR6 e PINE4 nunca podem acionar a porta de instituição financeira. O remédio
    — resolver o perfil pela raiz do ticker — continua sendo mudança de camada de
@@ -395,7 +395,7 @@ pesada empurrava o desconto para baixo do soberano.
 Executada em 08/09/2026 sobre o JSON de auditoria que o próprio aplicativo
 exporta — 18 avaliações, 267 cálculos, com o motor já sob as decisões 31 e 32.
 Nove apontamentos. **Dois se confirmaram e viraram a
-[decisão 33](../decisoes/033-rating-arbitrado-e-consistencia-da-base-acionaria.md);
+decisão 33;
 cinco não se confirmaram contra o dado; dois já estavam implementados.**
 
 ### 7.1 O que se confirmou

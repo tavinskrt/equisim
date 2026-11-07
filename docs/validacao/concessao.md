@@ -92,7 +92,7 @@ sempre**, numa distribuidora cuja concessão será relicitada e cuja tarifa é
 fixada por regulador para remunerar o capital **ao custo dele**, não acima.
 
 O terminal neutro da
-[decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md) —
+decisão 25 —
 `ROIC_∞ = WACC` — é exatamente o modelo certo para esse negócio, e a exceção de
 vantagem competitiva é exatamente o errado.
 
@@ -110,7 +110,7 @@ o contrato contradiz diretamente.
 
 CPFE3 −5,8% e TAEE11 −2,5%. Os outros três já tinham `λ` nulo — a bandeira
 estava ligada e não preservava nada, o que é a diferença entre
-`moatApplied` e `λ` que a [decisão 36](../decisoes/036-decaimento-medido-do-excedente-na-perpetuidade.md)
+`moatApplied` e `λ` que a decisão 36
 criou justamente para expor.
 
 ## 4. A classificação é declarada, não inferida

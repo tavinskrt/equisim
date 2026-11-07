@@ -1,4 +1,4 @@
-// O efeito da tarifa da B3 sobre a simulação da carteira (item C4).
+// O efeito da tarifa da B3 sobre a simulação da carteira.
 //
 // A simulação do aplicativo passou a cobrar a tarifa de negociação e
 // liquidação da B3 em cada compra (`TransactionCosts.b3`, 0,030%). Aqui se

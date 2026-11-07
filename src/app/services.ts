@@ -75,7 +75,7 @@ export interface ServicesOptions {
   readonly workerFactory?: WorkerFactory;
   /**
    * `true` no navegador, que não lê o arquivo do Tesouro: a curva vem só do
-   * pacote do build (decisão 86).
+   * pacote do build.
    */
   readonly isWeb?: boolean;
   /** Registro de aviso de infraestrutura. */
@@ -90,7 +90,7 @@ export interface ServicesOptions {
 export interface UserStores {
   readonly portfolios: PortfolioStore;
   readonly valuations: ManualValuationStore;
-  /** Os acompanhamentos da carteira na Meta (decisão 159). */
+  /** Os acompanhamentos da carteira na Meta. */
   readonly trackings: TrackingStore;
 }
 
@@ -191,7 +191,7 @@ export class Services {
       loadPackage: pkg(AssetPaths.cvmPackage),
       today: this.clock,
     });
-    // O setor é o da B3, por emissor (item A5, decisão 87).
+    // O setor é o da B3, por emissor.
     this.fundamentals = new OfficialSectorFundamentalsRepository({
       inner: this.cvm,
       classification: (t) => this.b3Registry.classificationFor(t),
@@ -219,7 +219,7 @@ export class Services {
     this.skillReadingRepository = new SkillReadingRepository({ loadPackage: pkg(AssetPaths.skillReading) });
     this.riskFreeCurveRepository = new RiskFreeCurveRepository({
       // Na web o navegador não lê o arquivo do Tesouro, e o aplicativo nem
-      // tenta: a curva vem só do pacote do build (decisão 86).
+      // tenta: a curva vem só do pacote do build.
       remote: options.isWeb === false ? new TreasuryDatasource(this.client) : null,
       loadPackage: pkg(AssetPaths.treasuryQuotes),
     });
@@ -241,7 +241,7 @@ export class Services {
   });
 
   /**
-   * Taxa livre de risco anual **da janela informada** (decisão 58): o Sharpe
+   * Taxa livre de risco anual **da janela informada**: o Sharpe
    * compara o retorno de uma janela com a renda fixa dela. Recua para o CAGR
    * decenal do CDI quando a série da janela não vem.
    */
@@ -285,7 +285,7 @@ export class Services {
   // -------------------------------------------------------- Pacotes do build --
 
   /**
-   * O prior do beta e a ressalva quando ele não pôde ser usado (item B11). Sem
+   * O prior do beta e a ressalva quando ele não pôde ser usado. Sem
    * prior o motor é outro — beta cru e WACC estático —, e a ressalva diz qual.
    */
   readonly betaPriorReading = once(async (): Promise<BetaPriorReading> => {
@@ -297,7 +297,7 @@ export class Services {
   });
 
   /**
-   * O prêmio de mercado do pacote, de onde veio e a ressalva (decisão 142). É
+   * O prêmio de mercado do pacote, de onde veio e a ressalva. É
    * o mesmo prêmio no desconto e no retorno esperado da carteira.
    */
   readonly marketPremiumReading = once(async (): Promise<MarketPremiumReading> => {
@@ -312,7 +312,7 @@ export class Services {
     }
   });
 
-  /** Curva de juros da avaliação de hoje e, sem ela, a razão (decisões 84 e 86). */
+  /** Curva de juros da avaliação de hoje e, sem ela, a razão. */
   readonly riskFreeCurveReading = once(async (): Promise<CurveReading> => {
     try {
       return await this.riskFreeCurveRepository.readAt(this.clock());
@@ -321,7 +321,7 @@ export class Services {
     }
   });
 
-  /** Faixas do valor realizado medidas nas coortes (decisão 92). Vazio sem pacote. */
+  /** Faixas do valor realizado medidas nas coortes. Vazio sem pacote. */
   readonly calibratedBands = once(async (): Promise<CalibratedBandTable[]> => {
     try {
       return await this.calibratedBandRepository.tables();
@@ -330,7 +330,7 @@ export class Services {
     }
   });
 
-  /** A habilidade do potencial medida nas coortes (decisão 96), ou `null`. */
+  /** A habilidade do potencial medida nas coortes, ou `null`. */
   readonly skillReading = once(async (): Promise<SkillReading | null> => {
     try {
       return await this.skillReadingRepository.reading();
@@ -340,7 +340,7 @@ export class Services {
   });
 
   /**
-   * O preço justo ponto no tempo das coortes trimestrais (decisão 159), de
+   * O preço justo ponto no tempo das coortes trimestrais, de
    * onde saem as compras com data passada do acompanhamento. `null` sem
    * pacote: aí o acompanhamento só começa de hoje em diante.
    */
@@ -355,7 +355,7 @@ export class Services {
   /** A ressalva de cobertura da CVM para a avaliação de um ativo, ou `null`. */
   readonly cvmCoverageNote = perTicker((t) => this.cvm.coverageNote(t));
 
-  /** Contagem oficial de ações do emissor (decisão 83). */
+  /** Contagem oficial de ações do emissor. */
   readonly officialShares = perTicker(async (t): Promise<OfficialShareCount | null> => {
     try {
       return await this.b3Registry.officialSharesFor(t);
@@ -364,7 +364,7 @@ export class Services {
     }
   });
 
-  /** `true` quando o emissor é de controle estatal hoje (item B46). */
+  /** `true` quando o emissor é de controle estatal hoje. */
   readonly stateControlled = perTicker(async (t): Promise<boolean> => {
     try {
       return await this.shareholderControlRepository.isStateControlled(t);
@@ -373,7 +373,7 @@ export class Services {
     }
   });
 
-  /** Fim do contrato de concessão, ou `null` (decisão 88). */
+  /** Fim do contrato de concessão, ou `null`. */
   readonly concessionEnd = perTicker(async (t): Promise<DateTime | null> => {
     try {
       return await this.concessionTermRepository.endFor(t);
@@ -382,7 +382,7 @@ export class Services {
     }
   });
 
-  /** Proventos da classe: o beta sai do retorno total (decisão 89). */
+  /** Proventos da classe: o beta sai do retorno total. */
   readonly dividends = perTicker(async (t): Promise<CashDividend[]> => {
     try {
       return await this.cashDividendsRepository.dividendsFor(t);
@@ -391,7 +391,7 @@ export class Services {
     }
   });
 
-  /** Ações na unit pela composição declarada na FCA (item B16), ou `null`. */
+  /** Ações na unit pela composição declarada na FCA, ou `null`. */
   readonly declaredSharesPerUnit = perTicker(async (t): Promise<number | null> => {
     try {
       return await this.unitCompositionRepository.sharesPerUnitFor(t);
@@ -400,7 +400,7 @@ export class Services {
     }
   });
 
-  /** As medianas de múltiplos dos pares (item B5), ou `null`. */
+  /** As medianas de múltiplos dos pares, ou `null`. */
   readonly peerMultiples = perTicker(async (t): Promise<PeerMultipleSet | null> => {
     try {
       return await this.peerMultiplesRepository.forTicker(t);

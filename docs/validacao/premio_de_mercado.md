@@ -10,7 +10,7 @@
 > Montagem de 5,5% conferida contra o gabarito ativo a ativo: **zero
 > divergências**.
 >
-> **Remedido depois da [decisão 119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md)**,
+> **Remedido depois da decisão 119**,
 > que estendeu à rota derivada a separação do caixa que a decisão 113 fez no
 > WACC. O preço justo caiu em 73 dos 97 e dois ativos saíram; os números abaixo
 > são os de depois.
@@ -95,7 +95,7 @@ terços do desacordo sobrevivem a um prêmio de risco **nulo**.
 O desacordo mora em outro lugar, e as rodadas anteriores já mostraram onde: o
 terminal neutro carrega um déficit perpétuo porque a rentabilidade das abertas
 brasileiras vive abaixo do custo de capital delas
-([decisão 112](../decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md)).
+(decisão 112).
 
 ## 4. E o prêmio quase não mexe na ordenação
 
@@ -113,7 +113,7 @@ ativos.
 
 ## 5. O que se decidiu
 
-[Decisão 116](../decisoes/116-o-premio-de-mercado-fica-em-5-5-por-cento-por-medicao-das-duas-alternativas.md):
+Decisão 116:
 **5,5% fica**, e deixa de ser convenção.
 
 - O histórico não estima: 0,39% com intervalo de trinta pontos de largura.

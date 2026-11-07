@@ -1,5 +1,5 @@
 // O aviso das contagens discordantes diz a contagem que a ponte usou
-// (item B40).
+//.
 //
 // O texto dizia sempre «a ponte por papel usa a implícita no valor de
 // mercado», e desde a decisão 83 o divisor pode ser a contagem oficial da B3:

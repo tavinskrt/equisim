@@ -4,7 +4,7 @@ import { Panel } from '../../ui/card';
 import { Metric, MetricRow } from '../../ui/metric';
 
 /**
- * A segunda leitura, por múltiplos de pares (item B5, decisão 118). Fica
+ * A segunda leitura, por múltiplos de pares. Fica
  * **depois** da sensibilidade: é o teste de sanidade sobre o nível, e não um
  * preço que compete com o do fluxo descontado.
  */

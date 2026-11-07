@@ -7,7 +7,7 @@ import { PointInTimeView } from '../../time/point-in-time-view';
 import { Inference } from '../valuation/inference';
 
 /**
- * A ordenação que decide o prêmio do retorno esperado (item B1).
+ * A ordenação que decide o prêmio do retorno esperado.
  *
  * **O preço justo continua sendo a entrega da tela de avaliação, e o prêmio do
  * retorno esperado sai de uma ordenação medida** — ver

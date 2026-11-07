@@ -74,7 +74,7 @@ export async function valuateOutcome(
       services.marketAnchors(),
       services.capitalEvents(ticker),
       // O prêmio de mercado é a média de dez anos do prêmio implícito no preço
-      // da bolsa (decisão 142); sem pacote, os 5,5%, ressalvados.
+      // da bolsa; sem pacote, os 5,5%, ressalvados.
       services.marketPremiumReading(),
       services.riskFreeCurveReading(),
       services.officialShares(ticker),
@@ -102,26 +102,26 @@ export async function valuateOutcome(
     projectionYears: settings.projectionYears,
     // Desconto nominal exige crescimento perpétuo nominal.
     perpetualGrowthCap: anchors.nominalEconomyGrowth,
-    // Âncora top-down da Saída 2 (decisão 25).
+    // Âncora top-down da Saída 2.
     inflation: anchors.inflationCagr,
-    // A curva dos prefixados do Tesouro é o padrão (decisão 84); sem curva
+    // A curva dos prefixados do Tesouro é o padrão; sem curva
     // recente, a cascata recua para o decaimento do CDI e diz isso.
     riskFreeCurve: curve.curve,
     terminalRiskFreeRate: anchors.riskFreeCagr,
-    // Contagem oficial da B3: o árbitro do divisor por papel (decisão 83).
+    // Contagem oficial da B3: o árbitro do divisor por papel.
     officialShares,
     isDistressed: distressed.contains(ticker.value),
-    // O controle estatal: só a ressalva, sem mudar o preço (item B46).
+    // O controle estatal: só a ressalva, sem mudar o preço.
     stateControlled,
-    // Só encurta a projeção quando o contrato acaba dentro dela (decisão 88).
+    // Só encurta a projeção quando o contrato acaba dentro dela.
     concessionEnd,
-    // O beta sai do retorno total, a convenção do Ibovespa (decisão 89).
+    // O beta sai do retorno total, a convenção do Ibovespa.
     dividends,
-    // O prior transversal do beta (item B11, decisão 105).
+    // O prior transversal do beta.
     betaPrior: betaPrior.prior,
-    // A composição declarada da unit (item B16, decisão 106).
+    // A composição declarada da unit.
     declaredSharesPerUnit,
-    // A segunda leitura, por múltiplos de pares (item B5, decisão 118).
+    // A segunda leitura, por múltiplos de pares.
     peerMultiples,
     // Os eventos de capital completam o ajuste da série e o patrimônio da
     // ponte (itens B28 e B29).
@@ -170,7 +170,7 @@ export async function portfolioValuations(
 }
 
 /**
- * Os sinais transversais dos ativos (item B1): book-to-market e lucro sobre o
+ * Os sinais transversais dos ativos: book-to-market e lucro sobre o
  * preço do último exercício publicado, pela mesma conta das coortes.
  */
 export async function portfolioSignals(
@@ -188,8 +188,8 @@ export async function portfolioSignals(
 
 /**
  * Situação da carteira frente à meta. A ordenação do prêmio é a que a
- * validação escolheu (item B1), e o prêmio do escore é o mesmo do desconto
- * (decisão 142).
+ * validação escolheu, e o prêmio do escore é o mesmo do desconto
+ *.
  */
 export async function goalAlignment(args: {
   services: Services;

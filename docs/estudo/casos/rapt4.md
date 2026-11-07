@@ -101,7 +101,7 @@ de 4,4% a 16,1% do valor da firma. O problema aparece depois, ao descontar:
 
 A conferência pelo outro lado dá o mesmo: o valor da firma é de R$ 5.091,1 mi, e
 a dívida líquida, de R$ 5.135,2 mi; `5.091,1 − 5.135,2 = −44,0`. Preço por ação
-negativo não é preço: o motor **recusa** (decisão 45), e a mensagem diz por quê.
+negativo não é preço: o motor **recusa**, e a mensagem diz por quê.
 
 **A ordem de grandeza do primeiro ano, à mão:**
 
@@ -142,13 +142,13 @@ Três alternativas foram consideradas e rejeitadas pelo projeto:
 2. **Trocar para a via do acionista.** Ela parte do lucro líquido, e daria algum
    número. Mas escolher o modelo **porque** o primeiro recusou faria o preço
    justo depender de qual conta alcançou um resultado — e aí qualquer ativo
-   sempre teria preço (decisão 102).
+   sempre teria preço.
 3. **Usar a taxa de um ano só, sem realavancar.** Esconderia o problema: com
    alavancagem alta, a taxa de hoje e a de daqui a cinco anos não são a mesma.
 
 Também não se afrouxa a trava de saúde para a conta fechar. O fator de 1,89
 quase dobraria o lucro de partida, mas a trava decide a base antes de qualquer
-resultado, e vale igual para todos os ativos fora de commodity (decisão 30).
+resultado, e vale igual para todos os ativos fora de commodity.
 
 A recusa aparece na tela com o motivo, e o painel de logs mostra todos os passos
 até ela.

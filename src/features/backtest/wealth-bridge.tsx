@@ -17,7 +17,7 @@ interface Bridge {
 /**
  * A ponte da compra ao patrimônio, **em centavos inteiros**:
  *
- *     investido = preço das ações + custos       (uma ação de cada, decisão 161)
+ *     investido = preço das ações + custos       (uma ação de cada)
  *     final     = posições a mercado
  *  ⇒ final     = investido − custos + ganho de mercado
  *

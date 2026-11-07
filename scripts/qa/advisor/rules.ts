@@ -20,7 +20,6 @@
 import { PROJECT_CONTEXT } from '../rules.ts';
 import type { AdvisorTarget } from './collect.ts';
 import type { Lens } from './lentes.ts';
-import { postureBlock, type Boundary } from './postura.ts';
 
 const ROLE = `
 ## Seu papel
@@ -88,10 +87,11 @@ const DISCIPLINE = `
    restricoes de arquitetura acima nao estao em negociacao, e no nucleo a
    pureza e travada por teste.
 
-7. SEM CONTRARIAR DECISAO EM SILENCIO. Se o material traz decisoes registradas
-   e sua proposta contradiz uma delas, diga isso e proponha SUBSTITUI-LA
-   explicitamente, com o motivo. Proposta que ignora decisao registrada e
-   descartada sem leitura.
+7. SEM CONTRARIAR A REGRA DOCUMENTADA EM SILENCIO. Se o material traz a regra
+   vigente documentada (docs/motor/, docs/estudo/, CLAUDE.md) e sua proposta a
+   contradiz, diga isso e proponha MUDA-LA explicitamente, com o motivo e a
+   medicao que a sustenta. Proposta que ignora regra documentada e descartada
+   sem leitura.
 
 8. CAMINHOS, NAO DECRETO. \`options\` tem dois ou tres itens, com o custo de
    cada um. Um item so significa que voce decidiu no lugar de quem decide.
@@ -125,8 +125,8 @@ de trabalho endereca so as ESTRUTURAL, e e por isso que inflaciona-las destroi
 o valor da lista inteira.
 
 - ESTRUTURAL -- a tensao esta na ORGANIZACAO, e nenhuma correcao local resolve.
-  Um rotulo que nomeia coisa diferente do que abre; uma decisao que o codigo
-  contradiz; uma regra de negocio na camada errada. Sao poucas, por definicao.
+  Um rotulo que nomeia coisa diferente do que abre; uma regra documentada que
+  o codigo contradiz; uma regra de negocio na camada errada. Sao poucas, por definicao.
   Se voce marcou mais de cinco numa lente, provavelmente inflacionou.
 
 - LOCAL -- resolve-se num ponto, sem mover nada de lugar.
@@ -137,6 +137,24 @@ o valor da lista inteira.
 
 Na duvida entre dois niveis, escolha o MENOR. Uma tensao subestimada aparece de
 novo na proxima rodada; uma superestimada rouba a rodada inteira.
+`;
+
+/**
+ * A postura diante do que ja existe: PRESERVACAO, sempre.
+ *
+ * O codigo funciona, ninguem pediu para mexer, e o risco de tocar supera o
+ * ganho. Divergencia e divida a inventariar, e so a REGRESSAO vira tarefa.
+ * Uma reconstrucao, quando houver, e pedida pelo usuario na propria tarefa,
+ * e nao aberta pelo conselheiro.
+ */
+const POSTURE = `
+## Postura: preservacao
+
+O que existe e para ser respeitado. Divergencia entre documento e codigo e
+divida a inventariar, e so REGRESSAO -- o que passou a divergir por uma
+mudanca recente, visivel no historico do git ou no changelog -- vira tarefa.
+Nao proponha reescrever uma superficie inteira: proponha o menor passo que
+desfaz a divergencia.
 `;
 
 const CONTRACT = `
@@ -155,10 +173,7 @@ de codigo, sem texto fora do JSON.
 `;
 
 /** Instrucao de sistema, montada para uma lente. */
-export function buildAdvisorSystem(
-  lens: Lens,
-  boundaries: Boundary[] = [],
-): string {
+export function buildAdvisorSystem(lens: Lens): string {
   return [
     'Voce e um consultor tecnico senior. Voce e conservador na afirmacao e',
     'implacavel na evidencia: prefere dizer "nao ha tensao aqui" a produzir uma',
@@ -172,8 +187,7 @@ export function buildAdvisorSystem(
     SEVERITY_GUIDE,
     // Vem DEPOIS da gravidade de proposito: a postura modifica como julgar o
     // que ja existe, entao precisa ser lida com a escala de gravidade fresca.
-    // Vazio quando nao ha reconstrucao aberta, que e o caso normal.
-    postureBlock(boundaries),
+    POSTURE,
     CONTRACT,
   ].join('\n');
 }
@@ -271,8 +285,8 @@ export function visualInstructions(labels: string[]): string {
     'disposicao, o rotulo e a hierarquia, que sao os do aplicativo real.',
     'A LOGO de cada empresa tambem e sintetica: um quadrado colorido com a raiz',
     'do ticker, no lugar da logo real da brapi. TAEE11 fica sem logo de',
-    'proposito, e mostra as iniciais que a substituem quando ela nao vem',
-    '(decisao 154). Nao reporte a aparencia da logo em si.',
+    'proposito, e mostra as iniciais que a substituem quando ela nao vem.',
+    'Nao reporte a aparencia da logo em si.',
     '',
     'Uma tela bem resolvida e o caso comum e desejavel. Nao invente tensao.',
     '',

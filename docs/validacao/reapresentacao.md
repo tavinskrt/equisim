@@ -1,6 +1,6 @@
 # A reapresentação no *point-in-time* — item B8
 
-> **Consertado em 22/09/2026** ([decisão 128](../decisoes/128-a-coorte-le-a-versao-que-era-publica-na-data.md)).
+> **Consertado em 22/09/2026** (decisão 128).
 > As §0 a §3 são a medição de 21/09, feita antes de haver as versões antigas;
 > a §4 é o conserto e o efeito dele.
 

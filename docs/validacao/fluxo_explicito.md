@@ -77,14 +77,14 @@ Nenhum fecha sozinho. E os quatro não têm o mesmo estatuto:
 
 **O freio não é defeito.** `b = g/ROIC` é a identidade que diz quanto capital
 novo um crescimento exige, e desligá-lo reintroduz exatamente o que a
-[decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md) corrigiu:
+decisão 25 corrigiu:
 fluxo crescendo sem nada retido para financiá-lo. Cobrar só o crescimento
 **real** é defensável — crescer ao lado da inflação pede reposição a preço
 maior, não investimento líquido — mas a depreciação a custo histórico que já
 está dentro do NOPAT subestima a reposição, e cobrar o nominal é a leitura
 conservadora dessa ambiguidade. **É escolha de método, e mudá-la para fechar o
 vão seria ajustar o motor ao mercado**, que a
-[decisão 35](../decisoes/035-dcf-reverso-e-regressao-condicional.md) veda.
+decisão 35 veda.
 
 **A convergência do ROIC ajuda o valor**, e desligá-la o piora em 4%. Ela não
 é candidata a nada.
@@ -129,12 +129,12 @@ alíquota daquele ano e não a mediana de quinze.
 
 ## 5. A correção, e o que ela move
 
-Implementada pela [decisão 37](../decisoes/037-aliquota-estrutural-no-fluxo-da-firma.md).
+Implementada pela decisão 37.
 
 **A alíquota entra na série e no fluxo-base ao mesmo tempo.** Mudar só o fluxo
 deixaria o ROIC na convenção antiga, e o freio `b = g/ROIC` passaria a cobrar
 reinvestimento de um retorno que não é o do fluxo descontado — o mesmo defeito
-que a [decisão 31](../decisoes/031-escala-do-preco-tributo-e-invariancia-das-guardas.md)
+que a decisão 31
 mediu em 17% na AZZA3. Por isso o efeito **compõe**: NOPAT maior sobre a mesma
 base de capital é ROIC maior, ROIC maior é retenção menor, e retenção menor é
 fluxo maior de novo.
@@ -185,7 +185,7 @@ via, todos de `dcfEarnings` para `dcfFcff`:
 
 O mecanismo: o NOPAT maior eleva o valor da firma, a participação do capital
 próprio cruza os 20% da pós-condição da
-[decisão 34](../decisoes/034-fronteira-das-vias-medida-na-taxa-estrutural.md), a
+decisão 34, a
 migração deixa de disparar, e o ativo **fica** na via da firma — que para ele
 devolve muito menos.
 
@@ -211,7 +211,7 @@ YDUQ3 —, e para eles um limiar decide entre dois números que diferem por
 múltiplos.
 
 É defeito da mesma família dos dois já removidos: o degrau da vantagem
-competitiva ([decisão 36](../decisoes/036-decaimento-medido-do-excedente-na-perpetuidade.md))
+competitiva (decisão 36)
 e a travessia induzida pelo ciclo monetário (decisão 34). **Não é corrigido
 aqui**, porque conciliar as duas vias é mudança de método com decisão própria,
 e bundlá-la nesta esconderia qual das duas produziu qual efeito.
@@ -343,7 +343,7 @@ medidos só nos 84 restantes.
 Os dois primeiros continuam com o estatuto que a §3 lhes deu: **escolha de
 método, não defeito**. `b = g/ROIC` é a identidade que diz quanto capital novo
 um crescimento exige, e afrouxá-la para fechar o vão seria ajustar o motor ao
-mercado, que a [decisão 35](../decisoes/035-dcf-reverso-e-regressao-condicional.md)
+mercado, que a decisão 35
 veda.
 
 O terceiro segue ajudando o valor. **O quarto é novo, e o resultado dele é o

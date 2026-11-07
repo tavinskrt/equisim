@@ -12,14 +12,14 @@
 > leitura não entra no cálculo. Essa conferência é parte da medição — se o
 > gabarito divergisse, a triangulação teria vazado para o preço.
 >
-> **Remedido depois da [decisão 119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md)**,
+> **Remedido depois da decisão 119**,
 > que estendeu à rota derivada a separação do caixa que a decisão 113 fez no
 > WACC. O preço justo caiu em 73 dos 97 e dois ativos saíram.
 >
 > **Remedido em 24/09/2026**, sobre o motor que fecha a Fase 3 — com o juro da
 > rota derivada pela curva (B24) e o prêmio de crédito sem despesa financeira
 > (B26), que movem o preço justo, e com a cópia única dos insumos
-> ([decisão 132](../decisoes/132-a-copia-dos-insumos-passa-por-um-lugar-so.md)),
+> (decisão 132),
 > que não o move. A cópia usada pela concessão que acaba dentro da projeção
 > perdia os múltiplos de pares, e **quatro concessionárias — EGIE3, EQTL3,
 > TAEE11 e TAEE4 — ficavam sem a segunda leitura**; agora as quatro recebem as
@@ -143,9 +143,9 @@ dizer «os múltiplos dão razão ao mercado» seria ler tautologia como evidên
    mais uma ordenação a medir.
 
 **A explicação do desacordo já foi encontrada em outro lugar desta rodada.** A
-[decisão 116](../decisoes/116-o-premio-de-mercado-fica-em-5-5-por-cento-por-medicao-das-duas-alternativas.md)
+decisão 116
 descartou o prêmio de risco: zerá-lo deixa dois terços do desacordo de pé. A
-[decisão 112](../decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md)
+decisão 112
 mostrou onde ele mora: a rentabilidade das abertas brasileiras vive **abaixo**
 do custo de capital delas, e o terminal neutro carrega esse déficit para sempre.
 **Os múltiplos não carregam premissa nenhuma sobre perpetuidade** — e é
@@ -153,7 +153,7 @@ exatamente por isso que as duas leituras se afastam.
 
 ## 5. O que se decidiu
 
-[Decisão 118](../decisoes/118-a-triangulacao-por-multiplos-e-segunda-leitura-declarada-e-nao-entra-no-preco.md):
+Decisão 118:
 **a triangulação entra, e não entra no preço.**
 
 - Toda avaliação traz as três leituras, a mediana delas e a divergência.
@@ -186,7 +186,7 @@ SAPR11: a mediana caía na Sanepar, e as leituras de P/VP e de EV/EBITDA
 devolviam, as duas, R$ 38,15 — o preço dela na data do pacote. Corrigido em
 `tool/multiplos_empacotar.dart`: cada companhia entra com a mediana das classes
 dela, a do ativo avaliado fica de fora, e o mínimo de cinco pares vale sobre as
-outras companhias ([decisão 141](../decisoes/141-a-documentacao-do-motor-e-refeita-do-zero-contra-o-codigo.md),
+outras companhias (decisão 141,
 plano, B41).
 
 Sobre a mesma entrada congelada, com `dart run tool/multiplos.dart`:

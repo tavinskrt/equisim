@@ -11,7 +11,7 @@ dart run tool/insumos_compartilhados.dart   # grava insumos_compartilhados.json
 ## 0. A pergunta
 
 [`vias.md`](vias.md) mediu que as duas vias discordam além de 1,5× em 55 de 92
-ativos. A [decisão 38](../decisoes/038-transicao-continua-entre-as-vias.md)
+ativos. A decisão 38
 removeu o **degrau** que essa discordância produzia — e não a discordância.
 
 Antes de decidir se conciliá-las exige reconstruir a Porta 2, cabia testar a

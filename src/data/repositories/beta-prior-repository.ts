@@ -8,7 +8,7 @@ export interface BetaPriorReading {
 }
 
 /**
- * Prior transversal do beta empacotado com o aplicativo (item B11).
+ * Prior transversal do beta empacotado com o aplicativo.
  *
  * **Por que vem empacotado.** Resolvê-lo é varrer o universo inteiro — cinco
  * anos de cotação, o histórico de fundamentos e o perfil de cada papel — para
@@ -33,7 +33,7 @@ export class BetaPriorRepository {
    * mediana quase não anda — medido em `beta_prior.md`. O limite existe para
    * que um pacote esquecido por anos não continue passando por atual, e não
    * porque a grandeza expire depressa. Compare-se com os sete dias da curva
-   * (decisão 86), que é taxa de um dia.
+   *, que é taxa de um dia.
    */
   static readonly validityDays = 365;
 

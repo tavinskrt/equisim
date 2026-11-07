@@ -66,7 +66,7 @@ Duas formas, as duas medidas:
 **Zero, ao centavo, nos 97.** É a confirmação numérica do §1: o peso estático
 nunca chega ao resultado quando as taxas resolvem — nem pela porta dos fundos,
 já que o ponto fixo é independente da partida desde a
-[decisão 110](../decisoes/110-o-ponto-fixo-e-tentado-de-duas-partidas-e-a-recusa-deixa-de-ser-do-chute.md).
+decisão 110.
 
 ## 3. Vazia hoje não é vazia sempre
 
@@ -84,7 +84,7 @@ medir.
 
 ## 4. O que se decidiu
 
-[Decisão 120](../decisoes/120-o-minoritario-fica-fora-do-peso-e-a-condicao-de-exposicao-e-declarada.md):
+Decisão 120:
 **o ajuste é recusado, e a condição de exposição é declarada.**
 
 - Recusado porque **o dado não existe**: o valor de **mercado** do minoritário

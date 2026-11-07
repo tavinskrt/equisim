@@ -11,7 +11,7 @@ Medido em 15/09/2026 por `dart run tool/ponte_por_papel.dart`, sobre
 `docs/validacao/backtest_trimestral.json` — as 31 coortes trimestrais com as
 deslistadas ([habilidade_trimestral.md](habilidade_trimestral.md)). Dados em
 [ponte_por_papel.json](ponte_por_papel.json). Decisão:
-[97](../decisoes/097-a-coorte-forma-preco-contagem-e-valor-de-mercado-na-base-da-data.md).
+97.
 
 ## 1. O que faltava, e o que se achou no caminho
 
@@ -128,7 +128,7 @@ a razão errou fica na cauda, e não foi separada.
 ## 7. A composição declarada passou a decidir — item B16, 20/09/2026
 
 A §3 mediu a inferência contra a declaração e achou 79 erros em 220 observações.
-A [decisão 106](../decisoes/106-a-razao-de-unidade-sai-da-composicao-declarada-e-a-medida-confere.md)
+A decisão 106
 inverteu os papéis: **a composição declarada decide, e a razão medida vira
 conferência**, no aplicativo e nas coortes.
 

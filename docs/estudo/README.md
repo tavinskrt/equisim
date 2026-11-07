@@ -67,6 +67,5 @@ acontecer, rode de novo e confira os números dos casos.
   `valor presente = fluxo ÷ (1 + taxa)^anos`.
 - "No código:" aponta o arquivo que faz a conta, para quem quiser conferir.
 - Toda afirmação sobre o que o motor faz foi conferida no código em
-  28/09/2026, e de novo em 01/10/2026 no que o prêmio de mercado mudou (decisão
-  142). Se o código mudar, a [documentação do motor](../motor/README.md)
+  28/09/2026, e de novo em 01/10/2026 no que o prêmio de mercado mudou. Se o código mudar, a [documentação do motor](../motor/README.md)
   muda junto, e este guia deve ser relido.

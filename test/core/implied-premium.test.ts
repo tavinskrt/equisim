@@ -1,4 +1,4 @@
-// O prêmio de mercado é a média de dez anos do prêmio implícito (decisão 142).
+// O prêmio de mercado é a média de dez anos do prêmio implícito.
 //
 // A série chega por pacote, e a média sai dela: os trimestres com fim em
 // `(data − dez anos, data]`, com pelo menos vinte; o prêmio de cada trimestre é

@@ -92,7 +92,7 @@ que é atingível — e está atingido — é **habilidade testada, com o poder
 declarado**: o motor foi medido pelo instrumento que se fixou antes de medir, a
 reprovação está registrada, e está dito até onde o instrumento enxerga.
 **Decidido em 27/09/2026**: o R3 é a segunda leitura
-([decisão 140](../decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)),
+(decisão 140),
 e a primeira fica para a réplica do C7.
 
 ## Remedido em 28/09/2026

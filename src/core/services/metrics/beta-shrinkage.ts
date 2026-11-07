@@ -54,13 +54,13 @@ export class BetaPrior {
 }
 
 /**
- * O prior empacotado para o aplicativo (item B11).
+ * O prior empacotado para o aplicativo.
  *
  * **Por que empacotado, e não resolvido em tempo de execução.** Resolver o
  * prior é varrer o universo inteiro para avaliar **um** ativo. **O prior é
  * lento, e é isso que torna o pacote honesto**: um dia a mais ou a menos não o
  * move. O pacote traz [generatedAt] para que uma defasagem grande demais seja
- * recusada em vez de passar em silêncio (decisão 86).
+ * recusada em vez de passar em silêncio.
  */
 export class BetaPriorPackage {
   readonly prior: BetaPrior;

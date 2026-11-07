@@ -10,7 +10,7 @@
 >
 > Montagem conferida contra o gabarito ativo a ativo: **zero divergências**.
 >
-> **Remedido depois da [decisão 119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md)**,
+> **Remedido depois da decisão 119**,
 > que estendeu à rota derivada a separação do caixa que a decisão 113 fez no
 > WACC. O preço justo caiu em 73 dos 97 e dois ativos saíram; os números abaixo
 > são os de depois.
@@ -102,7 +102,7 @@ motor do mercado, e não o aproximaria.
 
 ## 3. O que se decidiu
 
-[Decisão 117](../decisoes/117-risco-pais-e-tamanho-sao-recusados-com-medicao.md):
+Decisão 117:
 **os dois são recusados, com medição.**
 
 - **Risco-país**, porque o `R_f` brasileiro já o contém — 9,23% de juro real —, e
@@ -128,7 +128,7 @@ os dois fatores nomeados pelo item **já estão dentro dele por outro caminho**.
   83). Ele entra **só na ordenação** por tamanho, onde um erro de escala não
   troca tercil; nenhuma conta de dinheiro depende dele aqui.
 - **O beta maior dos pequenos pode ser ruído de liquidez**, e não risco. A
-  [decisão 108](../decisoes/108-a-recusa-por-liquidez-fica-e-o-beta-corrigido-fecha-um-terco-da-distancia.md)
+  decisão 108
   mediu o viés de negociação não sincrônica e manteve a recusa por liquidez; aqui
   a leitura é sobre os que **passam** no corte, onde o viés é menor — mas não é
   zero, e isso empurra na direção de o beta dos pequenos estar **subestimado**,

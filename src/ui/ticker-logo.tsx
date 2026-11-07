@@ -4,7 +4,7 @@ import type { Ticker } from '../core';
 import { cn } from './cn';
 
 /**
- * Onde a brapi publica as logos das empresas (decisão 154): o mesmo endereço
+ * Onde a brapi publica as logos das empresas: o mesmo endereço
  * que `/v2/stocks/profile` devolve em `logoUrl`, montado direto pelo código
  * para não gastar uma requisição da cota por ativo só para descobri-lo.
  */

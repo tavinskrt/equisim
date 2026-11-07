@@ -1,4 +1,4 @@
-// Rótulos de tela dos enums do núcleo (item B21, decisão 125).
+// Rótulos de tela dos enums do núcleo.
 //
 // O núcleo diz **o que** é; a apresentação diz **como se lê**. Moram fora da
 // interface React porque as ferramentas de `tool/` que escrevem relatório usam
@@ -25,7 +25,7 @@ const models: Record<string, string> = {
 
 /**
  * O nome da faixa de cenário, **pelas premissas, e não pelo resultado**
- * (decisão 148): com a empresa rendendo abaixo do custo de capital, as
+ *: com a empresa rendendo abaixo do custo de capital, as
  * premissas mais brandas podem valer menos que as mais duras.
  */
 const bands: Record<string, string> = {

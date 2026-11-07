@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 
 import tailwindcss from '@tailwindcss/vite';
@@ -7,8 +8,15 @@ import { defineConfig } from 'vite';
 // Configuração do Vite: aplicativo de página única, com o painel de auditoria
 // em /logs servido pela mesma página (o Firebase Hosting reescreve toda rota
 // para index.html, ver firebase.json).
+// A versão do package.json chega ao aplicativo como constante (src/app/version.ts):
+// o `define` troca o identificador pelo texto no build, e só o número entra no bundle.
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: {
+    __EQUISIM_VERSION__: JSON.stringify(version),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

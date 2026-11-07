@@ -14,9 +14,9 @@ export const PROJECT_CONTEXT = `
 ## Contexto do projeto auditado
 
 Equisim -- simulador de valuation (DCF/CAPM), backtest de carteira e metricas de
-desempenho para acoes da B3 (sem FII, desde a decisao 0). Publico: investidor pessoa fisica brasileiro.
+desempenho para acoes da B3 (sem FII: o escopo e so de acoes). Publico: investidor pessoa fisica brasileiro.
 
-Stack (decisao 152: a interface Flutter e o nucleo Dart sairam do repositorio):
+Stack (aplicativo web em TypeScript; a interface Flutter e o nucleo Dart sairam do repositorio na versao 2.0.0):
 - App:         aplicativo web em TypeScript estrito -- React 19, Vite, Tailwind
                CSS v4, Radix UI, Recharts, Zustand. Textos em pt-BR.
 - Dominio:     "src/core" -- TYPESCRIPT PURO, porte 1:1 do antigo nucleo Dart.
@@ -58,15 +58,15 @@ RESTRICOES DE ARQUITETURA QUE VOCE DEVE RESPEITAR (nao negocie com elas):
    - Titulos indexados ao IPCA e a inflacao usam base 360 ou 365 -- a base
      precisa estar explicita no codigo, nunca implicita.
    - Provento e DADO CONFERIDO de validacao, e nao credito da simulacao. A
-     decisao 023 tirou provento do projeto; a decisao 089 o reabriu em parte:
-     os proventos da B3 entram no RETORNO TOTAL das coortes de validacao
+     simulacao e a avaliacao nao creditam provento; os proventos da B3 entram
+     so no RETORNO TOTAL das coortes de validacao
      ("TotalReturn", "TotalReturnIndex", "tool/backtest-valuation.ts") e no
      BETA ("PrepareValuationInputs" com "dividends", "ResolveBetaPrior"), com o
-     JCP liquido dos 15% retidos. A decisao 092 acrescenta a FAIXA
+     JCP liquido dos 15% retidos, e na FAIXA
      CALIBRADA ("CalibratedBand", "public/assets/validacao/banda_calibrada.json",
      "tool/cobertura_banda.py"): quantis da razao entre o retorno total
      realizado nas coortes e o preco justo, apresentados na tela de avaliacao
-     como incerteza medida. Isso e o registro, e NAO e defeito.
+     como incerteza medida. Isso e a regra vigente (docs/motor/), e NAO e defeito.
      Continua proibido, e deve ser apontado: credito de provento na SIMULACAO
      da carteira (backtest de aportes), provento lido pela CASCATA de avaliacao
      (Gordon, dividendo publicado no fluxo), e "dividend yield" somado ao
@@ -186,7 +186,7 @@ R1 -- PRECISAO MONETARIA
   O criterio que separa: o valor e convertido para "Money" na FRONTEIRA (uma
   unica vez, ao fim do calculo) e nunca persistido nem exibido como fracao?
   Entao esta correto, e acusar e falso positivo. E o arranjo que
-  "DcfCalculator" ja usa desde a decisao 25, e que "Money.fromReais" fecha.
+  "DcfCalculator" usa, e que "Money.fromReais" fecha.
   Continua sendo FAIL: saldo de carteira somado em laco, preco vezes
   quantidade sem normalizar, e qualquer fracao que vire saldo persistido.
 

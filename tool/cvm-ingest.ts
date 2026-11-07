@@ -10,7 +10,7 @@
 //   A1.6  todos os anos, inclusive companhias que já não existem
 //   A1.8  o acumulado do ano anterior, para os últimos doze meses
 //
-// **Dois defeitos da primeira versão, corrigidos aqui** (decisão 72):
+// **Dois defeitos da primeira versão, corrigidos aqui**:
 //
 // 1. **A DRE do ITR traz duas linhas por conta** no 2º e no 3º trimestre: o
 //    trimestre isolado (`DT_INI_EXERC` no início do trimestre) e o acumulado
@@ -24,7 +24,7 @@
 //    exercício social fora do calendário, e para elas o ITR de dezembro é um
 //    acumulado de nove meses.
 //
-// **A regra de versão é decisão, e está aqui** (item B8). A CVM republica
+// **A regra de versão é decisão, e está aqui**. A CVM republica
 // documento reapresentado com `VERSAO` maior, e os CSVs anuais trazem só a
 // última — o número correto conhecido hoje, que numa avaliação datada é
 // conhecimento futuro. Por isso a ingestão grava **dois arquivos**:
@@ -541,7 +541,7 @@ export function main(args: string[]): void {
   writeText(output, JSON.stringify(fiscalYears));
   outln(`\n  gravado ${output} (${(statSync(output).size / 1e6).toFixed(1)} MB)`);
 
-  // --- Versões antigas (item B8) --------------------------------------------
+  // --- Versões antigas --------------------------------------------
   const versionsOutput = 'data/cvm_versoes.json';
   if (oldVersions.length === 0) {
     if (existsSync(versionsOutput)) unlinkSync(versionsOutput);

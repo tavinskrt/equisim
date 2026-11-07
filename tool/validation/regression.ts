@@ -262,7 +262,7 @@ export class Regression {
 
   /**
    * `t` da média de uma série de coeficientes de coorte com erro-padrão de
-   * Newey-West (item C1a).
+   * Newey-West.
    *
    * Coortes anuais medidas em 36 meses se sobrepõem por dois anos, e o
    * retorno de uma carrega o choque das duas vizinhas: os coeficientes saem
@@ -306,7 +306,7 @@ export class Regression {
 
   /**
    * `t` da média de uma série de coeficientes de coorte **corrigido pela
-   * estrutura da sobreposição**, e não estimado dela (item C1c).
+   * estrutura da sobreposição**, e não estimado dela.
    *
    * Coortes trimestrais medidas em 36 meses compartilham até 33 meses de
    * retorno: a coorte `t` e a `t+j` têm correlação `ρ_j = 1 − j/(L+1)` quando o
@@ -324,7 +324,7 @@ export class Regression {
    * **Por que ao lado do Newey-West, e não no lugar.** O Newey-West estima as
    * autocovariâncias da própria série, e com 22 coortes e 11 defasagens a
    * estimativa é ruído — com cinco coortes anuais ela saiu negativa e
-   * estreitou o erro (decisão 93). Esta correção não estima nada: vale o que a
+   * estreitou o erro. Esta correção não estima nada: vale o que a
    * sobreposição impõe, e o critério do R3 fica com o menor dos dois.
    *
    * Com `L = 0` devolve o `t` de [summarize]. Devolve `null` com menos de duas

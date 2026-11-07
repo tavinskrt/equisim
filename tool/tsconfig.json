@@ -4,5 +4,7 @@
     "lib": ["ES2023"],
     "types": ["node"]
   },
-  "include": ["**/*.ts"]
+  // O gerador do CHANGELOG.md mora em scripts/, mas importa src/data como as
+  // ferramentas daqui importam src/core: pela resolucao do aplicativo.
+  "include": ["**/*.ts", "../scripts/gerar-changelog.ts"]
 }

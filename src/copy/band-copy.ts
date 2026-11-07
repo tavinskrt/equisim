@@ -15,7 +15,7 @@ export interface BandReading {
 }
 
 /**
- * A faixa calibrada da tela de avaliação (decisões 92 e 100).
+ * A faixa calibrada da tela de avaliação.
  *
  * **É a incerteza medida, e não a sensibilidade**: vem do que aconteceu nas
  * coortes, com a cobertura fora da amostra declarada.

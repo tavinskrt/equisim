@@ -12,7 +12,7 @@ import { Tooltip } from '../../ui/tooltip';
  * de ressalva. Mostrar o preço justo embaixo é o que transforma "+447%" de
  * número solto em afirmação verificável.
  *
- * Com valuation do usuário (decisão 151), o preço justo é o dele, marcado
+ * Com valuation do usuário, o preço justo é o dele, marcado
  * "seu", e o potencial é contra a cotação **de hoje**.
  */
 export function PotentialCell({ ticker, mine }: { ticker: Ticker; mine: ManualValuationRecord | null }) {

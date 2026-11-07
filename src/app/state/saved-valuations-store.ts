@@ -23,7 +23,7 @@ export interface SavedValuationsState {
 }
 
 /**
- * Os valuations que o usuário confirmou (decisão 150).
+ * Os valuations que o usuário confirmou.
  *
  * **É daqui que eles chegam ao painel de logs**, em dois momentos: na
  * confirmação, e ao carregar o histórico gravado — o que faz o painel
@@ -124,7 +124,7 @@ function emitRefused(record: ManualValuationRecord, failure: Failure): void {
 
 /**
  * **O valuation do usuário que vale para o ativo**, ou `null` quando vale o do
- * motor (decisão 151): o mais recente confirmado, **desde que discorde do
+ * motor: o mais recente confirmado, **desde que discorde do
  * motor**. Confirmar os números do motor tal como estão é concordar com ele.
  */
 export function userValuationOf(records: readonly ManualValuationRecord[], ticker: Ticker): ManualValuationRecord | null {

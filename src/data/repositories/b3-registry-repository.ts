@@ -14,10 +14,10 @@ import {
 import { memoizedPackage, type PackageLoader } from './package-loader';
 
 /**
- * Registro de emissores da B3 empacotado com o aplicativo (item A3.3).
+ * Registro de emissores da B3 empacotado com o aplicativo.
  *
  * Dá à ponte por papel a **contagem oficial de ações** — o árbitro que as duas
- * contagens da fonte de preços não tinham (decisão 83). Gerado por
+ * contagens da fonte de preços não tinham. Gerado por
  * `tool/b3-package.ts` e versionado, como o pacote da CVM.
  *
  * **Sem pacote, o repositório é transparente**: sem contagem oficial, a ponte
@@ -45,7 +45,7 @@ export class B3RegistryRepository {
     return new OfficialShareCount({ total, asOf: e.consultedOn });
   }
 
-  /** Classificação setorial oficial do emissor de [ticker], ou `null` (item A5, decisão 87). */
+  /** Classificação setorial oficial do emissor de [ticker], ou `null`. */
   async classificationFor(ticker: Ticker): Promise<B3Classification | null> {
     const t = ticker.value;
     if (t.length < 4) return null;
@@ -55,7 +55,7 @@ export class B3RegistryRepository {
 
 /**
  * Perfil com a classificação setorial **oficial da B3**, sobre o perfil de
- * outra fonte (item A5, decisão 87).
+ * outra fonte.
  *
  * **A B3 arbitra o setor; o resto do perfil segue da fonte.** O nome continua
  * o da fonte de preços. Onde a B3 não classifica o emissor, o perfil passa

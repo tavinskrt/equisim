@@ -2,8 +2,8 @@
 
 Cópia do gráfico de linha da [Bklit UI](https://github.com/bklit/bklit-ui),
 `packages/ui/src` do commit clonado em 28/10/2026, sob a licença MIT (aviso em
-[THIRD_PARTY_NOTICES.md](../../../../THIRD_PARTY_NOTICES.md)). Entrou pela
-decisão 156, como piloto na curva de acumulação da Meta.
+[THIRD_PARTY_NOTICES.md](../../../../THIRD_PARTY_NOTICES.md)). Desenha a curva
+de acumulação e o acompanhamento da Meta e a evolução do Backtest.
 
 São os 64 arquivos alcançados a partir de `line-chart`, `line`, `grid`,
 `x-axis`, `y-axis` e `tooltip`, e nada mais. **Não edite estes arquivos para
@@ -15,7 +15,7 @@ O que mudou em relação ao original, e só isto:
 1. `@/lib/utils` virou import relativo para `lib/utils.ts`.
 2. A diretiva `"use client"` do Next.js saiu do topo dos arquivos.
 3. `motion.*` virou `m.*` (`motion/react-m`): o Equisim roda o Motion em
-   `LazyMotion` estrito (decisão 155), que recusa o componente `motion`
+   `LazyMotion` estrito, que recusa o componente `motion`
    completo. Nenhum dos arquivos usa animação de layout, então o `m` com
    `domAnimation` faz o mesmo.
 4. Três ajustes pedidos pelo gate local de QA (`scripts/qa-local.mjs`), sem
@@ -26,7 +26,7 @@ O que mudou em relação ao original, e só isto:
    `zinc`; em `y-axis.tsx`, o recuo de 8 px dos rótulos saiu do `style` para
    as classes `pr-2` e `pl-2`.
 
-5. Uma opção nova, `yDomainFit`, no `LineChart` (decisão 158): o eixo y se
+5. Uma opção nova, `yDomainFit`, no `LineChart`: o eixo y se
    ajusta à faixa dos dados em vez de partir do zero. Ela passa por
    `line-chart.tsx` e `time-series-chart-shell.tsx` até
    `resolveTimeSeriesYDomain`, em `y-domain-utils.ts`. Sem ela, o

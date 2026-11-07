@@ -139,7 +139,7 @@ export class PriceRepositoryImpl implements PriceRepository {
     // O lote pode responder e deixar um ativo de fora — série corrompida
     // daquele papel, papel que a fonte deixou de devolver. Para ele a rede
     // falhou do mesmo jeito, e o histórico em disco serve pela mesma razão
-    // do caminho acima (decisão 77).
+    // do caminho acima.
     for (const ticker of missing) {
       if (arrived.has(ticker)) continue;
       const stale = await this.seriesFromCache(ticker, range);
@@ -203,7 +203,7 @@ export class PriceRepositoryImpl implements PriceRepository {
    * ele entraria pelo cache.
    *
    * **O primeiro pregão que os dois têm, e não o primeiro da resposta**
-   * (decisão 134). Comparar só o primeiro dia da resposta dava "sem evento"
+   *. Comparar só o primeiro dia da resposta dava "sem evento"
    * sempre que ele faltasse no disco — um feriado lido de outro jeito, um
    * pregão que a busca anterior não trouxe —, e o histórico em outra base
    * ficava. Um evento entre duas buscas reajusta todo pregão anterior a ele,
@@ -246,7 +246,7 @@ export class PriceRepositoryImpl implements PriceRepository {
     // está em disco com outro preço, todo o disco daquele ativo é de outra base
     // e sai — perder profundidade é menos grave que servir uma série com degrau
     // que ninguém vê. **Todo, e não só o que antecede a resposta** (lente
-    // `dados`, decisão 134): o pregão que a resposta omite no meio da janela
+    // `dados`): o pregão que a resposta omite no meio da janela
     // ficava em disco na escala velha, e o upsert não o alcançava.
     if (await this.baseChanged(ticker, series)) {
       const deleted = await tryCache(async () => {

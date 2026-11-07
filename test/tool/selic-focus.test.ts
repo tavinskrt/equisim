@@ -1,5 +1,5 @@
 // A trajetória do Focus que `tool/selic-focus.ts` mede contra a curva
-// (item B33): a Selic média de cada ano, e a curva que a reproduz.
+//: a Selic média de cada ano, e a curva que a reproduz.
 import { describe, expect, it } from 'vitest';
 
 import { DateTime } from '../../src/core';

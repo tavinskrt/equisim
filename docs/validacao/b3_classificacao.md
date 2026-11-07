@@ -2,7 +2,7 @@
 
 Medido em 14/09/2026. Ferramentas: `tool/b3_complemento_baixar.py`,
 `tool/b3_empacotar.dart` e `tool/padrao_ligar.dart`.
-[Decisão 87](../decisoes/087-o-setor-e-o-da-b3-por-emissor.md).
+Decisão 87.
 
 ## 1. O que estava errado
 

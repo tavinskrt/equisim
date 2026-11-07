@@ -1,4 +1,4 @@
-// A composição declarada das units, do formulário cadastral da CVM (item B16).
+// A composição declarada das units, do formulário cadastral da CVM.
 //
 // Cada caso de leitura de texto é uma linha **real** da FCA, copiada do
 // arquivo: a coluna é texto livre, e o que garante que o leitor serve é ele

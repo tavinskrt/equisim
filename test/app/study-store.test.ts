@@ -96,7 +96,7 @@ describe('O estudo — edição síncrona', () => {
         }),
       }),
     );
-    // Sem peso escolhido na interface (decisão 160): o estudo que chega com
+    // Sem peso escolhido na interface: o estudo que chega com
     // outros pesos entra equiponderado.
     for (const w of state().study.principal.weights) expect(w.value).toBeCloseTo(0.5, 9);
   });

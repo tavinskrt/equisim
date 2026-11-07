@@ -98,7 +98,7 @@ export class Portfolio {
   /**
    * Teto de ativos por carteira.
    *
-   * **É regra de produto, e por isso mora aqui** (decisão 59). A ferramenta
+   * **É regra de produto, e por isso mora aqui**. A ferramenta
    * estuda carteira concentrada: acima de quinze ativos o alerta de
    * concentração setorial deixa de discriminar e a comparação entre Principal
    * e Reserva perde o sentido de "duas teses". **A interface só exibe o

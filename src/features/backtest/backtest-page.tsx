@@ -36,7 +36,7 @@ export function shortenedWindowMessage(result: PortfolioComparison): string {
 /**
  * **O Laboratório de backtest**: Principal contra Reserva na mesma janela, com
  * **uma ação de cada ativo** comprada no primeiro pregão, pelo mercado
- * fracionário, e nenhuma compra depois (decisão 161). Sem rebalanceamento,
+ * fracionário, e nenhuma compra depois. Sem rebalanceamento,
  * tarifa da B3 — e só preço: a simulação não distribui provento.
  */
 export function BacktestPage() {
@@ -56,7 +56,7 @@ export function BacktestPage() {
   );
 }
 
-/** A janela e o prazo da meta, sem texto explicativo ao lado (decisão 160). */
+/** A janela e o prazo da meta, sem texto explicativo ao lado. */
 function SettingsCard({ settings, goal }: { settings: BacktestSettings; goal: FinancialGoal | null }) {
   return (
     <Panel title="Parâmetros da simulação" subtitle="Uma ação de cada ativo, no fracionário, comprada no início da janela">
@@ -160,7 +160,6 @@ function exportCsv(result: PortfolioComparison) {
 }
 
 function ComparisonBody({ result }: { result: PortfolioComparison }) {
-  const analyst = usePreferences((s) => s.mode) === 'analyst';
   const correlation = useCorrelation();
   const { principal, reserve } = result;
 
@@ -204,7 +203,7 @@ function ComparisonBody({ result }: { result: PortfolioComparison }) {
       </div>
 
       {principal !== null && reserve !== null ? (
-        <SideBySidePortfolios principal={principal} reserve={reserve} essential={!analyst} />
+        <SideBySidePortfolios principal={principal} reserve={reserve} />
       ) : (
         <>
           {principal !== null && <SinglePortfolioMetrics title="Carteira Principal" outcome={principal} isReserve={false} />}
@@ -214,21 +213,11 @@ function ComparisonBody({ result }: { result: PortfolioComparison }) {
 
       <PerAssetCard principal={principal} reserve={reserve} />
 
-      {analyst ? (
-        // `grid-cols-1` fixa a coluna em `minmax(0, 1fr)`: sem ela, a coluna
-        // implícita cresce até a largura mínima do conteúdo, e no Safari o mapa
-        // de correlação de muitos ativos alarga o cartão (e o do lado) para fora
-        // da tela, em vez de rolar dentro dele.
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          {result.riskReturn.length > 0 && <RiskReturnChart result={result} />}
-          {correlation.status === 'success' && correlation.data !== null && <CorrelationHeatmap data={correlation.data} />}
-        </div>
-      ) : (
-        <Banner>
-          O modo <strong>Completo</strong> mostra a volatilidade, o Sharpe, o Sortino e o Calmar, a dispersão risco × retorno e a correlação entre os ativos. Os
-          números são os mesmos nos dois modos.
-        </Banner>
-      )}
+      {/* `grid-cols-1` fixa a coluna em `minmax(0, 1fr)`: sem ela, a coluna implícita cresce até a largura mínima do conteúdo, e no Safari o mapa de correlação de muitos ativos alarga o cartão (e o do lado) para fora da tela, em vez de rolar dentro dele. */}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {result.riskReturn.length > 0 && <RiskReturnChart result={result} />}
+        {correlation.status === 'success' && correlation.data !== null && <CorrelationHeatmap data={correlation.data} />}
+      </div>
     </div>
   );
 }

@@ -42,7 +42,7 @@ const divergent = (id = '00000000-0000-4000-8000-000000000001', minute = 1) =>
   record((p) => p.copyWith({ growth: p.growth + 0.02 }), id, minute);
 const agreeing = (id = '00000000-0000-4000-8000-000000000002', minute = 2) => record((p) => p, id, minute);
 
-describe('Confirmar o valuation (decisão 150)', () => {
+describe('Confirmar o valuation', () => {
   it('grava, põe no topo da lista e registra no painel com o identificador do registro', async () => {
     testRuntime();
     const r = divergent();
@@ -105,7 +105,7 @@ describe('Confirmar o valuation (decisão 150)', () => {
   });
 });
 
-describe('O valuation do usuário que vale para o ativo (decisão 151)', () => {
+describe('O valuation do usuário que vale para o ativo', () => {
   it('sem salvo, vale o do motor', () => {
     expect(userValuationOf([], engine.ticker)).toBeNull();
   });

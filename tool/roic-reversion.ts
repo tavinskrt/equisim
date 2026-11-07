@@ -4,7 +4,7 @@
 // retorno que o capital instalado alcança na projeção — e medido, esse retorno
 // é de 0,71 vez o custo de capital na mediana
 // ([terminal_excedente.md](../docs/validacao/terminal_excedente.md)). A
-// [decisão 107](../docs/decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md)
+// decisão 107
 // manteve o número por não haver medição de reversão à média; trocá-lo por
 // `capital_N` move +14,1% do preço justo na mediana. Esta é a medição.
 //

@@ -13,7 +13,7 @@ import { expectClose } from '../core/helpers';
 import { asObject, isServed, readPublicJson, readRepoJson } from './public-assets';
 
 /**
- * A faixa calibrada é o que o aplicativo declara como incerteza (item C2,
+ * A faixa calibrada é o que o aplicativo declara como incerteza (
  * decisão 92). Pacote ausente, ilegível ou fora do critério reprova a suíte:
  * no aplicativo, a ausência só esconde o cartão, e o lugar de pegar o descuido
  * é antes do build.
@@ -37,7 +37,7 @@ it('existe em public/ e é legível', () => {
 // **A cobertura declarada é a medida.** O pacote não pode dizer ao aplicativo
 // uma cobertura diferente da que a ferramenta mediu, e a forma do pacote é a
 // que a regra da §9 de `cobertura_banda.md` escolheu — hoje a da volatilidade
-// (decisão 100).
+//.
 it('a cobertura fora da amostra do pacote é a que cobertura_banda mediu', () => {
   const decoded = tables();
   const measurement = asObject(readRepoJson('docs/validacao/cobertura_banda_trimestral.json'), 'medição');

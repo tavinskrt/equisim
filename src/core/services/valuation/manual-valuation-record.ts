@@ -1,6 +1,6 @@
 /**
  * O valuation confirmado: as premissas do usuário e o que a conta deu com
- * elas, guardados juntos (decisão 150).
+ * elas, guardados juntos.
  */
 
 import {
@@ -88,7 +88,7 @@ const Wire = {
 };
 
 /**
- * **Um valuation que o usuário confirmou** (decisão 150): as premissas
+ * **Um valuation que o usuário confirmou**: as premissas
  * digitadas, as do motor de que elas partiram, e o resultado inteiro da
  * conta. **Nada aqui recalcula.**
  */

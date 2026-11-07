@@ -1,4 +1,4 @@
-/** O prazo das outorgas, lido do Formulário de Referência da CVM (item A6). */
+/** O prazo das outorgas, lido do Formulário de Referência da CVM. */
 
 import { DateTime } from '../../lang/date-time';
 import { asInt, isJsonObject, type JsonObject } from '../../lang/json';
@@ -225,7 +225,7 @@ function codecDate(v: unknown): DateTime | null {
 }
 
 /**
- * Formato do pacote de prazos, para empacotar no aplicativo (item A6).
+ * Formato do pacote de prazos, para empacotar no aplicativo.
  *
  * Mora no núcleo pela mesma razão do `CvmDocumentCodec`: a ferramenta que
  * grava e o repositório que lê precisam concordar sobre o formato.

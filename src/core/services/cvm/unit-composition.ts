@@ -1,4 +1,4 @@
-/** A composição declarada de uma unit, do Formulário Cadastral da CVM (item B16). */
+/** A composição declarada de uma unit, do Formulário Cadastral da CVM. */
 
 import type { DateTime } from '../../lang/date-time';
 import { asInt, asString, isJsonObject, type JsonObject } from '../../lang/json';

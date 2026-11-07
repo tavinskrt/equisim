@@ -2,7 +2,7 @@ import { type SkillReading, SkillReadingCodec } from '../../core';
 import { memoizedPackage, type PackageLoader } from './package-loader';
 
 /**
- * Leitura da habilidade do potencial empacotada com o aplicativo (item B1.0).
+ * Leitura da habilidade do potencial empacotada com o aplicativo.
  *
  * Gerada por `tool/conditional-regression.ts --trimestral` a partir das
  * coortes da validação. **Sem pacote, a leitura é `null`**, e a tela de metas

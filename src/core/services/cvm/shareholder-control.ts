@@ -1,4 +1,4 @@
-/** A espécie do controle acionário, do Formulário Cadastral da CVM (item B46). */
+/** A espécie do controle acionário, do Formulário Cadastral da CVM. */
 
 import { DartEnum } from '../../lang/dart-enum';
 import { DateTime } from '../../lang/date-time';

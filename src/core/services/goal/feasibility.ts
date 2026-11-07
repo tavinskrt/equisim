@@ -33,7 +33,7 @@ export class MarketAnchors {
 
   /**
    * Crescimento **real** da economia na janela, em fração — IBC-Br
-   * dessazonalizado por média móvel de 12 meses (decisão 25).
+   * dessazonalizado por média móvel de 12 meses.
    */
   readonly realEconomyGrowth: number;
 
@@ -78,7 +78,7 @@ export class MarketAnchors {
   /**
    * Crescimento nominal de longo prazo da economia:
    * `(1 + real) × (1 + inflação) − 1`. **É composição, não PIB nominal
-   * medido** (decisão 25).
+   * medido**.
    */
   get nominalEconomyGrowth(): number {
     return (1 + this.realEconomyGrowth) * (1 + this.inflationCagr) - 1;

@@ -53,7 +53,7 @@ export function main(args: string[]): void {
     }
   }
 
-  // --- Regra 0: registro oficial da B3 (decisão 82) ---
+  // --- Regra 0: registro oficial da B3 ---
   // Emissor → código CVM, de data/b3/companhias; código CVM → CNPJ, dos
   // metadados de DFP e ITR de todos os anos. Ausente o registro, a regra só
   // não responde. Os arquivos são lidos em ordem de nome, para que "o último

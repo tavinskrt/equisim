@@ -16,9 +16,9 @@ sobre `docs/validacao/backtest_trimestral.json` (de
 `dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas
 --trimestral --contrafactual-base`, 29 minutos). Dados em
 [habilidade_trimestral.json](habilidade_trimestral.json). Decisões:
-[96](../decisoes/096-o-t-da-habilidade-e-corrigido-pela-sobreposicao-contra-o-critico-dela.md),
-[97](../decisoes/097-a-coorte-forma-preco-contagem-e-valor-de-mercado-na-base-da-data.md) e
-[98](../decisoes/098-a-serie-ancorada-ordena-mais-sem-provar-e-fica-fora-do-padrao.md).
+96,
+97 e
+98.
 
 > **Isto não é o veredito do R3.** O usuário pediu, em 15/09/2026, para medir a
 > habilidade do motor quando todas as fases estiverem completas, e o C1 foi para
@@ -162,7 +162,7 @@ reingestão da CVM.
 **Uma correção mudou o potencial dos financeiros**: sem o custo de capital
 resolvido, a taxa de cada ano interpolava em linha reta do CDI da data até a
 perpetuidade, em vez de seguir a curva (item B37,
-[decisão 141](../decisoes/141-a-documentacao-do-motor-e-refeita-do-zero-contra-o-codigo.md)).
+decisão 141).
 O backtest trimestral inteiro foi refeito com o motor corrigido.
 
 | 36 meses, trimestral, com deslistadas (n = 2.176) | 25/09 (§11) | **28/09** | `t` corrigido / crítico | Newey-West | passa |
@@ -178,7 +178,7 @@ O backtest trimestral inteiro foi refeito com o motor corrigido.
 
 ## 14. Com o motor da decisão 153 — remedido em 03/11/2026
 
-**A mudança:** a [decisão 153](../decisoes/153-o-lucro-de-partida-e-o-ano-corrente-anualizado.md)
+**A mudança:** a decisão 153
 fez do ano corrente, anualizado a partir do último ITR, o ponto mais recente da
 série. As bases brutas foram reconstruídas numa máquina nova (CVM, FRE, FCA,
 COTAHIST, cadastro e complemento da B3, ponte das deslistadas), e as 626 versões
@@ -201,7 +201,7 @@ continua sem prêmio de ordenação (decisão 103).
 
 ## 13. Com a base de patrimônio corrigida — remedido em 02/10/2026
 
-**O defeito** (item B47, [decisão 146](../decisoes/146-sem-o-par-vpa-e-contagem-a-base-e-o-pl-da-demonstracao.md)):
+**O defeito** (item B47, decisão 146):
 a base de patrimônio é `VPA × contagem do exercício`, e a fonte de mercado
 devolve a contagem zerada para algumas companhias e anos. Sem o par, a base
 sumia: companhias com patrimônio positivo saíam recusadas como insolventes, e a
@@ -234,18 +234,18 @@ cobre 87,9% em 12 meses e 88,1% em 36 ([cobertura_banda.md](cobertura_banda.md)
 **Três mudanças entraram juntas**, todas da medição do prêmio implícito
 ([premio_implicito.md](premio_implicito.md)):
 
-- **O prêmio de mercado** ([decisão 142](../decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md))
+- **O prêmio de mercado** (decisão 142)
   deixa de ser 5,5% e passa a ser, em cada coorte, a média de dez anos do prêmio
   implícito só com os trimestres até a data dela: de 0,91% a 1,62%. Ele muda o
   `Ke` de todo ativo, e com ele o preço justo, a via e a recusa por estrutura.
-- **A contagem de ações** ([decisão 143](../decisoes/143-a-contagem-da-coorte-e-conferida-contra-o-salto-do-preco.md))
+- **A contagem de ações** (decisão 143)
   é conferida contra o salto do preço: 29 entradas descartadas em 26 das 276
   companhias listadas e 24 nas deslistadas. 138 observações mudam de valor de
   mercado em mais de 1,5 vez — a HAPV3 de 2025 caía de R$ 278 bilhões para R$ 18
   bilhões, a IRBR3 de 2024 de R$ 78 a 110 bilhões para R$ 2,6 a 3,7 bilhões —,
   e quatro delas são avaliadas; a MGLU3 de 31/03/2025 sai de R$ 2,46 para
   R$ 37,04 de preço justo, com as 739 milhões de ações que tinha.
-- **Os proventos** ([decisão 144](../decisoes/144-o-nome-de-pregao-da-consulta-de-proventos-vai-sem-barra.md))
+- **Os proventos** (decisão 144)
   dos sete emissores com barra no nome que pagaram entram no retorno total e no
   beta.
 
@@ -288,19 +288,19 @@ de 5 ([cobertura_banda.md](cobertura_banda.md) §14). **O R2 continua atingido.*
 **Quatro correções mudaram o que as coortes medem**, e três delas vieram de
 medir a primeira:
 
-- **B28** ([decisão 135](../decisoes/135-o-capital-emitido-depois-do-balanco-entra-quando-declarado.md)):
+- **B28** (decisão 135):
   a emissão com valor declarado depois do balanço entra no patrimônio da ponte.
   111 observações de 31 papéis, mediana de +0,35 p.p. no potencial; a ALOS3 de
   2023 tinha o preço justo pela metade.
-- **B29** ([decisão 136](../decisoes/136-o-evento-de-acoes-que-a-fonte-nao-ajustou-e-ajustado.md)):
+- **B29** (decisão 136):
   a série de preços de 57 papéis tinha bonificações que a fonte não ajustou. O
   retorno de 36 meses muda em 509 observações, com mediana de +9,3%, e o beta
   muda junto.
-- **B30** ([decisão 137](../decisoes/137-a-contagem-da-coorte-recebe-o-evento-que-o-fre-nao-absorveu.md)):
+- **B30** (decisão 137):
   a contagem da coorte recebe o evento que o formulário não registrou. 41
   observações de 10 papéis; o Banco do Brasil de 2024 tinha metade do valor de
   mercado.
-- **B31** ([decisão 139](../decisoes/139-proventos-da-mesma-data-ex-entram-juntos-no-retorno-total.md)):
+- **B31** (decisão 139):
   os proventos da mesma data ex deixam de compor entre si. O retorno de 36 meses
   muda em 2.189 observações, com mediana de 0,07 p.p. e cauda de 12 p.p. na
   PETR4.
@@ -350,13 +350,13 @@ padrão.
 §12). **O R2 continua atingido.**
 
 **E o R3 mudou de definição em 27/09/2026**: o usuário escolheu «habilidade
-testada, com o poder declarado» ([decisão 140](../decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)),
+testada, com o poder declarado» (decisão 140),
 e é o que esta seção e a §10 entregam — o critério medido, não passando, e o
 poder declarado em [poder_r3.md](poder_r3.md).
 
 ## 10. Com a cópia dos insumos corrigida — remedido em 24/09/2026
 
-**O backtest foi reexecutado por causa do item B27** ([decisão 132](../decisoes/132-a-copia-dos-insumos-passa-por-um-lugar-so.md)):
+**O backtest foi reexecutado por causa do item B27** (decisão 132):
 as cópias que montam a leitura ancorada e o contrafactual sem o corte de
 liquidez perdiam a composição declarada da unit, a taxa de referência do
 crédito e a janela do beta. **A leitura padrão não passa por essas cópias**, e
@@ -426,7 +426,7 @@ quintil de maior potencial e vende o de menor passa de +0,75% para **+6,0%** em
 36 meses. **O sinal melhorou, e continua longe do crítico.** Líquido de custo de
 transação (item C4), a leitura é a mesma ([custos_transacao.md](custos_transacao.md)).
 
-**É o veredito do C1, e ele vem com o poder medido** ([decisão 129](../decisoes/129-o-r3-nao-passa-e-o-teste-declara-o-poder-que-tem.md),
+**É o veredito do C1, e ele vem com o poder medido** (decisão 129,
 [poder_r3.md](poder_r3.md)). Com estas 22 coortes, o menor coeficiente que o
 critério vê com 80% de chance é **0,62**; o book-to-market tem 37% de chance de
 passar no próprio efeito. A reprovação não prova ausência de habilidade — prova
@@ -461,7 +461,7 @@ caiu foi o **fator contra o qual ele é medido** — e a queda do book-to-market
 vem da amostra, não da cascata: são 287 observações a menos, com a base bruta
 reconstruída de zero e o COTAHIST rebaixado do dia.
 
-**A regra da [decisão 103](../decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)
+**A regra da decisão 103
 devolve o mesmo:** prêmio nenhum. E ela agora foi aplicada a **cinco**
 candidatas, com a quarta e a quinta entrando nesta rodada
 ([multiplos_ordenacao.md](multiplos_ordenacao.md), item B22).
@@ -490,7 +490,7 @@ reexecutado. **O JSON desta medição é o do motor novo; as §§1 a 5 registram
 
 Crítico de 2,70 nas duas. **O book-to-market deixa de passar** no critério da
 decisão 96, e nenhuma das três ordenações passa — o que, pela regra fixada antes
-de medir, tira o prêmio do retorno esperado ([decisão 103](../decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)).
+de medir, tira o prêmio do retorno esperado (decisão 103).
 
 **A série ancorada contra a anual** (§4), sobre 2.359 observações: IC de 0,059
 contra 0,079, diferença de +0,020 com `t` corrigido de 0,36. A decisão 98 continua

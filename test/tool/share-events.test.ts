@@ -1,4 +1,4 @@
-// Os eventos de ações e as emissões por valor das coortes (itens B28 a B30).
+// Os eventos de ações e as emissões por valor das coortes.
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';

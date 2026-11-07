@@ -152,7 +152,7 @@
   --color-json-string: var(--json-string);
   --color-json-number: var(--json-number);
   --color-json-bool: var(--json-bool);
-  /* Os nomes que os gráficos da Bklit UI esperam (decisão 156), sobre os nossos. */
+  /* Os nomes que os gráficos da Bklit UI esperam, sobre os nossos. */
   --color-chart-label: var(--fg-3);
   --color-chart-tooltip-background: var(--raised);
   --color-chart-tooltip-foreground: var(--fg);
@@ -349,7 +349,7 @@
   }
 }
 
-/* ---- Movimento e profundidade (decisão 155) ---------------------------- */
+/* ---- Movimento e profundidade ---------------------------- */
 
 /* A entrada de uma área ou de um bloco: sobe de leve e acende. Em CSS, e não
    no Motion: a animação CSS não depende de JavaScript nem de quadro de tela
@@ -419,7 +419,7 @@
   pointer-events: none;
 }
 
-/* ---- Gráficos da Bklit UI (decisão 156) -------------------------------- */
+/* ---- Gráficos da Bklit UI -------------------------------- */
 
 /* As variáveis que os gráficos da Bklit leem, apontadas para os tokens do
    Equisim: o tema claro e o escuro vêm dos mesmos pares medidos, e nenhuma

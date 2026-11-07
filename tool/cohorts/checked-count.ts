@@ -1,4 +1,4 @@
-// A contagem de ações por data conferida contra o salto do preço (item B43).
+// A contagem de ações por data conferida contra o salto do preço.
 //
 // **Por que conferir.** A contagem do Formulário de Referência erra de escala
 // nos dois sentidos. A correção reenviada às vezes repete a contagem de antes
